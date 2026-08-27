@@ -1,162 +1,219 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Clock, Thermometer, Scale, Timer, AlertCircle, Lightbulb } from "lucide-react";
-import { CalculationResults } from "@/core/calculations";
-import { SourdoughPanel } from "@/components/SourdoughPanel";
+import { useState } from 'react';
+import { Check, Copy, Download, Link2, Printer, Save } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { IngredientTable } from '@/components/recipe/IngredientTable';
+import { RecipeTimeline } from '@/components/recipe/RecipeTimeline';
+import { DoughTempCard } from '@/components/recipe/DoughTempCard';
+import { YeastExplainer } from '@/components/recipe/YeastExplainer';
+import { SourdoughPanel } from '@/components/recipe/SourdoughPanel';
+import { NotesList } from '@/components/recipe/NotesList';
+import { FlourAdvisor } from '@/components/recipe/FlourAdvisor';
+import type { BreadStyle } from '@/data/styles';
+import type { CalculationResults } from '@/core/types';
+import { useI18n } from '@/i18n';
+import { formatClock, formatGrams, formatNumber } from '@/lib/format';
+import {
+  copyToClipboard,
+  downloadText,
+  recipeFilename,
+  recipeToText,
+} from '@/lib/recipe/export';
 
-interface RecipeResultsProps extends CalculationResults {
-  styleName: string;
+interface RecipeResultsProps {
+  style: BreadStyle;
+  results: CalculationResults;
+  startIso: string;
+  shareUrl: string;
+  onSave: () => void;
+  saved: boolean;
 }
 
-export function RecipeResults({ 
-  ingredients, 
-  waterTemp, 
-  bulkTime, 
-  proofTime, 
-  totalFlour,
-  yeastPercentage,
-  timeline,
-  notes,
-  params,
-  styleName
+export function RecipeResults({
+  style,
+  results,
+  startIso,
+  shareUrl,
+  onSave,
+  saved,
 }: RecipeResultsProps) {
-  const totalWeight = ingredients.reduce((sum, ingredient) => sum + ingredient.grams, 0);
+  const { t, lang } = useI18n();
+  const [copied, setCopied] = useState<'text' | 'link' | null>(null);
+
+  const n = (value: number, decimals = 1) => formatNumber(value, lang, decimals);
+  const pieceUnit =
+    style.category === 'pizza'
+      ? results.totals.pieces === 1
+        ? 'unit.ball'
+        : 'unit.balls'
+      : results.totals.pieces === 1
+        ? 'unit.loaf'
+        : 'unit.loaves';
+
+  const flash = (which: 'text' | 'link') => {
+    setCopied(which);
+    window.setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleCopyText = async () => {
+    const text = recipeToText(style, results, t, lang, shareUrl);
+    if (await copyToClipboard(text)) flash('text');
+  };
+
+  const handleCopyLink = async () => {
+    if (await copyToClipboard(shareUrl)) flash('link');
+  };
+
+  const handleDownload = () => {
+    downloadText(recipeFilename(style.name), recipeToText(style, results, t, lang, shareUrl));
+  };
+
+  const preferment = results.sections.find((s) => s.id === 'preferment');
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card className="p-6 bg-gradient-to-r from-primary/5 to-primary-glow/5">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xl font-semibold text-card-foreground">{styleName}</h3>
-          <Badge variant="secondary" className="text-sm">
-            Total: {totalWeight.toFixed(0)}g
+    <div className="space-y-4">
+      {/* ── Headline ── */}
+      <Card className="bg-gradient-to-br from-primary-soft to-card p-5" data-print-card>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-semibold tracking-tight">{style.name}</h3>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {t('recipe.for', {
+                count: results.totals.pieces,
+                weight: formatGrams(results.totals.perPiece, lang),
+                unit: t(pieceUnit),
+              })}
+            </p>
+          </div>
+          <Badge variant="secondary" className="tabular">
+            {t('recipe.readyAt', { time: formatClock(results.readyAt, lang) })}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Recept genererat med Q10-modellering och stilspecifika korrigeringar
-        </p>
+
+        <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Stat label={t('recipe.totalFlour')} value={`${formatGrams(results.totals.flour, lang)} g`} />
+          <Stat
+            label={t('recipe.totalDough')}
+            value={`${formatGrams(results.totals.doughWeight, lang)} g`}
+          />
+          <Stat label={t('recipe.waterTemp')} value={`${n(results.water.tempC)} °C`} />
+          <Stat
+            label={t('recipe.trueHydration')}
+            value={`${n(results.totals.trueHydrationPct)}%`}
+          />
+        </dl>
       </Card>
 
-      {/* Ingredients */}
-      <Card className="p-6">
-        <h4 className="text-lg font-semibold text-card-foreground mb-4">Ingredienser</h4>
-        <div className="space-y-3">
-          {ingredients.map((ingredient, index) => (
-            <div key={index} className="flex justify-between items-center py-2 border-b border-border last:border-0">
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${
-                  ingredient.type === 'flour' ? 'bg-amber-400' :
-                  ingredient.type === 'water' ? 'bg-blue-400' :
-                  ingredient.type === 'salt' ? 'bg-gray-400' :
-                  ingredient.type === 'yeast' ? 'bg-yellow-400' :
-                  ingredient.type === 'starter' ? 'bg-amber-700' :
-                  ingredient.type === 'sugar' ? 'bg-pink-300' :
-                  ingredient.type === 'oil' ? 'bg-lime-500' :
-                  'bg-green-400'
-                }`} />
-                <span className="font-medium text-card-foreground">{ingredient.name}</span>
-              </div>
-              <div className="text-right">
-                <span className="font-semibold text-lg">
-                  {ingredient.grams < 10 ? ingredient.grams.toFixed(2) : Math.round(ingredient.grams)}g
-                </span>
-                <Badge variant="outline" className="ml-2 text-xs">
-                  {ingredient.percentage.toFixed(1)}%
-                </Badge>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Process Info */}
-      <Card className="p-6">
-        <h4 className="text-lg font-semibold text-card-foreground mb-4">Process</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center space-y-2">
-            <div className="flex justify-center">
-              <Thermometer className="h-8 w-8 text-primary" />
-            </div>
-            <div className="text-sm text-muted-foreground">Vattentemp</div>
-            <div className="font-semibold text-lg">{waterTemp.toFixed(1)}°C</div>
-          </div>
-          
-          <div className="text-center space-y-2">
-            <div className="flex justify-center">
-              <Clock className="h-8 w-8 text-primary" />
-            </div>
-            <div className="text-sm text-muted-foreground">Bulkjäsning</div>
-            <div className="font-semibold text-lg">{bulkTime.toFixed(1)}h</div>
-          </div>
-          
-          <div className="text-center space-y-2">
-            <div className="flex justify-center">
-              <Timer className="h-8 w-8 text-primary" />
-            </div>
-            <div className="text-sm text-muted-foreground">Slutjäsning</div>
-            <div className="font-semibold text-lg">{proofTime.toFixed(1)}h</div>
-          </div>
-          
-          <div className="text-center space-y-2">
-            <div className="flex justify-center">
-              <Scale className="h-8 w-8 text-primary" />
-            </div>
-            <div className="text-sm text-muted-foreground">Total mjöl</div>
-            <div className="font-semibold text-lg">{totalFlour.toFixed(0)}g</div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Sourdough ratio, maturity checklist and sensitivity */}
-      <SourdoughPanel params={params} totalFlour={totalFlour} />
-
-      {/* Timeline */}
-      <Card className="p-6">
-        <h4 className="text-lg font-semibold text-card-foreground mb-4">Tidslinje</h4>
-        <div className="space-y-3">
-          {timeline.map((step, index) => (
-            <div key={index} className="flex gap-4">
-              <div className="flex-shrink-0 w-16 text-sm font-mono text-primary font-semibold">
-                {step.time}
-              </div>
-              <div className="flex-1">
-                <div className="font-medium text-card-foreground">{step.action}</div>
-                <div className="text-sm text-muted-foreground">{step.description}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Notes & Tips */}
-      {notes.length > 0 && (
-        <Card className="p-6">
-          <h4 className="text-lg font-semibold text-card-foreground mb-4 flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
-            Tips & Varningar
-          </h4>
-          <div className="space-y-2">
-            {notes.map((note, index) => (
-              <div key={index} className="flex gap-3 text-sm">
-                <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                <span className="text-muted-foreground">{note}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Export */}
-      <div className="flex gap-3">
-        <Button className="flex-1" size="lg">
-          📱 Exportera till Telefon
+      {/* ── Actions ── */}
+      <div className="no-print flex flex-wrap gap-2">
+        <Button onClick={onSave} variant={saved ? 'secondary' : 'default'} className="gap-2">
+          {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+          {saved ? t('action.saved') : t('action.save')}
         </Button>
-        <Button variant="outline" size="lg">
-          🖨️ Skriv ut
+        <Button onClick={handleCopyLink} variant="outline" className="gap-2">
+          {copied === 'link' ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
+          {copied === 'link' ? t('action.shared') : t('action.share')}
+        </Button>
+        <Button onClick={handleCopyText} variant="outline" className="gap-2">
+          {copied === 'text' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          {copied === 'text' ? t('action.copied') : t('action.copy')}
+        </Button>
+        <Button onClick={handleDownload} variant="outline" className="gap-2">
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">{t('action.download')}</span>
+        </Button>
+        <Button onClick={() => window.print()} variant="outline" className="gap-2">
+          <Printer className="h-4 w-4" />
+          <span className="hidden sm:inline">{t('action.print')}</span>
         </Button>
       </div>
+
+      {/* ── Ingredients ── */}
+      <section className="space-y-3" aria-label={t('recipe.ingredients')}>
+        {results.sections.map((section) => (
+          <IngredientTable
+            key={section.id}
+            section={section}
+            subdued={section.id !== 'final'}
+          />
+        ))}
+      </section>
+
+      {/* ── Process ── */}
+      <div className="print-grid grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <DoughTempCard
+          water={results.water}
+          doughTemp={results.water.desiredDoughTempC}
+          roomTempC={results.fermentation.roomTempC}
+          prefermentTempC={preferment?.meta?.tempC}
+        />
+        <FermentationCard results={results} />
+      </div>
+
+      <div className="print-grid grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <YeastExplainer style={style} results={results} />
+        <FlourAdvisor style={style} effectiveHours={results.fermentation.roomEquivHours} />
+      </div>
+
+      <SourdoughPanel
+        fermentation={results.fermentation}
+        starterHydration={results.params.starterHydration}
+        totalFlour={results.totals.flour}
+      />
+
+      {/* ── Timeline ── */}
+      <Card className="p-5" data-print-card>
+        <h4 className="mb-4 font-semibold">{t('recipe.timeline')}</h4>
+        <RecipeTimeline steps={results.timeline} startIso={startIso} />
+      </Card>
+
+      <NotesList notes={results.notes} />
+
+      <p className="print-only pt-4 text-xs text-muted-foreground">
+        {t('recipe.printedBy')} — {shareUrl}
+      </p>
     </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="stat-label">{label}</dt>
+      <dd className="stat-value">{value}</dd>
+    </div>
+  );
+}
+
+function FermentationCard({ results }: { results: CalculationResults }) {
+  const { t, lang } = useI18n();
+  const f = results.fermentation;
+  const n = (value: number, decimals = 1) => formatNumber(value, lang, decimals);
+
+  return (
+    <Card className="p-5" data-print-card>
+      <h4 className="mb-4 font-semibold">{t('params.fermentation')}</h4>
+      <dl className="grid grid-cols-2 gap-4">
+        <Stat label={t('recipe.bulk')} value={`${n(f.bulkHours)} h`} />
+        <Stat label={t('recipe.proof')} value={`${n(f.proofHours)} h`} />
+        {f.coldHours > 0 && (
+          <Stat
+            label={t('recipe.coldRetard')}
+            value={`${n(f.coldHours)} h · ${n(f.coldTempC)} °C`}
+          />
+        )}
+        <Stat label={t('recipe.roomEquiv')} value={`${n(f.roomEquivHours)} h`} />
+        {f.inoculationPct > 0 && (
+          <Stat label={t('recipe.inoculation')} value={`${n(f.levainOnFlourPct)}%`} />
+        )}
+        {f.yeastPct > 0 && (
+          <Stat
+            label={t('recipe.yeast')}
+            value={`${formatNumber(f.yeastPct, lang, 3)}%`}
+          />
+        )}
+      </dl>
+    </Card>
   );
 }

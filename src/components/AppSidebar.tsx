@@ -1,4 +1,5 @@
-import { ChefHat, Calculator, Settings, BookOpen } from "lucide-react";
+import { BookOpen, ChefHat, ListChecks, Settings2, Sliders } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -9,65 +10,100 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
+import { useT } from '@/i18n';
+import { cn } from '@/lib/utils';
+
+export type Section = 'styles' | 'parameters' | 'recipe';
 
 interface AppSidebarProps {
-  selectedStyle: string | null;
-  onSectionChange: (section: 'styles' | 'calculator' | 'results') => void;
-  currentSection: 'styles' | 'calculator' | 'results';
+  currentSection: Section;
+  onSectionChange: (section: Section) => void;
+  /** Parameters and recipe only make sense once a style is chosen. */
+  hasStyle: boolean;
+  styleName?: string;
 }
 
-export function AppSidebar({ selectedStyle, onSectionChange, currentSection }: AppSidebarProps) {
+const SECTIONS: { id: Section; labelKey: string; icon: typeof Sliders }[] = [
+  { id: 'styles', labelKey: 'nav.styles', icon: BookOpen },
+  { id: 'parameters', labelKey: 'nav.parameters', icon: Sliders },
+  { id: 'recipe', labelKey: 'nav.recipe', icon: ListChecks },
+];
+
+export function AppSidebar({
+  currentSection,
+  onSectionChange,
+  hasStyle,
+  styleName,
+}: AppSidebarProps) {
   const { state } = useSidebar();
-  const isCollapsed = state === 'collapsed';
+  const t = useT();
+  const collapsed = state === 'collapsed';
 
   return (
-    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
+    <Sidebar collapsible="icon" className="no-print">
       <SidebarContent>
-        <div className="p-4 border-b">
-          <div className="flex items-center gap-2">
-            <ChefHat className="h-6 w-6 text-primary" />
-            {!isCollapsed && <span className="font-semibold">Baker's Calculator</span>}
-          </div>
+        <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-4">
+          <ChefHat className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+          {!collapsed && <span className="truncate font-semibold">{t('app.name')}</span>}
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          {!collapsed && <SidebarGroupLabel>{t('recipe.title')}</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {SECTIONS.map(({ id, labelKey, icon: Icon }, index) => {
+                const disabled = id !== 'styles' && !hasStyle;
+                const active = currentSection === id;
+                return (
+                  <SidebarMenuItem key={id}>
+                    <SidebarMenuButton
+                      onClick={() => !disabled && onSectionChange(id)}
+                      disabled={disabled}
+                      aria-current={active ? 'step' : undefined}
+                      tooltip={t(labelKey)}
+                      className={cn(
+                        active && 'bg-sidebar-accent font-medium text-sidebar-accent-foreground',
+                        disabled && 'cursor-not-allowed opacity-40',
+                      )}
+                    >
+                      <Icon className="h-4 w-4" aria-hidden />
+                      {!collapsed && (
+                        <span className="flex-1 truncate text-left">{t(labelKey)}</span>
+                      )}
+                      {!collapsed && (
+                        <span className="text-xs tabular text-muted-foreground">{index + 1}</span>
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {hasStyle && styleName && !collapsed && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{t('styles.selected')}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <p className="px-2 text-sm font-medium leading-snug text-sidebar-foreground">
+                {styleName}
+              </p>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton 
-                  onClick={() => onSectionChange('styles')}
-                  className={currentSection === 'styles' ? 'bg-muted text-primary font-medium' : ''}
-                >
-                  <BookOpen className="h-4 w-4" />
-                  {!isCollapsed && <span>Välj Stil</span>}
+                <SidebarMenuButton asChild tooltip={t('nav.saved')}>
+                  <NavLink to="/saved">
+                    <Settings2 className="h-4 w-4" aria-hidden />
+                    {!collapsed && <span>{t('nav.saved')}</span>}
+                  </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
-              {selectedStyle && (
-                <>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton 
-                      onClick={() => onSectionChange('calculator')}
-                      className={currentSection === 'calculator' ? 'bg-muted text-primary font-medium' : ''}
-                    >
-                      <Settings className="h-4 w-4" />
-                      {!isCollapsed && <span>Parametrar</span>}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  
-                  <SidebarMenuItem>
-                    <SidebarMenuButton 
-                      onClick={() => onSectionChange('results')}
-                      className={currentSection === 'results' ? 'bg-muted text-primary font-medium' : ''}
-                    >
-                      <Calculator className="h-4 w-4" />
-                      {!isCollapsed && <span>Recept</span>}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </>
-              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

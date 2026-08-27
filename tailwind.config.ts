@@ -28,7 +28,8 @@ export default {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
 					hover: 'hsl(var(--primary-hover))',
-					glow: 'hsl(var(--primary-glow))'
+					glow: 'hsl(var(--primary-glow))',
+					soft: 'hsl(var(--primary-soft))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -53,7 +54,23 @@ export default {
 				},
 				card: {
 					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					foreground: 'hsl(var(--card-foreground))',
+					muted: 'hsl(var(--card-muted))'
+				},
+				success: 'hsl(var(--success))',
+				warning: 'hsl(var(--warning))',
+				info: 'hsl(var(--info))',
+				ing: {
+					flour: 'hsl(var(--ing-flour))',
+					water: 'hsl(var(--ing-water))',
+					salt: 'hsl(var(--ing-salt))',
+					yeast: 'hsl(var(--ing-yeast))',
+					starter: 'hsl(var(--ing-starter))',
+					fat: 'hsl(var(--ing-fat))',
+					sugar: 'hsl(var(--ing-sugar))',
+					dairy: 'hsl(var(--ing-dairy))',
+					egg: 'hsl(var(--ing-egg))',
+					other: 'hsl(var(--ing-other))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -87,11 +104,20 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-up': {
+					from: { opacity: '0', transform: 'translateY(8px)' },
+					to: { opacity: '1', transform: 'translateY(0)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-up': 'fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both'
+			},
+			boxShadow: {
+				soft: 'var(--shadow-soft)',
+				medium: 'var(--shadow-medium)'
 			}
 		}
 	},

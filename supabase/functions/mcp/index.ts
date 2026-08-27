@@ -7,609 +7,3011 @@ import { defineMcp } from "npm:@lovable.dev/mcp-js@0.26.3";
 
 // src/lib/mcp/tools/list-styles.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.26.3";
-import { z } from "npm:zod@^3.25.76";
+import { z as z2 } from "npm:zod@^3.25.76";
 
 // src/data/styles.ts
+var WHEAT = [{ key: "flour.bread", percentage: 100, protein_pct: 12 }];
 var BREAD_STYLES = [
-  // PIZZA STYLES
+  // ─────────────────────────── PIZZA ───────────────────────────
   {
     id: "neapolitan",
-    name: "Traditionell Napolitansk Pizza",
-    description: "Traditionell napolitansk pizza enligt originalrecept",
+    name: "Pizza Napoletana",
     category: "pizza",
-    region: "Napoli, Italien",
-    defaultParams: {
-      hydration_pct: 66,
-      salt_pct: 2.8,
-      sugar_pct: 0,
-      oil_pct: 0
-    },
+    regionKey: "region.napoli",
+    defaultParams: { hydration_pct: 62, salt_pct: 2.8, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
-      bulk_ratio: 0.8,
-      // 12-14h bulk, 3h proof
-      proof_ratio: 0.2,
+      bulk_ratio: 0.75,
+      proof_ratio: 0.25,
       base_yeast_fresh_pct: 0.025,
-      // 0.25g per 1000g mjöl
-      base_inoculation_pct: 18
+      yeast_ref_hours: 24,
+      yeast_ref_temp_c: 21,
+      base_inoculation_pct: 7,
+      levain_ref_hours: 10,
+      levain_ref_temp_c: 22
     },
-    characteristics: ["265g bollar", "L\xE5ng bulkj\xE4sning 12-14h", "21\xB0C j\xE4sning", "Vikning 3 g\xE5nger"],
+    process: {
+      mixMin: 20,
+      benchRestMin: 20,
+      folds: { count: 3, intervalMin: 15, techniqueKey: "process.fold.slapfold" },
+      shapeKey: "process.shape.balls",
+      bakeKey: "process.bake.neapolitan",
+      bakeTempC: 450,
+      bakeMinutes: 2,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 265,
+      ballCount: 4,
+      totalTime: 24,
+      coldHours: 0,
+      roomTemp: 21,
+      doughTemp: 23,
+      leavenType: "commercial"
+    },
     flourBlend: [
-      { name: "Caputo Pizzeria", percentage: 50, protein_pct: 12.5 },
-      { name: "Vigevano Oro di Macina", percentage: 50, protein_pct: 13 }
-    ]
+      { key: "flour.caputo_pizzeria", percentage: 50, protein_pct: 12.5 },
+      { key: "flour.vigevano_oro", percentage: 50, protein_pct: 13 }
+    ],
+    minProteinPct: 12,
+    characteristicCount: 4
   },
   {
     id: "ny_style",
     name: "New York Style Pizza",
-    description: "Tunn men seg amerikansk pizza",
     category: "pizza",
-    region: "New York, USA",
-    defaultParams: {
-      hydration_pct: 62,
-      salt_pct: 2.2,
-      sugar_pct: 1.5,
-      oil_pct: 2
-    },
+    regionKey: "region.newyork",
+    defaultParams: { hydration_pct: 63, salt_pct: 2.2, sugar_pct: 1.5, oil_pct: 2, fatKey: "ing.oliveoil" },
     fermentation: {
-      bulk_ratio: 0.3,
-      proof_ratio: 0.7,
-      base_yeast_fresh_pct: 0.2,
-      base_inoculation_pct: 20
+      bulk_ratio: 0.25,
+      proof_ratio: 0.75,
+      base_yeast_fresh_pct: 0.35,
+      yeast_ref_hours: 24,
+      yeast_ref_temp_c: 21,
+      base_inoculation_pct: 8,
+      levain_ref_hours: 10,
+      levain_ref_temp_c: 22
     },
-    characteristics: ["Seg konsistens", "Kan vikas", "Hemugn 250\xB0C", "Mozzarella"]
+    process: {
+      mixMin: 10,
+      benchRestMin: 20,
+      shapeKey: "process.shape.balls",
+      bakeKey: "process.bake.steel",
+      bakeTempC: 285,
+      bakeMinutes: 8,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 280,
+      ballCount: 4,
+      totalTime: 48,
+      coldHours: 44,
+      roomTemp: 21,
+      doughTemp: 24,
+      leavenType: "commercial"
+    },
+    flourBlend: [{ key: "flour.bread_high", percentage: 100, protein_pct: 13.5 }],
+    minProteinPct: 12.5,
+    characteristicCount: 4
   },
   {
     id: "detroit",
     name: "Detroit Style Pizza",
-    description: "Tjock, luftig siciliansk stil",
     category: "pizza",
-    region: "Detroit, USA",
-    defaultParams: {
-      hydration_pct: 72,
-      salt_pct: 2.5,
-      sugar_pct: 2,
-      oil_pct: 4
-    },
+    regionKey: "region.detroit",
+    defaultParams: { hydration_pct: 72, salt_pct: 2.2, sugar_pct: 1, oil_pct: 4, fatKey: "ing.oliveoil" },
     fermentation: {
-      bulk_ratio: 0.35,
-      proof_ratio: 0.65,
-      base_yeast_fresh_pct: 0.25
+      bulk_ratio: 0.6,
+      proof_ratio: 0.4,
+      base_yeast_fresh_pct: 0.25,
+      yeast_ref_hours: 24,
+      yeast_ref_temp_c: 21
     },
-    characteristics: ["Fyrkantig form", "Knapriga kanter", "Ost till kanterna", "S\xE5s p\xE5 toppen"]
+    process: {
+      mixMin: 8,
+      benchRestMin: 30,
+      folds: { count: 2, intervalMin: 30, techniqueKey: "process.fold.coil" },
+      shapeKey: "process.shape.pan",
+      bakeKey: "process.bake.pan",
+      bakeTempC: 260,
+      bakeMinutes: 14,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 560,
+      ballCount: 1,
+      totalTime: 24,
+      coldHours: 18,
+      roomTemp: 21,
+      doughTemp: 25,
+      leavenType: "commercial"
+    },
+    flourBlend: [{ key: "flour.bread_high", percentage: 100, protein_pct: 13.5 }],
+    minProteinPct: 12.5,
+    characteristicCount: 4
   },
   {
     id: "roman",
-    name: "Roman Pizza (Al Taglio)",
-    description: "Ultratunn romersk pizza",
+    name: "Pizza in Teglia (Romana)",
     category: "pizza",
-    region: "Rom, Italien",
-    defaultParams: {
-      hydration_pct: 68,
-      salt_pct: 2.5,
-      sugar_pct: 0,
-      oil_pct: 3
-    },
+    regionKey: "region.rome",
+    defaultParams: { hydration_pct: 80, salt_pct: 2.4, sugar_pct: 0, oil_pct: 3, fatKey: "ing.oliveoil" },
     fermentation: {
-      bulk_ratio: 0.4,
-      proof_ratio: 0.6,
-      base_yeast_fresh_pct: 0.08
+      bulk_ratio: 0.7,
+      proof_ratio: 0.3,
+      base_yeast_fresh_pct: 0.08,
+      yeast_ref_hours: 24,
+      yeast_ref_temp_c: 20
     },
-    characteristics: ["Ultratunn", "Knaprig", "Rektangul\xE4r", "L\xE5ng j\xE4sning"]
+    process: {
+      autolyseMin: 30,
+      mixMin: 10,
+      benchRestMin: 30,
+      folds: { count: 3, intervalMin: 30, techniqueKey: "process.fold.coil" },
+      shapeKey: "process.shape.tray",
+      bakeKey: "process.bake.tray",
+      bakeTempC: 250,
+      bakeMinutes: 16,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 800,
+      ballCount: 1,
+      totalTime: 26,
+      coldHours: 20,
+      roomTemp: 20,
+      doughTemp: 24,
+      leavenType: "commercial"
+    },
+    flourBlend: [{ key: "flour.tipo1", percentage: 100, protein_pct: 13.5 }],
+    minProteinPct: 13,
+    characteristicCount: 4
   },
   {
     id: "chicago_deep",
     name: "Chicago Deep Dish",
-    description: "Djup amerikansk pizza med tjock botten",
     category: "pizza",
-    region: "Chicago, USA",
-    defaultParams: {
-      hydration_pct: 58,
-      salt_pct: 2,
-      sugar_pct: 1,
-      oil_pct: 8
-    },
-    fermentation: {
-      bulk_ratio: 0.5,
-      proof_ratio: 0.5,
-      base_yeast_fresh_pct: 0.3
-    },
-    characteristics: ["Djup form", "Sm\xF6rbotten", "Ost p\xE5 botten", "Mycket p\xE5l\xE4gg"]
-  },
-  // BREAD STYLES
-  {
-    id: "country_sourdough",
-    name: "Country Sourdough",
-    description: "Klassiskt lantbr\xF6d med surdeg",
-    category: "bread",
-    region: "Frankrike",
-    defaultParams: {
-      hydration_pct: 75,
-      salt_pct: 2,
-      sugar_pct: 0,
-      oil_pct: 0
-    },
+    regionKey: "region.chicago",
+    defaultParams: { hydration_pct: 52, salt_pct: 1.8, sugar_pct: 2, oil_pct: 18, fatKey: "ing.butter" },
     fermentation: {
       bulk_ratio: 0.65,
       proof_ratio: 0.35,
-      base_yeast_fresh_pct: 0,
-      base_inoculation_pct: 20
+      base_yeast_fresh_pct: 0.3,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 22
     },
-    characteristics: ["Surdegsj\xE4st", "\xD6ppen krumb", "Syrlig smak", "Tjock skorpa"]
+    process: {
+      mixMin: 6,
+      shapeKey: "process.shape.deepdish",
+      bakeKey: "process.bake.deepdish",
+      bakeTempC: 220,
+      bakeMinutes: 32,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 620,
+      ballCount: 1,
+      totalTime: 5,
+      coldHours: 0,
+      roomTemp: 22,
+      doughTemp: 24,
+      leavenType: "commercial"
+    },
+    flourBlend: [
+      { key: "flour.ap", percentage: 80, protein_pct: 10.5 },
+      { key: "flour.semolina", percentage: 20, protein_pct: 12.5 }
+    ],
+    characteristicCount: 4
   },
   {
-    id: "baguette",
-    name: "Baguette Traditionnelle",
-    description: "Klassisk fransk baguette med poolish",
-    category: "bread",
-    region: "Frankrike",
-    defaultParams: {
-      hydration_pct: 68,
-      salt_pct: 2,
-      sugar_pct: 0,
-      oil_pct: 0,
-      preferment: {
-        type: "poolish",
-        flour_pct: 40,
-        hydration_pct: 100
-      }
-    },
+    id: "sicilian_pizza",
+    name: "Sfincione Siciliano",
+    category: "pizza",
+    regionKey: "region.sicily",
+    defaultParams: { hydration_pct: 75, salt_pct: 2.4, sugar_pct: 1, oil_pct: 6, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.6,
       proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.1
+      base_yeast_fresh_pct: 0.15,
+      yeast_ref_hours: 6,
+      yeast_ref_temp_c: 22,
+      base_inoculation_pct: 10,
+      levain_ref_hours: 7,
+      levain_ref_temp_c: 23
     },
-    characteristics: ["Poolish f\xF6rj\xE4sning", "Knaprig skorpa", "\xD6ppen krumb", "Traditionell"]
+    process: {
+      mixMin: 10,
+      benchRestMin: 30,
+      folds: { count: 2, intervalMin: 40, techniqueKey: "process.fold.coil" },
+      shapeKey: "process.shape.tray",
+      bakeKey: "process.bake.tray",
+      bakeTempC: 240,
+      bakeMinutes: 22,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 1,
+      totalTime: 7,
+      coldHours: 0,
+      roomTemp: 22,
+      doughTemp: 25,
+      leavenType: "commercial"
+    },
+    flourBlend: [
+      { key: "flour.tipo00", percentage: 60, protein_pct: 11 },
+      { key: "flour.semolina", percentage: 40, protein_pct: 13.5 }
+    ],
+    characteristicCount: 4
+  },
+  // ──────────────────── PIZZA WITH PREFERMENT ────────────────────
+  {
+    id: "pizza_poolish",
+    name: "Pizza con Poolish",
+    category: "preferment",
+    regionKey: "region.napoli",
+    defaultParams: { hydration_pct: 65, salt_pct: 2.4, sugar_pct: 0.6, oil_pct: 0, sugarKey: "ing.honey" },
+    fermentation: {
+      bulk_ratio: 0.35,
+      proof_ratio: 0.65,
+      base_yeast_fresh_pct: 0.1,
+      yeast_ref_hours: 6,
+      yeast_ref_temp_c: 22
+    },
+    preferment: {
+      type: "poolish",
+      flour_pct: 35,
+      hydration_pct: 100,
+      hours: 16,
+      temp_c: 18,
+      yeast_fresh_pct: 0.6,
+      extras: [{ key: "ing.honey", pct: 1.7, type: "sugar" }]
+    },
+    process: {
+      mixMin: 12,
+      benchRestMin: 20,
+      folds: { count: 2, intervalMin: 30, techniqueKey: "process.fold.slapfold" },
+      shapeKey: "process.shape.balls",
+      bakeKey: "process.bake.neapolitan",
+      bakeTempC: 430,
+      bakeMinutes: 2,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 270,
+      ballCount: 4,
+      totalTime: 6,
+      coldHours: 0,
+      roomTemp: 22,
+      doughTemp: 24,
+      leavenType: "commercial"
+    },
+    flourBlend: [{ key: "flour.tipo00", percentage: 100, protein_pct: 12.5 }],
+    minProteinPct: 12,
+    characteristicCount: 4
+  },
+  {
+    id: "pizza_biga",
+    name: "Pizza 100% Biga",
+    category: "preferment",
+    regionKey: "region.napoli",
+    defaultParams: { hydration_pct: 70, salt_pct: 2.8, sugar_pct: 1, oil_pct: 0, sugarKey: "ing.malt" },
+    fermentation: {
+      bulk_ratio: 0.25,
+      proof_ratio: 0.75,
+      base_yeast_fresh_pct: 0.05,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 20
+    },
+    preferment: {
+      type: "biga",
+      flour_pct: 100,
+      hydration_pct: 47,
+      hours: 18,
+      temp_c: 16,
+      yeast_fresh_pct: 0.25
+    },
+    process: {
+      mixMin: 18,
+      benchRestMin: 30,
+      shapeKey: "process.shape.balls",
+      bakeKey: "process.bake.neapolitan",
+      bakeTempC: 430,
+      bakeMinutes: 2,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 270,
+      ballCount: 4,
+      totalTime: 5,
+      coldHours: 0,
+      roomTemp: 20,
+      doughTemp: 24,
+      leavenType: "commercial"
+    },
+    flourBlend: [
+      { key: "flour.pizzuti", percentage: 60, protein_pct: 13 },
+      { key: "flour.vigevano_tramonti", percentage: 40, protein_pct: 14 }
+    ],
+    minProteinPct: 13,
+    characteristicCount: 4
+  },
+  {
+    id: "poolish_bread",
+    name: "Pain au Poolish",
+    category: "preferment",
+    regionKey: "region.france",
+    defaultParams: { hydration_pct: 74, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
+    fermentation: {
+      bulk_ratio: 0.6,
+      proof_ratio: 0.4,
+      base_yeast_fresh_pct: 0.08,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 23
+    },
+    preferment: {
+      type: "poolish",
+      flour_pct: 50,
+      hydration_pct: 100,
+      hours: 14,
+      temp_c: 19,
+      yeast_fresh_pct: 0.3
+    },
+    process: {
+      autolyseMin: 30,
+      mixMin: 8,
+      benchRestMin: 30,
+      folds: { count: 3, intervalMin: 40, techniqueKey: "process.fold.stretchfold" },
+      preshapeRestMin: 25,
+      shapeKey: "process.shape.batard",
+      bakeKey: "process.bake.dutchoven",
+      bakeTempC: 250,
+      bakeDropTempC: 225,
+      bakeMinutes: 40,
+      steamMinutes: 20,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 2,
+      totalTime: 5,
+      coldHours: 0,
+      roomTemp: 23,
+      doughTemp: 25,
+      leavenType: "commercial"
+    },
+    flourBlend: [
+      { key: "flour.bread", percentage: 80, protein_pct: 12.5 },
+      { key: "flour.wholewheat", percentage: 20, protein_pct: 14 }
+    ],
+    characteristicCount: 4
+  },
+  {
+    id: "biga_pane",
+    name: "Pane Pugliese",
+    category: "preferment",
+    regionKey: "region.puglia",
+    defaultParams: { hydration_pct: 72, salt_pct: 2.2, sugar_pct: 0, oil_pct: 0 },
+    fermentation: {
+      bulk_ratio: 0.65,
+      proof_ratio: 0.35,
+      base_yeast_fresh_pct: 0.06,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 22
+    },
+    preferment: {
+      type: "biga",
+      flour_pct: 60,
+      hydration_pct: 45,
+      hours: 16,
+      temp_c: 18,
+      yeast_fresh_pct: 0.2
+    },
+    process: {
+      mixMin: 12,
+      benchRestMin: 30,
+      folds: { count: 3, intervalMin: 40, techniqueKey: "process.fold.coil" },
+      preshapeRestMin: 25,
+      shapeKey: "process.shape.boule",
+      bakeKey: "process.bake.dutchoven",
+      bakeTempC: 250,
+      bakeDropTempC: 220,
+      bakeMinutes: 45,
+      steamMinutes: 20,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 2,
+      totalTime: 5,
+      coldHours: 0,
+      roomTemp: 22,
+      doughTemp: 25,
+      leavenType: "commercial"
+    },
+    flourBlend: [
+      { key: "flour.tipo0", percentage: 70, protein_pct: 11.5 },
+      { key: "flour.tipo1", percentage: 30, protein_pct: 12 }
+    ],
+    characteristicCount: 4
+  },
+  {
+    id: "baguette",
+    name: "Baguette de Tradition",
+    category: "preferment",
+    regionKey: "region.france",
+    defaultParams: { hydration_pct: 72, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
+    fermentation: {
+      bulk_ratio: 0.6,
+      proof_ratio: 0.4,
+      base_yeast_fresh_pct: 0.1,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 23
+    },
+    preferment: {
+      type: "poolish",
+      flour_pct: 40,
+      hydration_pct: 100,
+      hours: 14,
+      temp_c: 19,
+      yeast_fresh_pct: 0.3
+    },
+    process: {
+      autolyseMin: 40,
+      mixMin: 6,
+      benchRestMin: 45,
+      folds: { count: 2, intervalMin: 45, techniqueKey: "process.fold.letterfold" },
+      preshapeRestMin: 25,
+      shapeKey: "process.shape.baguette",
+      bakeKey: "process.bake.steam",
+      bakeTempC: 250,
+      bakeDropTempC: 235,
+      bakeMinutes: 22,
+      steamMinutes: 12,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 350,
+      ballCount: 4,
+      totalTime: 4,
+      coldHours: 0,
+      roomTemp: 23,
+      doughTemp: 24,
+      leavenType: "commercial"
+    },
+    flourBlend: [{ key: "flour.t65", percentage: 100, protein_pct: 11.5 }],
+    characteristicCount: 4
   },
   {
     id: "ciabatta",
     name: "Ciabatta",
-    description: "Italienskt br\xF6d med h\xF6g hydrering",
-    category: "bread",
-    region: "Italien",
-    defaultParams: {
-      hydration_pct: 80,
-      salt_pct: 2.2,
-      sugar_pct: 0,
-      oil_pct: 1,
-      preferment: {
-        type: "biga",
-        flour_pct: 50,
-        hydration_pct: 45
-      }
-    },
+    category: "preferment",
+    regionKey: "region.italy",
+    defaultParams: { hydration_pct: 82, salt_pct: 2.2, sugar_pct: 0, oil_pct: 1, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.7,
       proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0.08
+      base_yeast_fresh_pct: 0.08,
+      yeast_ref_hours: 4,
+      yeast_ref_temp_c: 22
     },
-    characteristics: ["Biga f\xF6rj\xE4sning", "Mycket luftig", "Oregelbundna h\xE5l", "Mjuk skorpa"]
+    preferment: {
+      type: "biga",
+      flour_pct: 50,
+      hydration_pct: 45,
+      hours: 16,
+      temp_c: 18,
+      yeast_fresh_pct: 0.2
+    },
+    process: {
+      mixMin: 12,
+      benchRestMin: 30,
+      folds: { count: 3, intervalMin: 30, techniqueKey: "process.fold.coil" },
+      shapeKey: "process.shape.ciabatta",
+      bakeKey: "process.bake.steam",
+      bakeTempC: 240,
+      bakeMinutes: 25,
+      steamMinutes: 12,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 450,
+      ballCount: 2,
+      totalTime: 4,
+      coldHours: 0,
+      roomTemp: 22,
+      doughTemp: 25,
+      leavenType: "commercial"
+    },
+    flourBlend: [{ key: "flour.tipo0", percentage: 100, protein_pct: 12.5 }],
+    minProteinPct: 12,
+    characteristicCount: 4
+  },
+  // ─────────────────────────── BREAD ───────────────────────────
+  {
+    id: "country_sourdough",
+    name: "Pain de Campagne",
+    category: "bread",
+    regionKey: "region.france",
+    defaultParams: { hydration_pct: 76, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
+    fermentation: {
+      bulk_ratio: 0.55,
+      proof_ratio: 0.45,
+      base_yeast_fresh_pct: 0,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 23,
+      base_inoculation_pct: 9,
+      levain_ref_hours: 9,
+      levain_ref_temp_c: 23
+    },
+    process: {
+      autolyseMin: 45,
+      mixMin: 10,
+      benchRestMin: 30,
+      folds: { count: 4, intervalMin: 30, techniqueKey: "process.fold.stretchfold" },
+      preshapeRestMin: 25,
+      shapeKey: "process.shape.boule",
+      bakeKey: "process.bake.dutchoven",
+      bakeTempC: 250,
+      bakeDropTempC: 225,
+      bakeMinutes: 45,
+      steamMinutes: 20,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 2,
+      totalTime: 18,
+      coldHours: 12,
+      roomTemp: 24,
+      doughTemp: 25,
+      leavenType: "sourdough"
+    },
+    flourBlend: [
+      { key: "flour.bread", percentage: 85, protein_pct: 12.5 },
+      { key: "flour.wholewheat", percentage: 10, protein_pct: 14 },
+      { key: "flour.rye", percentage: 5, protein_pct: 8 }
+    ],
+    characteristicCount: 4
   },
   {
     id: "focaccia",
     name: "Focaccia Genovese",
-    description: "Italiensk platt olivoljebr\xF6d",
     category: "bread",
-    region: "Genua, Italien",
-    defaultParams: {
-      hydration_pct: 70,
-      salt_pct: 2.5,
-      sugar_pct: 0,
-      oil_pct: 8
-    },
+    regionKey: "region.genoa",
+    defaultParams: { hydration_pct: 80, salt_pct: 2.2, sugar_pct: 0.5, oil_pct: 8, fatKey: "ing.oliveoil" },
     fermentation: {
-      bulk_ratio: 0.4,
-      proof_ratio: 0.6,
-      base_yeast_fresh_pct: 0.15
+      bulk_ratio: 0.55,
+      proof_ratio: 0.45,
+      base_yeast_fresh_pct: 0.15,
+      yeast_ref_hours: 6,
+      yeast_ref_temp_c: 22,
+      base_inoculation_pct: 10,
+      levain_ref_hours: 7,
+      levain_ref_temp_c: 23
     },
-    characteristics: ["Olivolja", "Platt form", "Mjuk konsistens", "Toppings"]
+    process: {
+      mixMin: 8,
+      benchRestMin: 30,
+      folds: { count: 3, intervalMin: 30, techniqueKey: "process.fold.coil" },
+      shapeKey: "process.shape.tray",
+      bakeKey: "process.bake.focaccia",
+      bakeTempC: 230,
+      bakeMinutes: 22,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 1,
+      totalTime: 6,
+      coldHours: 0,
+      roomTemp: 22,
+      doughTemp: 25,
+      leavenType: "commercial"
+    },
+    flourBlend: [{ key: "flour.tipo0", percentage: 100, protein_pct: 12 }],
+    characteristicCount: 4
   },
   {
     id: "pain_de_mie",
     name: "Pain de Mie",
-    description: "Franskt formbr\xF6d (sandwich bread)",
     category: "bread",
-    region: "Frankrike",
-    defaultParams: {
-      hydration_pct: 65,
-      salt_pct: 1.8,
-      sugar_pct: 3,
-      oil_pct: 4
-    },
+    regionKey: "region.france",
+    defaultParams: { hydration_pct: 66, salt_pct: 1.8, sugar_pct: 3, oil_pct: 5, fatKey: "ing.butter" },
     fermentation: {
       bulk_ratio: 0.45,
       proof_ratio: 0.55,
-      base_yeast_fresh_pct: 0.25
+      base_yeast_fresh_pct: 0.25,
+      yeast_ref_hours: 3,
+      yeast_ref_temp_c: 24
     },
-    characteristics: ["Mjuk skorpa", "Fin krumb", "Kvadratisk form", "Sandwich"]
-  },
-  // PREFERMENT BREADS
-  {
-    id: "poolish_bread",
-    name: "Poolish Country Bread",
-    description: "Rustikt br\xF6d med poolish f\xF6rj\xE4sning",
-    category: "preferment",
-    region: "Frankrike",
-    defaultParams: {
-      hydration_pct: 72,
-      salt_pct: 2,
-      sugar_pct: 0,
-      oil_pct: 0,
-      preferment: {
-        type: "poolish",
-        flour_pct: 50,
-        hydration_pct: 100
-      }
+    process: {
+      mixMin: 12,
+      shapeKey: "process.shape.pullman",
+      bakeKey: "process.bake.pullman",
+      bakeTempC: 200,
+      bakeMinutes: 35,
+      coldPhase: "bulk"
     },
-    fermentation: {
-      bulk_ratio: 0.6,
-      proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.08
+    defaults: {
+      ballWeight: 800,
+      ballCount: 1,
+      totalTime: 3,
+      coldHours: 0,
+      roomTemp: 23,
+      doughTemp: 25,
+      leavenType: "commercial"
     },
-    characteristics: ["Poolish 12-16h", "Komplex smak", "\xD6ppen krumb", "Knaprig skorpa"],
-    flourBlend: [
-      { name: "Br\xF6d\xADmj\xF6l", percentage: 80, protein_pct: 12.5 },
-      { name: "Fullkornsvete", percentage: 20, protein_pct: 14 }
-    ]
-  },
-  {
-    id: "biga_pane",
-    name: "Pane Pugliese (Biga)",
-    description: "Italienskt br\xF6d med biga f\xF6rj\xE4sning",
-    category: "preferment",
-    region: "Apulien, Italien",
-    defaultParams: {
-      hydration_pct: 70,
-      salt_pct: 2.2,
-      sugar_pct: 0,
-      oil_pct: 0,
-      preferment: {
-        type: "biga",
-        flour_pct: 60,
-        hydration_pct: 45
-      }
-    },
-    fermentation: {
-      bulk_ratio: 0.65,
-      proof_ratio: 0.35,
-      base_yeast_fresh_pct: 0.06
-    },
-    characteristics: ["Biga 12-24h", "N\xF6taktig smak", "Fin krumb", "H\xE5llbart"],
-    flourBlend: [
-      { name: "Tipo 0", percentage: 70, protein_pct: 11.5 },
-      { name: "Tipo 1", percentage: 30, protein_pct: 12 }
-    ]
-  },
-  {
-    id: "pizza_poolish",
-    name: "Neapolitan Poolish Pizza",
-    description: "Napolitansk pizza med poolish enligt traditionellt recept",
-    category: "pizza",
-    region: "Napoli, Italien",
-    defaultParams: {
-      hydration_pct: 60,
-      // 300g vatten / 500g mjöl
-      salt_pct: 2.4,
-      // 12g salt / 500g mjöl
-      sugar_pct: 0.6,
-      // 3g honung / 500g mjöl
-      oil_pct: 0,
-      preferment: {
-        type: "poolish",
-        flour_pct: 35,
-        // 175g / 500g total mjöl
-        hydration_pct: 100
-        // 175g vatten i poolish
-      }
-    },
-    fermentation: {
-      bulk_ratio: 0.15,
-      // 2h rumstemperatur efter blandning
-      proof_ratio: 0.85,
-      // 18-24h kall + 2h uppvärmning
-      base_yeast_fresh_pct: 0.3
-      // Motsvarar 1g IDY i poolish
-    },
-    characteristics: ["270g bollar", "Poolish 18-24h kall", "2h uppv\xE4rmning", "Leopard spotting"],
-    flourBlend: [
-      { name: "Tipo 00", percentage: 100, protein_pct: 12.5 }
-    ]
-  },
-  {
-    id: "pizza_biga",
-    name: "Pizza Napoletana (100% Biga)",
-    description: "Napolitansk pizza med 100% biga",
-    category: "pizza",
-    region: "Napoli, Italien",
-    defaultParams: {
-      hydration_pct: 70,
-      // 450-500ml + 200-250ml = 650-750ml / 1000g
-      salt_pct: 2.8,
-      // 28g / 1000g mjöl
-      sugar_pct: 1,
-      // 10g malt / 1000g mjöl
-      oil_pct: 0,
-      preferment: {
-        type: "biga",
-        flour_pct: 100,
-        // 100% biga - inget extra mjöl
-        hydration_pct: 47
-        // 450-500ml / 1000g mjöl i bigan
-      }
-    },
-    fermentation: {
-      bulk_ratio: 0.2,
-      // 30min vila efter knådning
-      proof_ratio: 0.8,
-      // 18h biga + 3h bollning
-      base_yeast_fresh_pct: 0.25
-      // 2-3g / 1000g mjöl
-    },
-    characteristics: ["260-280g bollar", "100% biga", "18h kallf\xF6rj\xE4sning", "W300+ mj\xF6l kr\xE4vs"],
-    flourBlend: [
-      { name: "Molino Pizzuti Costa d'Amalfi", percentage: 60, protein_pct: 13 },
-      { name: "Vigevano Tramonti Oro", percentage: 40, protein_pct: 14 }
-    ]
-  },
-  {
-    id: "sicilian_pizza",
-    name: "Sicilian Pizza",
-    description: "Tjock siciliansk pizza (Sfincione)",
-    category: "pizza",
-    region: "Sicilien, Italien",
-    defaultParams: {
-      hydration_pct: 68,
-      salt_pct: 2.8,
-      sugar_pct: 1,
-      oil_pct: 6
-    },
-    fermentation: {
-      bulk_ratio: 0.4,
-      proof_ratio: 0.6,
-      base_yeast_fresh_pct: 0.15,
-      base_inoculation_pct: 22
-    },
-    characteristics: ["Tjock botten", "Olivolja", "L\xF6ktoppning", "Breadcrumbs"],
-    flourBlend: [
-      { name: "Tipo 00", percentage: 60, protein_pct: 11 },
-      { name: "Semolina", percentage: 40, protein_pct: 13.5 }
-    ]
-  },
-  // ENRICHED BREADS
-  {
-    id: "milkbread",
-    name: "Milkbread (Hokkaido)",
-    description: "Japanskt mj\xF6lkbr\xF6d - magiskt mjukt och luftigt",
-    category: "enriched",
-    region: "Japan/Sverige",
-    defaultParams: {
-      hydration_pct: 64,
-      // 345g vatten / 540g mjöl
-      salt_pct: 1.1,
-      // 1 tsk salt ≈ 6g / 540g mjöl
-      sugar_pct: 6.5,
-      // 35g strösocker / 540g mjöl
-      oil_pct: 5.6
-      // 30g smör / 540g mjöl
-    },
-    fermentation: {
-      bulk_ratio: 0.6,
-      proof_ratio: 0.4,
-      base_yeast_fresh_pct: 2.8
-      // 15g jäst / 540g mjöl
-    },
-    characteristics: ["Torrmj\xF6lkspulver 4.6%", "Extremt mjuk", "L\xE5ng h\xE5llbarhet", "Tangzhong-metod"],
-    flourBlend: [
-      { name: "\xD6landsvetemj\xF6l (eller br\xF6d\xADmj\xF6l)", percentage: 100, protein_pct: 11.5 }
-    ]
-  },
-  {
-    id: "pain_de_mie_traditional",
-    name: "Pain de Mie (Traditionell)",
-    description: "Klassiskt franskt formbr\xF6d enligt originalrecept",
-    category: "enriched",
-    region: "Frankrike",
-    defaultParams: {
-      hydration_pct: 69,
-      // (250g vatten + 250g mjölk) / 720g mjöl
-      salt_pct: 2.1,
-      // 15g salt / 720g mjöl
-      sugar_pct: 2.6,
-      // 19g honung / 720g mjöl
-      oil_pct: 14
-      // 100g smör / 720g mjöl
-    },
-    fermentation: {
-      bulk_ratio: 0.4,
-      proof_ratio: 0.6,
-      base_yeast_fresh_pct: 2
-      // 6g torrjäst motsvarar ~15g färsk
-    },
-    characteristics: ["Mj\xF6lk + vatten", "Honung ist\xE4llet f\xF6r socker", "Mycket sm\xF6r", "Kvadratisk form"],
-    flourBlend: [
-      { name: "Vetemj\xF6l", percentage: 100, protein_pct: 11.5 }
-    ]
-  },
-  {
-    id: "sourdough_form_bread",
-    name: "Surdeg Formbr\xF6d",
-    description: "Svenskt surdegsbr\xF6d f\xF6r form - Martin Johanssons recept",
-    category: "bread",
-    region: "Sverige",
-    defaultParams: {
-      hydration_pct: 62.5,
-      // 250g vatten / 400g mjöl
-      salt_pct: 2.4,
-      // Uppskattad 1½ tsk ≈ 9.6g / 400g
-      sugar_pct: 0,
-      oil_pct: 0
-    },
-    fermentation: {
-      bulk_ratio: 0.7,
-      proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0,
-      base_inoculation_pct: 50
-      // 200g surdeg / 400g mjöl
-    },
-    characteristics: ["50% surdegsinokulation", "Vikning i bunke", "Avl\xE5ng limpa", "3-4h j\xE4sning"],
-    flourBlend: [
-      { name: "Vetemj\xF6l Special", percentage: 100, protein_pct: 12 }
-    ]
-  },
-  {
-    id: "sourdough_tortillas",
-    name: "Surdeg Tortillas",
-    description: "Mexikanska tortillas med svensk surdeg",
-    category: "bread",
-    region: "Mexico/Sverige",
-    defaultParams: {
-      hydration_pct: 57,
-      // (150ml surdeg/2 + 250ml vatten) / 420g mjöl
-      salt_pct: 2.3,
-      // 1½ tsk ≈ 9.6g / 420g mjöl
-      sugar_pct: 0,
-      oil_pct: 24
-      // 100g smält smör / 420g mjöl
-    },
-    fermentation: {
-      bulk_ratio: 0.2,
-      proof_ratio: 0.8,
-      base_yeast_fresh_pct: 0,
-      base_inoculation_pct: 18
-      // 150ml surdeg ≈ 75g / 420g mjöl
-    },
-    characteristics: ["MMS-metoden", "Hett vatten", "Sm\xE4lt sm\xF6r", "12 stora eller 24 sm\xE5"],
-    flourBlend: [
-      { name: "Vetemj\xF6l", percentage: 100, protein_pct: 11 }
-    ]
-  },
-  {
-    id: "brioche",
-    name: "Brioche",
-    description: "Rikt franskt sm\xF6rbr\xF6d",
-    category: "enriched",
-    region: "Frankrike",
-    defaultParams: {
-      hydration_pct: 58,
-      salt_pct: 1.8,
-      sugar_pct: 12,
-      oil_pct: 40
-      // Smör
-    },
-    fermentation: {
-      bulk_ratio: 0.5,
-      proof_ratio: 0.5,
-      base_yeast_fresh_pct: 1.2
-    },
-    characteristics: ["Mycket sm\xF6r", "S\xF6t", "Mjuk konsistens", "\xC4ggrik"]
-  },
-  {
-    id: "challah",
-    name: "Challah",
-    description: "Judiskt fl\xE4tat \xE4ggbr\xF6d",
-    category: "enriched",
-    region: "\xD6steuropa",
-    defaultParams: {
-      hydration_pct: 55,
-      salt_pct: 1.5,
-      sugar_pct: 8,
-      oil_pct: 8
-    },
-    fermentation: {
-      bulk_ratio: 0.45,
-      proof_ratio: 0.55,
-      base_yeast_fresh_pct: 0.8
-    },
-    characteristics: ["\xC4ggrik", "Fl\xE4tat", "S\xF6t", "Glansig yta"]
+    liquids: [
+      { key: "ing.water", share: 0.5, waterFraction: 1, type: "water" },
+      { key: "ing.milk", share: 0.5, waterFraction: 0.87, type: "dairy" }
+    ],
+    flourBlend: WHEAT,
+    characteristicCount: 4
   },
   {
     id: "pita",
-    name: "Pita Bread",
-    description: "Mellan\xF6stern fickbr\xF6d",
+    name: "Pita",
     category: "bread",
-    region: "Mellan\xF6stern",
-    defaultParams: {
-      hydration_pct: 62,
-      salt_pct: 2,
-      sugar_pct: 1,
-      oil_pct: 2
-    },
-    fermentation: {
-      bulk_ratio: 0.5,
-      proof_ratio: 0.5,
-      base_yeast_fresh_pct: 0.5
-    },
-    characteristics: ["Platt", "Ficka", "Snabb bakning", "Mjuk"]
-  },
-  {
-    id: "sourdough_rye",
-    name: "Swedish Rye Sourdough",
-    description: "Svenskt r\xE5gsurdegsbr\xF6d",
-    category: "bread",
-    region: "Sverige",
-    defaultParams: {
-      hydration_pct: 72,
-      salt_pct: 2.2,
-      sugar_pct: 0,
-      oil_pct: 0
-    },
+    regionKey: "region.levant",
+    defaultParams: { hydration_pct: 62, salt_pct: 2, sugar_pct: 1, oil_pct: 3, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.7,
       proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0,
-      base_inoculation_pct: 25
+      base_yeast_fresh_pct: 0.5,
+      yeast_ref_hours: 3,
+      yeast_ref_temp_c: 24
     },
-    characteristics: ["R\xE5gsurdeg", "M\xF6rk f\xE4rg", "T\xE4t krumb", "Syrlig"],
+    process: {
+      mixMin: 8,
+      shapeKey: "process.shape.discs",
+      bakeKey: "process.bake.pita",
+      bakeTempC: 275,
+      bakeMinutes: 4,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 90,
+      ballCount: 8,
+      totalTime: 3,
+      coldHours: 0,
+      roomTemp: 24,
+      doughTemp: 26,
+      leavenType: "commercial"
+    },
+    flourBlend: WHEAT,
+    characteristicCount: 4
+  },
+  {
+    id: "sourdough_rye",
+    name: "R\xE5gsurdegsbr\xF6d",
+    category: "bread",
+    regionKey: "region.sweden",
+    defaultParams: { hydration_pct: 78, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
+    fermentation: {
+      bulk_ratio: 0.6,
+      proof_ratio: 0.4,
+      base_yeast_fresh_pct: 0,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 23,
+      base_inoculation_pct: 14,
+      levain_ref_hours: 8,
+      levain_ref_temp_c: 24
+    },
+    process: {
+      mixMin: 8,
+      benchRestMin: 40,
+      folds: { count: 2, intervalMin: 45, techniqueKey: "process.fold.coil" },
+      shapeKey: "process.shape.tin",
+      bakeKey: "process.bake.rye",
+      bakeTempC: 250,
+      bakeDropTempC: 200,
+      bakeMinutes: 55,
+      steamMinutes: 15,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 1,
+      totalTime: 14,
+      coldHours: 8,
+      roomTemp: 24,
+      doughTemp: 27,
+      leavenType: "sourdough"
+    },
     flourBlend: [
-      { name: "R\xE5gmj\xF6l", percentage: 30, protein_pct: 8 },
-      { name: "Vetemj\xF6l", percentage: 70, protein_pct: 11.5 }
-    ]
+      { key: "flour.rye", percentage: 40, protein_pct: 8 },
+      { key: "flour.bread", percentage: 60, protein_pct: 12.5 }
+    ],
+    characteristicCount: 4
   },
   {
     id: "multigrain_sourdough",
     name: "Multigrain Sourdough",
-    description: "Flerkornsbr\xF6d med surdeg",
     category: "bread",
-    region: "Norden",
-    defaultParams: {
-      hydration_pct: 78,
-      salt_pct: 2,
-      sugar_pct: 0,
-      oil_pct: 2
+    regionKey: "region.nordic",
+    defaultParams: { hydration_pct: 82, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
+    fermentation: {
+      bulk_ratio: 0.55,
+      proof_ratio: 0.45,
+      base_yeast_fresh_pct: 0,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 23,
+      base_inoculation_pct: 10,
+      levain_ref_hours: 9,
+      levain_ref_temp_c: 23
     },
+    process: {
+      autolyseMin: 45,
+      mixMin: 10,
+      benchRestMin: 30,
+      folds: { count: 4, intervalMin: 30, techniqueKey: "process.fold.stretchfold" },
+      preshapeRestMin: 25,
+      shapeKey: "process.shape.batard",
+      bakeKey: "process.bake.dutchoven",
+      bakeTempC: 250,
+      bakeDropTempC: 225,
+      bakeMinutes: 45,
+      steamMinutes: 20,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 2,
+      totalTime: 18,
+      coldHours: 12,
+      roomTemp: 24,
+      doughTemp: 26,
+      leavenType: "sourdough"
+    },
+    flourBlend: [
+      { key: "flour.bread", percentage: 50, protein_pct: 12.5 },
+      { key: "flour.rye", percentage: 20, protein_pct: 8 },
+      { key: "flour.spelt", percentage: 30, protein_pct: 14 }
+    ],
+    extras: [{ key: "ing.seeds_soaker", pct: 12, type: "other", waterFraction: 0.5 }],
+    characteristicCount: 4
+  },
+  {
+    id: "sourdough_form_bread",
+    name: "Surdeg Formbr\xF6d",
+    category: "bread",
+    regionKey: "region.sweden",
+    defaultParams: { hydration_pct: 68, salt_pct: 2.2, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.65,
       proof_ratio: 0.35,
       base_yeast_fresh_pct: 0,
-      base_inoculation_pct: 22
+      yeast_ref_hours: 4,
+      yeast_ref_temp_c: 23,
+      base_inoculation_pct: 20,
+      levain_ref_hours: 5,
+      levain_ref_temp_c: 23
     },
-    characteristics: ["Flera kornsorter", "N\xF6taktig", "H\xF6g fiber", "M\xE4ttande"],
-    flourBlend: [
-      { name: "Br\xF6d\xADmj\xF6l", percentage: 50, protein_pct: 12.5 },
-      { name: "R\xE5g\xADmj\xF6l", percentage: 20, protein_pct: 8 },
-      { name: "Speltvete", percentage: 30, protein_pct: 14 }
-    ]
+    process: {
+      mixMin: 8,
+      benchRestMin: 30,
+      folds: { count: 3, intervalMin: 30, techniqueKey: "process.fold.bowlfold" },
+      shapeKey: "process.shape.tin",
+      bakeKey: "process.bake.tin",
+      bakeTempC: 230,
+      bakeDropTempC: 200,
+      bakeMinutes: 40,
+      steamMinutes: 15,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 750,
+      ballCount: 1,
+      totalTime: 6,
+      coldHours: 0,
+      roomTemp: 23,
+      doughTemp: 25,
+      leavenType: "sourdough"
+    },
+    flourBlend: [{ key: "flour.bread", percentage: 100, protein_pct: 12 }],
+    characteristicCount: 4
+  },
+  {
+    id: "sourdough_tortillas",
+    name: "Surdegstortillas",
+    category: "bread",
+    regionKey: "region.mexico",
+    defaultParams: { hydration_pct: 58, salt_pct: 2, sugar_pct: 0, oil_pct: 18, fatKey: "ing.melted_butter" },
+    fermentation: {
+      bulk_ratio: 0.8,
+      proof_ratio: 0.2,
+      base_yeast_fresh_pct: 0,
+      yeast_ref_hours: 3,
+      yeast_ref_temp_c: 23,
+      base_inoculation_pct: 8,
+      levain_ref_hours: 3,
+      levain_ref_temp_c: 23
+    },
+    process: {
+      mixMin: 8,
+      shapeKey: "process.shape.tortilla",
+      bakeKey: "process.bake.skillet",
+      bakeTempC: 230,
+      bakeMinutes: 1,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 70,
+      ballCount: 12,
+      totalTime: 3,
+      coldHours: 0,
+      roomTemp: 23,
+      doughTemp: 28,
+      leavenType: "sourdough"
+    },
+    flourBlend: WHEAT,
+    characteristicCount: 4
+  },
+  // ────────────────────────── ENRICHED ──────────────────────────
+  {
+    id: "milkbread",
+    name: "Hokkaido Milk Bread",
+    category: "enriched",
+    regionKey: "region.japan",
+    defaultParams: { hydration_pct: 68, salt_pct: 1.6, sugar_pct: 10, oil_pct: 8, fatKey: "ing.butter" },
+    fermentation: {
+      bulk_ratio: 0.55,
+      proof_ratio: 0.45,
+      base_yeast_fresh_pct: 2.8,
+      yeast_ref_hours: 2.5,
+      yeast_ref_temp_c: 26
+    },
+    process: {
+      mixMin: 15,
+      shapeKey: "process.shape.rolls",
+      bakeKey: "process.bake.enriched",
+      bakeTempC: 180,
+      bakeMinutes: 30,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 1,
+      totalTime: 3,
+      coldHours: 0,
+      roomTemp: 24,
+      doughTemp: 26,
+      leavenType: "commercial"
+    },
+    liquids: [
+      { key: "ing.milk", share: 0.75, waterFraction: 0.87, type: "dairy" },
+      { key: "ing.water", share: 0.25, waterFraction: 1, type: "water" }
+    ],
+    extras: [{ key: "ing.milk_powder", pct: 4.6, type: "dairy" }],
+    flourBlend: [{ key: "flour.bread", percentage: 100, protein_pct: 12.5 }],
+    characteristicCount: 4
+  },
+  {
+    id: "pain_de_mie_traditional",
+    name: "Pain de Mie Traditionnel",
+    category: "enriched",
+    regionKey: "region.france",
+    defaultParams: { hydration_pct: 69, salt_pct: 2.1, sugar_pct: 2.6, oil_pct: 14, fatKey: "ing.butter", sugarKey: "ing.honey" },
+    fermentation: {
+      bulk_ratio: 0.45,
+      proof_ratio: 0.55,
+      base_yeast_fresh_pct: 2,
+      yeast_ref_hours: 3,
+      yeast_ref_temp_c: 24
+    },
+    process: {
+      mixMin: 15,
+      shapeKey: "process.shape.pullman",
+      bakeKey: "process.bake.pullman",
+      bakeTempC: 220,
+      bakeDropTempC: 190,
+      bakeMinutes: 35,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 900,
+      ballCount: 1,
+      totalTime: 3,
+      coldHours: 0,
+      roomTemp: 23,
+      doughTemp: 25,
+      leavenType: "commercial"
+    },
+    liquids: [
+      { key: "ing.water", share: 0.5, waterFraction: 1, type: "water" },
+      { key: "ing.milk", share: 0.5, waterFraction: 0.87, type: "dairy" }
+    ],
+    flourBlend: WHEAT,
+    characteristicCount: 4
+  },
+  {
+    id: "brioche",
+    name: "Brioche",
+    category: "enriched",
+    regionKey: "region.france",
+    defaultParams: { hydration_pct: 52, salt_pct: 1.8, sugar_pct: 12, oil_pct: 45, fatKey: "ing.butter" },
+    fermentation: {
+      bulk_ratio: 0.55,
+      proof_ratio: 0.45,
+      base_yeast_fresh_pct: 1.2,
+      yeast_ref_hours: 4,
+      yeast_ref_temp_c: 22
+    },
+    process: {
+      mixMin: 25,
+      shapeKey: "process.shape.brioche",
+      bakeKey: "process.bake.enriched",
+      bakeTempC: 175,
+      bakeMinutes: 28,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 500,
+      ballCount: 2,
+      totalTime: 14,
+      coldHours: 10,
+      roomTemp: 22,
+      doughTemp: 24,
+      leavenType: "commercial"
+    },
+    liquids: [
+      { key: "ing.egg", share: 0.7, waterFraction: 0.75, type: "egg" },
+      { key: "ing.milk", share: 0.3, waterFraction: 0.87, type: "dairy" }
+    ],
+    flourBlend: [{ key: "flour.bread", percentage: 100, protein_pct: 12.5 }],
+    minProteinPct: 12,
+    characteristicCount: 4
+  },
+  {
+    id: "challah",
+    name: "Challah",
+    category: "enriched",
+    regionKey: "region.ashkenaz",
+    defaultParams: { hydration_pct: 55, salt_pct: 1.6, sugar_pct: 9, oil_pct: 9, fatKey: "ing.oil" },
+    fermentation: {
+      bulk_ratio: 0.55,
+      proof_ratio: 0.45,
+      base_yeast_fresh_pct: 0.8,
+      yeast_ref_hours: 4,
+      yeast_ref_temp_c: 24
+    },
+    process: {
+      mixMin: 12,
+      shapeKey: "process.shape.braid",
+      bakeKey: "process.bake.enriched",
+      bakeTempC: 180,
+      bakeMinutes: 30,
+      coldPhase: "bulk"
+    },
+    defaults: {
+      ballWeight: 800,
+      ballCount: 1,
+      totalTime: 4,
+      coldHours: 0,
+      roomTemp: 24,
+      doughTemp: 26,
+      leavenType: "commercial"
+    },
+    liquids: [
+      { key: "ing.water", share: 0.55, waterFraction: 1, type: "water" },
+      { key: "ing.egg", share: 0.45, waterFraction: 0.75, type: "egg" }
+    ],
+    flourBlend: WHEAT,
+    characteristicCount: 4
   }
 ];
-var getStyleById = (id) => {
-  return BREAD_STYLES.find((style) => style.id === id);
+var getStyleById = (id) => BREAD_STYLES.find((style) => style.id === id);
+
+// src/i18n/sv.ts
+var sv = {
+  // ── App shell ──
+  "app.name": "Baker's Calculator",
+  "app.tagline": "Perfekt j\xE4sning f\xF6r varje stil",
+  "nav.styles": "V\xE4lj stil",
+  "nav.parameters": "Parametrar",
+  "nav.recipe": "Recept",
+  "nav.saved": "Sparade recept",
+  "nav.home": "Till start",
+  "nav.back": "Tillbaka",
+  "nav.next": "N\xE4sta",
+  "nav.step": "Steg {n} av {total}",
+  // ── Hero ──
+  "hero.title": "Baker's",
+  "hero.titleAccent": "Calculator",
+  "hero.lead": "Degber\xE4kning byggd p\xE5 j\xE4sningskemi.\nR\xE4tt m\xE4ngd j\xE4st, r\xE4tt vattentemperatur, r\xE4tt tid \u2013 varje g\xE5ng.",
+  "hero.cta": "B\xF6rja ber\xE4kna",
+  "hero.secondary": "S\xE5 fungerar det",
+  "hero.styles": "{n} stilar",
+  "hero.scroll": "L\xE4s mer",
+  "feature.title": "Precision m\xF6ter hantverk",
+  "feature.lead": "Fr\xE5n napolitansk pizza till r\xE5gsurdeg \u2013 samma modell, olika f\xF6ruts\xE4ttningar.",
+  "feature.q10.title": "Q10-modellerad j\xE4st",
+  "feature.q10.body": "J\xE4stm\xE4ngden skalas mot verklig tid och temperatur. Kylj\xE4sning r\xE4knas om till rumsekvivalent tid, inklusive de timmar degen fortfarande \xE4r ljummen p\xE5 v\xE4g ner.",
+  "feature.timing.title": "Schema med klockslag",
+  "feature.timing.body": "Ange n\xE4r du vill s\xE4tta degen s\xE5 f\xE5r du varje moment p\xE5 klockslag \u2013 autolys, vikningar, kyl, formning och gr\xE4ddning.",
+  "feature.styles.title": "{n} stilar",
+  "feature.styles.body": "Pizza, br\xF6d, rika degar och f\xF6rj\xE4sningar. Poolish, biga och levain r\xE4knas av fr\xE5n huvuddegen automatiskt.",
+  "feature.ddt.title": "DDT-vattentemperatur",
+  "feature.ddt.body": "Vattentemperaturen r\xE4knas ut fr\xE5n m\xE5ltemperatur, mj\xF6l, rum och friktion \u2013 med isandel n\xE4r det beh\xF6vs.",
+  "feature.export.title": "Spara, dela, skriv ut",
+  "feature.export.body": "Varje recept f\xE5r en delbar l\xE4nk. Spara i bakloggen, skriv ut ett rent bakblad eller exportera som text.",
+  "feature.mcp.title": "\xD6ppen MCP-server",
+  "feature.mcp.body": "Fyra verktyg \u2013 list_styles, get_style, calculate_recipe och explain_recipe \u2013 g\xF6r motorn tillg\xE4nglig f\xF6r AI-assistenter.",
+  // ── Categories ──
+  "category.pizza": "Pizza",
+  "category.bread": "Br\xF6d",
+  "category.enriched": "Rika degar",
+  "category.preferment": "F\xF6rj\xE4sning",
+  "category.all": "Alla",
+  // ── Style picker ──
+  "styles.title": "V\xE4lj stil",
+  "styles.lead": "Varje stil s\xE4tter hydrering, salt, j\xE4sningstid och process. Allt g\xE5r att justera efter\xE5t.",
+  "styles.search": "S\xF6k stil, region eller mj\xF6l\u2026",
+  "styles.empty": "Ingen stil matchar \u201C{query}\u201D.",
+  "styles.clear": "Rensa",
+  "styles.count": "{n} stilar",
+  "styles.select": "V\xE4lj {name}",
+  "styles.selected": "Vald",
+  "styles.hydration": "{n}% hydrering",
+  "styles.salt": "{n}% salt",
+  "styles.time": "{n} h",
+  "styles.blend": "Mj\xF6l",
+  // ── Parameters ──
+  "params.title": "Parametrar",
+  "params.lead": "Finjustera {name}. Receptet r\xE4knas om direkt.",
+  "params.dough": "Deg",
+  "params.fermentation": "J\xE4sning",
+  "params.method": "Metod",
+  "params.advanced": "Avancerat",
+  "params.reset": "\xC5terst\xE4ll till stilens standard",
+  "params.resetDone": "Parametrarna \xE4r \xE5terst\xE4llda",
+  "field.scaleMode": "Skala efter",
+  "field.scaleMode.pieces": "Antal & vikt",
+  "field.scaleMode.flour": "Mj\xF6lm\xE4ngd",
+  "field.scaleMode.dough": "Total degvikt",
+  "field.scaleMode.help": "Har du 500 g mj\xF6l kvar i p\xE5sen? Skala efter mj\xF6l ist\xE4llet.",
+  "field.ballWeight": "Vikt per {unit}",
+  "field.ballCount": "Antal {unit}",
+  "field.targetFlour": "Mj\xF6l totalt",
+  "field.targetDough": "Degvikt totalt",
+  "field.hydration": "Hydrering",
+  "field.hydration.help": "Vatten i procent av mj\xF6lvikten.",
+  "field.salt": "Salt",
+  "field.salt.help": "Under 1,5% blir degen slapp och smakl\xF6s, \xF6ver 3% bromsar j\xE4sningen m\xE4rkbart.",
+  "field.sugar": "Socker",
+  "field.fat": "Fett",
+  "field.totalTime": "Total j\xE4sningstid",
+  "field.totalTime.help": "Fr\xE5n blandning till redo att gr\xE4dda. F\xF6rj\xE4sning r\xE4knas separat.",
+  "field.roomTemp": "Rumstemperatur",
+  "field.coldHours": "Varav i kyl",
+  "field.coldHours.help": "Kylj\xE4sning r\xE4knas om till rumsekvivalent tid innan j\xE4stm\xE4ngden best\xE4ms.",
+  "field.coldTemp": "Kyltemperatur",
+  "field.coldPhase": "Kyl under",
+  "field.coldPhase.bulk": "Bulkj\xE4sning",
+  "field.coldPhase.proof": "Slutj\xE4sning",
+  "field.doughTemp": "\xD6nskad degtemperatur (DDT)",
+  "field.doughTemp.help": "M\xE5ltemperatur p\xE5 f\xE4rdigblandad deg. Viktigare \xE4n klockan.",
+  "field.flourTemp": "Mj\xF6lets temperatur",
+  "field.flourTemp.help": "St\xE5r mj\xF6let svalt? S\xE4nk h\xE4r s\xE5 justeras vattnet.",
+  "field.leavenType": "J\xE4smedel",
+  "field.leaven.commercial": "J\xE4st",
+  "field.leaven.sourdough": "Surdeg",
+  "field.leaven.hybrid": "Hybrid",
+  "field.yeastForm": "J\xE4stform",
+  "field.yeast.fresh": "F\xE4rsk j\xE4st",
+  "field.yeast.active_dry": "Torrj\xE4st (aktiv)",
+  "field.yeast.instant": "Torrj\xE4st (instant)",
+  "field.mixing": "Blandningsmetod",
+  "field.mixing.hand": "F\xF6r hand",
+  "field.mixing.dlx": "DLX / Ankarmaskin",
+  "field.mixing.planetary": "Hush\xE5llsmaskin",
+  "field.mixing.spiral": "Spiralmaskin",
+  "field.mixing.help": "Friktionsv\xE4rme: {n} \xB0C.",
+  "field.starterHydration": "Surdegens hydrering",
+  "field.starterHydration.help": "100% = lika delar mj\xF6l och vatten. Stiv levain ligger p\xE5 50\u201360%.",
+  "field.usePreferment": "Anv\xE4nd {type}",
+  "field.usePreferment.help": "St\xE4ng av f\xF6r att g\xF6ra samma stil som direktdeg.",
+  "field.startTime": "Starttid",
+  "field.startTime.help": "N\xE4r du blandar degen. Schemat r\xE4knas ut fr\xE5n den tiden.",
+  "field.recommended": "Rekommenderat: {value}",
+  "field.styleDefault": "Stilens standard: {value}",
+  "unit.ball": "boll",
+  "unit.balls": "bollar",
+  "unit.loaf": "br\xF6d",
+  "unit.loaves": "br\xF6d",
+  "unit.hours": "h",
+  "unit.minutes": "min",
+  "unit.grams": "g",
+  "action.showRecipe": "Visa recept",
+  "action.print": "Skriv ut",
+  "action.share": "Kopiera l\xE4nk",
+  "action.shared": "L\xE4nken \xE4r kopierad",
+  "action.copy": "Kopiera recept",
+  "action.copied": "Receptet \xE4r kopierat",
+  "action.save": "Spara i bakloggen",
+  "action.saved": "Sparat",
+  "action.delete": "Ta bort",
+  "action.load": "\xD6ppna",
+  "action.startOver": "B\xF6rja om",
+  "action.download": "Ladda ner som text",
+  // ── Recipe view ──
+  "recipe.title": "Recept",
+  "recipe.for": "{count} \xD7 {weight} g {unit}",
+  "recipe.ingredients": "Ingredienser",
+  "recipe.overview": "\xD6versikt",
+  "recipe.process": "Process",
+  "recipe.timeline": "Tidslinje",
+  "recipe.notes": "Noteringar",
+  "recipe.sourdough": "Surdeg",
+  "recipe.why": "Varf\xF6r",
+  "recipe.grams": "Gram",
+  "recipe.percent": "Baker's %",
+  "recipe.ingredient": "Ingrediens",
+  "recipe.totalDough": "Total degvikt",
+  "recipe.targetDough": "M\xE5lvikt",
+  "recipe.perPiece": "Per {unit}",
+  "recipe.totalFlour": "Totalt mj\xF6l",
+  "recipe.waterTemp": "Vattentemperatur",
+  "recipe.bulk": "Bulkj\xE4sning",
+  "recipe.proof": "Slutj\xE4sning",
+  "recipe.coldRetard": "Kylj\xE4sning",
+  "recipe.yeast": "J\xE4st",
+  "recipe.inoculation": "Inokulering",
+  "recipe.roomEquiv": "Rumsekvivalent tid",
+  "recipe.readyAt": "Klart {time}",
+  "recipe.startAt": "Start {time}",
+  "recipe.trueHydration": "Verklig hydrering",
+  "recipe.percentBasis": "Procent r\xE4knas p\xE5 totalt mj\xF6l ({flour} g).",
+  "recipe.sectionTotal": "Summa {grams} g",
+  "recipe.printedBy": "Ber\xE4knat med Baker's Calculator",
+  "section.final": "Huvuddeg",
+  "section.poolish": "Poolish",
+  "section.biga": "Biga",
+  "section.levain": "Levain (surdeg)",
+  "section.meta": "{hours} h vid {temp} \xB0C",
+  // ── DDT card ──
+  "ddt.title": "Vattentemperatur",
+  "ddt.formula": "{factors} \xD7 {ddt} \u2212 mj\xF6l {flour} \u2212 rum {room} \u2212 friktion {friction}{preferment} = {result} \xB0C",
+  "ddt.prefermentTerm": " \u2212 f\xF6rj\xE4sning {temp}",
+  "ddt.ice": "Byt {grams} g av vattnet mot is f\xF6r att komma ner till {temp} \xB0C.",
+  "ddt.explain": "Blandningen v\xE4rmer degen och vatten \xE4r det enda du enkelt kan tempera, s\xE5 det f\xE5r b\xE4ra hela korrigeringen. Att tr\xE4ffa degtemperaturen betyder mer \xE4n att f\xF6lja klockan: 2 \xB0C varmare deg j\xE4ser ungef\xE4r 15% snabbare.",
+  // ── Sourdough panel ──
+  "sd.title": "Surdeg",
+  "sd.ratio": "{onFlour}% levain p\xE5 mj\xF6let",
+  "sd.body": "{grams} g mogen levain vid {hydration}% hydrering. Det \xE4r {onFlour}% r\xE4knat p\xE5 degens mj\xF6l \u2013 siffran de flesta recept menar med \u201Cinokulering\u201D \u2013 eller {inoculation}% av det totala mj\xF6let om man r\xE4knar surdegens mj\xF6l f\xF6r sig.",
+  "sd.peak": "Levainen beh\xF6ver ungef\xE4r {hours} h f\xF6r att n\xE5 toppen vid {temp} \xB0C.",
+  "sd.base": "Basen f\xF6r den h\xE4r stilen \xE4r {base}% vid {temp} \xB0C och {hours} h. M\xE4ngden skalas med Q10: dubbelt s\xE5 l\xE5ng tid \u2248 halva m\xE4ngden, +10 \xB0C \u2248 {q10}\xD7 snabbare j\xE4sning.",
+  "sd.now": "Just nu: {total} h vid {temp} \xB0C{cold}.",
+  "sd.nowCold": " ({cold} h i kyl \u2192 {equiv} h rumsekvivalent)",
+  "sd.checklist": "\xC4r surdegen mogen?",
+  "sd.check.0": "Matad 1:2:2 (t.ex. 20 g surdeg + 40 g mj\xF6l + 40 g vatten)",
+  "sd.check.1": "Har minst dubblat, helst 2\u20133\xD7 sedan matningen",
+  "sd.check.2": "Kupolen \xE4r p\xE5 topp eller precis b\xF6rjat plana ut, inte insjunken",
+  "sd.check.3": "Flyttest: en klick flyter i rumstempererat vatten",
+  "sd.check.4": "Doft: syrlig och fruktig, inte skarp \xE4ttika eller aceton",
+  "sd.check.5": "N\xE4tverk av bubblor syns l\xE4ngs burkens sidor",
+  "sd.checkFoot": "Tr\xF6g eller nymatad surdeg j\xE4ser l\xE5ngsammare \xE4n ber\xE4kningen antar \u2013 v\xE4nta hellre en timme extra.",
+  "sd.sensitivity": "K\xE4nslighet: tid och temperatur",
+  "sd.sensitivityLead": "Levain i % av degens mj\xF6l, med surdegens mj\xF6l som andel av totalen inom parentes. Ditt l\xE4ge \xE4r markerat.",
+  "sd.sensitivityFoot": "Tabellen g\xE4ller j\xE4sning i rumstemperatur hela tiden. Kyltid r\xE4knas om till rumsekvivalent tid innan m\xE4ngden best\xE4ms.",
+  "sd.time": "Tid",
+  // ── Yeast explainer ──
+  "yeast.title": "S\xE5 r\xE4knades j\xE4sten ut",
+  "yeast.base": "Basdos {base}% f\xE4rsk j\xE4st vid {hours} h och {temp} \xB0C",
+  "yeast.time": "Tid: {hours} h effektiv j\xE4sning",
+  "yeast.temperature": "Temperatur: {temp} \xB0C mot referensens {ref} \xB0C",
+  "yeast.salt": "Salt {pct}%",
+  "yeast.sugar": "Socker {pct}%",
+  "yeast.hydration": "Hydrering {pct}%",
+  "yeast.fat": "Fett {pct}%",
+  "yeast.form": "Omr\xE4kning till {form}",
+  "yeast.preferment": "F\xF6rj\xE4sningen b\xE4r en del av lyftet",
+  "yeast.result": "Slutdos {pct}% = {grams} g",
+  "yeast.factor": "\xD7{value}",
+  // ── Timeline ──
+  "timeline.now": "Nu",
+  "timeline.day": "Dag {n}",
+  "timeline.duration": "{value}",
+  "timeline.dayBefore": "Dagen innan",
+  "timeline.relative": "T{sign}{time}",
+  "process.autolyse": "Autolys",
+  "process.autolyse.body": "Blanda bara mj\xF6l och vatten och l\xE5t vila {minutes} min. Glutenet b\xF6rjar bygga sig sj\xE4lv utan kn\xE5dning.",
+  "process.mix": "Blanda degen",
+  "process.mix.body": "Arbeta degen {minutes} min tills den \xE4r sammanh\xE5llen och sl\xE4t.",
+  "process.bulk": "Bulkj\xE4sning",
+  "process.bulk.body": "{hours} h vid {temp} \xB0C. Sikta p\xE5 50\u201360% volym\xF6kning under bulken \u2013 degen ska vara sp\xE4nstig och h\xE5lla formen, inte klibbig.",
+  "process.fold": "Vikning {index} av {count}",
+  "process.fold.body": "{technique}",
+  "process.fold.slapfold": "Slap & fold p\xE5 b\xE4nken tills degen sp\xE4nner upp",
+  "process.fold.coil": "Coil fold i bunken med v\xE5ta h\xE4nder",
+  "process.fold.stretchfold": "Stretch & fold, ett varv runt bunken",
+  "process.fold.letterfold": "Bokvikning \u2013 vik degen i tre delar",
+  "process.fold.bowlfold": "Vik degen \xF6ver sig sj\xE4lv i bunken, fyra h\xE5ll",
+  "process.divide": "Dela degen",
+  "process.divide.body": "Dela i {pieces} lika delar.",
+  "process.preshape": "F\xF6rforma och vila",
+  "process.preshape.body": "F\xF6rforma l\xF6st och l\xE5t vila {minutes} min under duk.",
+  "process.proof": "Slutj\xE4sning",
+  "process.proof.body": "{hours} h vid {temp} \xB0C. Fingertest: intrycket ska fj\xE4dra tillbaka l\xE5ngsamt.",
+  "process.cold.bulk": "Bulk i kyl",
+  "process.cold.bulk.body": "{hours} h vid {temp} \xB0C. Smaken byggs, j\xE4sningen bromsas.",
+  "process.cold.proof": "Slutj\xE4sning i kyl",
+  "process.cold.proof.body": "{hours} h vid {temp} \xB0C. Gr\xE4dda direkt ur kylen \u2013 kall deg \xE4r l\xE4ttare att snitta.",
+  "process.preheat": "S\xE4tt p\xE5 ugnen",
+  "process.preheat.body": "F\xF6rv\xE4rm till {temp} \xB0C i minst {minutes} min, med sten eller gryta i ugnen.",
+  "process.done": "Klart",
+  "process.done.body": "L\xE5t svalna {minutes} min innan du sk\xE4r \u2013 krumman s\xE4tter sig medan br\xF6det kyler, och surdegsbr\xF6d som sk\xE4rs varmt blir degigt.",
+  "process.preferment.poolish": "G\xF6r poolish",
+  "process.preferment.poolish.body": "Blanda och l\xE5t st\xE5 {hours} h vid {temp} \xB0C tills den \xE4r bubblig och just b\xF6rjat sjunka.",
+  "process.preferment.biga": "G\xF6r biga",
+  "process.preferment.biga.body": "Blanda till en grov, torr deg och l\xE5t st\xE5 {hours} h vid {temp} \xB0C.",
+  "process.preferment.levain": "G\xF6r levain",
+  "process.preferment.levain.body": "Blanda och l\xE5t st\xE5 {hours} h vid {temp} \xB0C.",
+  "process.preferment.ready": "F\xF6rj\xE4sningen \xE4r klar",
+  "process.preferment.ready.body": "Kupolen ska ha n\xE5tt toppen och doften vara syrlig och n\xF6tig.",
+  "process.levain.build": "Mata levainen",
+  "process.levain.build.body": "Mata surdegen och l\xE5t den n\xE5 toppen \u2013 ungef\xE4r {hours} h vid {temp} \xB0C. Tiden g\xE4ller ditt rum: vid 18 \xB0C tar samma matning n\xE4stan dubbelt s\xE5 l\xE5ng tid som vid 26 \xB0C.",
+  "process.shape.balls": "Bolla",
+  "process.shape.balls.body": "Bolla {pieces} stycken med sp\xE4nd yta och l\xE5t dem g\xE5 i l\xE5da.",
+  "process.shape.pan": "L\xE4gg i formen",
+  "process.shape.pan.body": "Olja formen v\xE4l och tryck ut degen mot h\xF6rnen.",
+  "process.shape.tray": "L\xE4gg i pl\xE5ten",
+  "process.shape.tray.body": "Olja pl\xE5ten och dra f\xF6rsiktigt ut degen till kanterna.",
+  "process.shape.deepdish": "Kl\xE4 formen",
+  "process.shape.deepdish.body": "Kavla ut och kl\xE4 den smorda formen upp l\xE4ngs kanterna.",
+  "process.shape.batard": "Forma b\xE2tard",
+  "process.shape.batard.body": "Forma till avl\xE5ng limpa med sp\xE4nd yta, l\xE4gg i korg med skarven upp\xE5t.",
+  "process.shape.boule": "Forma boule",
+  "process.shape.boule.body": "Forma till rund limpa med sp\xE4nd yta, l\xE4gg i mj\xF6lad korg.",
+  "process.shape.baguette": "Forma baguetter",
+  "process.shape.baguette.body": "Rulla ut till {pieces} baguetter och l\xE4gg i veckad duk.",
+  "process.shape.ciabatta": "Dela ciabatta",
+  "process.shape.ciabatta.body": "H\xE4ll ut degen p\xE5 mj\xF6lad b\xE4nk och dela i {pieces} rektanglar \u2013 forma inte om.",
+  "process.shape.pullman": "L\xE4gg i formen",
+  "process.shape.pullman.body": "Forma till limpa och l\xE4gg i smord form.",
+  "process.shape.discs": "Kavla ut",
+  "process.shape.discs.body": "Kavla {pieces} runda kakor, ca 5 mm tjocka.",
+  "process.shape.tin": "L\xE4gg i formen",
+  "process.shape.tin.body": "Forma och l\xE4gg i smord br\xF6dform med skarven ned\xE5t.",
+  "process.shape.tortilla": "Bolla och kavla",
+  "process.shape.tortilla.body": "Dela i {pieces} bollar, vila under duk och kavla tunt precis f\xF6re stekning.",
+  "process.shape.rolls": "Rulla och l\xE4gg i formen",
+  "process.shape.rolls.body": "Kavla ut, rulla ihop varje bit och l\xE4gg dem t\xE4tt i smord form.",
+  "process.shape.brioche": "Forma brioche",
+  "process.shape.brioche.body": "Forma kalla degbitar snabbt s\xE5 sm\xF6ret inte sm\xE4lter.",
+  "process.shape.braid": "Fl\xE4ta",
+  "process.shape.braid.body": "Rulla ut str\xE4ngar och fl\xE4ta, pensla med \xE4gg.",
+  "process.bake.neapolitan": "Gr\xE4dda",
+  "process.bake.neapolitan.body": "{temp} \xB0C i {minutes} min. I hemugn: 250 \xB0C med bakst\xE5l h\xF6gt upp, 6\u20138 min.",
+  "process.bake.steel": "Gr\xE4dda",
+  "process.bake.steel.body": "{temp} \xB0C p\xE5 bakst\xE5l, {minutes} min tills botten \xE4r gyllene.",
+  "process.bake.pan": "Gr\xE4dda i form",
+  "process.bake.pan.body": "{temp} \xB0C i {minutes} min. Osten ska karamellisera mot kanten.",
+  "process.bake.tray": "Gr\xE4dda p\xE5 pl\xE5t",
+  "process.bake.tray.body": "{temp} \xB0C i {minutes} min, g\xE4rna i nedre delen av ugnen f\xF6rst.",
+  "process.bake.deepdish": "Gr\xE4dda",
+  "process.bake.deepdish.body": "{temp} \xB0C i {minutes} min tills kanten \xE4r gyllenbrun.",
+  "process.bake.dutchoven": "Gr\xE4dda i gryta",
+  "process.bake.dutchoven.body": "{temp} \xB0C med lock i {steam} min, sedan {dropTemp} \xB0C utan lock resten av tiden ({minutes} min totalt).",
+  "process.bake.steam": "Gr\xE4dda med \xE5nga",
+  "process.bake.steam.body": "{temp} \xB0C med \xE5nga i {steam} min, sedan {dropTemp} \xB0C utan \xE5nga ({minutes} min totalt).",
+  "process.bake.focaccia": "Gr\xE4dda",
+  "process.bake.focaccia.body": "{temp} \xB0C i {minutes} min. Ringla \xF6ver olivolja n\xE4r den kommer ut.",
+  "process.bake.pullman": "Gr\xE4dda i form",
+  "process.bake.pullman.body": "{temp} \xB0C i {minutes} min. Med lock blir kanten kvadratisk.",
+  "process.bake.pita": "Gr\xE4dda",
+  "process.bake.pita.body": "{temp} \xB0C p\xE5 het sten, {minutes} min \u2013 de ska bl\xE5sa upp helt.",
+  "process.bake.rye": "Gr\xE4dda",
+  "process.bake.rye.body": "{temp} \xB0C med \xE5nga i {steam} min, sedan {dropTemp} \xB0C ({minutes} min totalt). R\xE5gbr\xF6d ska svalna helt innan det sk\xE4rs.",
+  "process.bake.tin": "Gr\xE4dda i form",
+  "process.bake.tin.body": "{temp} \xB0C med \xE5nga i {steam} min, sedan {dropTemp} \xB0C ({minutes} min totalt).",
+  "process.bake.skillet": "Stek i panna",
+  "process.bake.skillet.body": "Torr, het panna. 20\u201330 sekunder per sida tills de bubblar upp.",
+  "process.bake.enriched": "Gr\xE4dda",
+  "process.bake.enriched.body": "{temp} \xB0C i {minutes} min. T\xE4ck med folie om ytan blir m\xF6rk f\xF6r tidigt.",
+  // ── Ingredients ──
+  "ing.flour": "Mj\xF6l",
+  "ing.water": "Vatten",
+  "ing.milk": "Mj\xF6lk",
+  "ing.egg": "\xC4gg",
+  "ing.salt": "Salt",
+  "ing.sugar": "Socker",
+  "ing.honey": "Honung",
+  "ing.malt": "Maltextrakt",
+  "ing.oil": "Olja",
+  "ing.oliveoil": "Olivolja",
+  "ing.butter": "Sm\xF6r",
+  "ing.melted_butter": "Sm\xE4lt sm\xF6r",
+  "ing.milk_powder": "Torrmj\xF6lkspulver",
+  "ing.seeds_soaker": "Fr\xF6bl\xF6tl\xE4ggning",
+  "ing.yeast_fresh": "F\xE4rsk j\xE4st",
+  "ing.yeast_active_dry": "Torrj\xE4st (aktiv)",
+  "ing.yeast_instant": "Torrj\xE4st (instant)",
+  "ing.starter_seed": "Surdegsgrund",
+  "ing.levain_ripe": "Mogen levain",
+  "ing.poolish_all": "All poolish",
+  "ing.biga_all": "All biga",
+  "ing.levain_all": "All levain",
+  "flour.bread": "Vetemj\xF6l special",
+  "flour.bread_high": "Starkt vetemj\xF6l",
+  "flour.ap": "Vetemj\xF6l",
+  "flour.tipo00": "Tipo 00",
+  "flour.tipo0": "Tipo 0",
+  "flour.tipo1": "Tipo 1",
+  "flour.t65": "T65",
+  "flour.semolina": "Semolina rimacinata",
+  "flour.wholewheat": "Fullkornsvete",
+  "flour.rye": "R\xE5gmj\xF6l",
+  "flour.spelt": "Speltmj\xF6l",
+  "flour.caputo_pizzeria": "Caputo Pizzeria",
+  "flour.vigevano_oro": "Vigevano Oro di Macina",
+  "flour.vigevano_tramonti": "Vigevano Tramonti Oro",
+  "flour.pizzuti": "Molino Pizzuti Costa d'Amalfi",
+  "region.napoli": "Neapel, Italien",
+  "region.newyork": "New York, USA",
+  "region.detroit": "Detroit, USA",
+  "region.rome": "Rom, Italien",
+  "region.chicago": "Chicago, USA",
+  "region.sicily": "Sicilien, Italien",
+  "region.france": "Frankrike",
+  "region.italy": "Italien",
+  "region.puglia": "Apulien, Italien",
+  "region.genoa": "Genua, Italien",
+  "region.levant": "Levanten",
+  "region.sweden": "Sverige",
+  "region.nordic": "Norden",
+  "region.mexico": "Mexiko",
+  "region.japan": "Japan",
+  "region.ashkenaz": "Centraleuropa",
+  // ── Notes ──
+  "note.cold_clamped": "Kyltiden var l\xE4ngre \xE4n den totala tiden och har begr\xE4nsats till {hours} h.",
+  "note.water_clamped": "Ber\xE4knad vattentemperatur ({raw} \xB0C) ligger utanf\xF6r praktiskt intervall och har justerats till {used} \xB0C. Degtemperaturen blir d\xE4rmed inte exakt din m\xE5ls\xE4ttning.",
+  "note.use_ice": "Byt {grams} g av vattnet mot is f\xF6r att n\xE5 {temp} \xB0C.",
+  "note.water_hot": "Vattnet \xE4r \xF6ver {limit} \xB0C. H\xE4ll aldrig det direkt p\xE5 j\xE4sten \u2013 blanda i mj\xF6let f\xF6rst.",
+  "note.cold_retard": "Kylj\xE4sning: {cold} av {total} h ligger vid {coldTemp} \xB0C ({phase}). Det motsvarar {equiv} h i rumstemperatur, och j\xE4sten \xE4r doserad f\xF6r den siffran.",
+  "note.yeast_clamped": "J\xE4stm\xE4ngden n\xE5dde modellens gr\xE4ns och stannar p\xE5 {pct}% ({grams} g). Justera tid eller temperatur ist\xE4llet.",
+  "note.tiny_yeast": "Bara {grams} g j\xE4st. V\xE4g p\xE5 en 0,01-v\xE5g, eller l\xF6s upp en st\xF6rre m\xE4ngd i vatten och anv\xE4nd en del av l\xF6sningen.",
+  "note.levain_ratio": "Surdegsratio: {onFlour}% mogen levain p\xE5 mj\xF6let i degen \u2013 den siffran de flesta recept menar med \u201Cinokulering\u201D. Det \xE4r {grams} g levain vid {hydration}% hydrering, vilket motsvarar {inoculation}% av det totala mj\xF6let r\xE4knat som surdegens mj\xF6l.",
+  "note.levain_ripe": "Anv\xE4nd levainen p\xE5 toppen \u2013 ungef\xE4r {hours} h vid {temp} \xB0C efter en vanlig matning. En h\xF6g utsp\xE4dning som 1:5:5 tar l\xE4ngre tid, och en tr\xF6g surdeg j\xE4ser l\xE5ngsammare \xE4n ber\xE4kningen antar.",
+  "note.levain_high": "H\xF6g inokulering ({pct}%). Degen j\xE4ser fort och blir syrligare \u2013 h\xE5ll koll fr\xE5n halva tiden.",
+  "note.levain_generic": "Den h\xE4r stilen har ingen egen surdegsreferens, s\xE5 en generisk bas p\xE5 20% anv\xE4nds.",
+  "note.high_hydration": "{pct}% hydrering. Bl\xF6ta h\xE4nder vid vikning, och forma med l\xE4tt hand.",
+  "note.true_hydration": "Angiven hydrering \xE4r {stated}%, men mj\xF6lk, \xE4gg och bl\xF6tl\xE4ggningar r\xE4knat g\xF6r degen {actual}% vatten p\xE5 mj\xF6let.",
+  "note.low_salt": "Bara {pct}% salt. Degen blir slapp och j\xE4ser okontrollerat \u2013 1,8\u20132,2% \xE4r normalt.",
+  "note.high_salt": "{pct}% salt bromsar j\xE4sten m\xE4rkbart. J\xE4stm\xE4ngden \xE4r uppjusterad f\xF6r att kompensera.",
+  "note.rich_dough": "{pct}% fett. Tills\xE4tt fettet f\xF6rst n\xE4r glutenet \xE4r utvecklat, annars f\xE5r degen aldrig f\xE4ste.",
+  "note.preferment": "F\xF6rj\xE4sningens mj\xF6l och vatten \xE4r avr\xE4knade fr\xE5n huvuddegen, s\xE5 totalerna st\xE4mmer.",
+  "note.percent_basis": "Alla procent r\xE4knas p\xE5 totalt mj\xF6l ({flour} g), inklusive mj\xF6let i f\xF6rj\xE4sning och surdeg.",
+  "note.flour_overdrawn": "F\xF6rj\xE4sning och surdeg drar mer mj\xF6l \xE4n receptet inneh\xE5ller. Minska f\xF6rj\xE4sningen eller inokuleringen.",
+  "note.water_overdrawn": "F\xF6rj\xE4sning och surdeg inneh\xE5ller mer vatten \xE4n {hydration}% hydrering till\xE5ter. H\xF6j hydreringen eller s\xE4nk surdegens hydrering.",
+  "note.from_section": "fr\xE5n egen sektion",
+  // ── Flour advisor ──
+  "flourAdvice.title": "Mj\xF6lstyrka",
+  "flourAdvice.ok": "Blandningen ligger p\xE5 ca {protein}% protein, vilket r\xE4cker f\xF6r den h\xE4r stilen.",
+  "flourAdvice.weak": "Blandningen ligger p\xE5 ca {protein}% protein men stilen vill ha minst {min}%. Vid {hours} h j\xE4sning riskerar glutenet att brytas ner \u2013 byt till ett starkare mj\xF6l eller korta tiden.",
+  "flourAdvice.long": "Vid {hours} h j\xE4sning beh\xF6ver mj\xF6let vara starkt (W300+ / 13% protein). Svagt mj\xF6l blir klistrigt och tappar formen.",
+  // ── Saved recipes ──
+  "saved.title": "Bakloggen",
+  "saved.lead": "Sparade recept ligger i den h\xE4r webbl\xE4saren. Dela ett recept med l\xE4nken ist\xE4llet f\xF6r att flytta filer.",
+  "saved.empty": "Inget sparat \xE4n. R\xE4kna ut ett recept och tryck \u201CSpara i bakloggen\u201D.",
+  "saved.name": "Namn",
+  "saved.date": "Sparat",
+  "saved.note": "Anteckning",
+  "saved.notePlaceholder": "Hur blev det? Krumma, skorpa, j\xE4sning\u2026",
+  "saved.confirmDelete": "Ta bort \u201C{name}\u201D?",
+  // ── Misc ──
+  "theme.light": "Ljust l\xE4ge",
+  "theme.dark": "M\xF6rkt l\xE4ge",
+  "lang.label": "Spr\xE5k",
+  "error.title": "N\xE5got gick fel",
+  "error.body": "Receptet kunde inte ber\xE4knas med de h\xE4r v\xE4rdena. Prova att \xE5terst\xE4lla parametrarna.",
+  "notFound.title": "Sidan finns inte",
+  "notFound.body": "L\xE4nken leder ingenstans.",
+  "notFound.cta": "Till startsidan"
 };
+
+// src/i18n/en.ts
+var en = {
+  // ── App shell ──
+  "app.name": "Baker's Calculator",
+  "app.tagline": "Perfect fermentation timing for every style",
+  "nav.styles": "Choose style",
+  "nav.parameters": "Parameters",
+  "nav.recipe": "Recipe",
+  "nav.saved": "Saved recipes",
+  "nav.home": "Back to home",
+  "nav.back": "Back",
+  "nav.next": "Next",
+  "nav.step": "Step {n} of {total}",
+  // ── Hero ──
+  "hero.title": "Baker's",
+  "hero.titleAccent": "Calculator",
+  "hero.lead": "Dough maths built on fermentation chemistry.\nThe right yeast, the right water temperature, the right time \u2014 every time.",
+  "hero.cta": "Start calculating",
+  "hero.secondary": "How it works",
+  "hero.styles": "{n} styles",
+  "hero.scroll": "Read on",
+  "feature.title": "Precision meets craft",
+  "feature.lead": "From Neapolitan pizza to rye sourdough \u2014 one model, different conditions.",
+  "feature.q10.title": "Q10-modelled yeast",
+  "feature.q10.body": "The dose scales to real time and temperature. Cold retards convert to room-equivalent hours, including the time the dough is still warm on its way down.",
+  "feature.timing.title": "A schedule with clock times",
+  "feature.timing.body": "Tell it when you start mixing and every step lands on the clock \u2014 autolyse, folds, fridge, shaping and bake.",
+  "feature.styles.title": "{n} styles",
+  "feature.styles.body": "Pizza, bread, enriched doughs and preferments. Poolish, biga and levain are subtracted from the final dough automatically.",
+  "feature.ddt.title": "DDT water temperature",
+  "feature.ddt.body": "Water temperature solved from target dough temperature, flour, room and friction \u2014 with an ice split when you need one.",
+  "feature.export.title": "Save, share, print",
+  "feature.export.body": "Every recipe gets a shareable link. Keep it in the bake log, print a clean bake sheet or export it as text.",
+  "feature.mcp.title": "Open MCP server",
+  "feature.mcp.body": "Four tools \u2014 list_styles, get_style, calculate_recipe and explain_recipe \u2014 expose the engine to AI assistants.",
+  // ── Categories ──
+  "category.pizza": "Pizza",
+  "category.bread": "Bread",
+  "category.enriched": "Enriched",
+  "category.preferment": "Preferment",
+  "category.all": "All",
+  // ── Style picker ──
+  "styles.title": "Choose a style",
+  "styles.lead": "Each style sets hydration, salt, timing and process. Everything stays adjustable afterwards.",
+  "styles.search": "Search style, region or flour\u2026",
+  "styles.empty": "No style matches \u201C{query}\u201D.",
+  "styles.clear": "Clear",
+  "styles.count": "{n} styles",
+  "styles.select": "Choose {name}",
+  "styles.selected": "Selected",
+  "styles.hydration": "{n}% hydration",
+  "styles.salt": "{n}% salt",
+  "styles.time": "{n} h",
+  "styles.blend": "Flour",
+  // ── Parameters ──
+  "params.title": "Parameters",
+  "params.lead": "Fine-tune {name}. The recipe recalculates as you go.",
+  "params.dough": "Dough",
+  "params.fermentation": "Fermentation",
+  "params.method": "Method",
+  "params.advanced": "Advanced",
+  "params.reset": "Reset to style defaults",
+  "params.resetDone": "Parameters reset",
+  "field.scaleMode": "Scale by",
+  "field.scaleMode.pieces": "Count & weight",
+  "field.scaleMode.flour": "Flour weight",
+  "field.scaleMode.dough": "Total dough weight",
+  "field.scaleMode.help": "Got 500 g of flour left in the bag? Scale by flour instead.",
+  "field.ballWeight": "Weight per {unit}",
+  "field.ballCount": "Number of {unit}",
+  "field.targetFlour": "Total flour",
+  "field.targetDough": "Total dough",
+  "field.hydration": "Hydration",
+  "field.hydration.help": "Water as a percentage of flour weight.",
+  "field.salt": "Salt",
+  "field.salt.help": "Below 1.5% the dough goes slack and bland; above 3% fermentation slows noticeably.",
+  "field.sugar": "Sugar",
+  "field.fat": "Fat",
+  "field.totalTime": "Total fermentation",
+  "field.totalTime.help": "From mixing to ready to bake. A preferment is timed separately.",
+  "field.roomTemp": "Room temperature",
+  "field.coldHours": "Of which in the fridge",
+  "field.coldHours.help": "Cold hours convert to room-equivalent time before the dose is set.",
+  "field.coldTemp": "Fridge temperature",
+  "field.coldPhase": "Retard during",
+  "field.coldPhase.bulk": "Bulk",
+  "field.coldPhase.proof": "Final proof",
+  "field.doughTemp": "Desired dough temperature (DDT)",
+  "field.doughTemp.help": "Target temperature of the mixed dough. It matters more than the clock.",
+  "field.flourTemp": "Flour temperature",
+  "field.flourTemp.help": "Flour stored somewhere cold? Lower it here and the water compensates.",
+  "field.leavenType": "Leavening",
+  "field.leaven.commercial": "Yeast",
+  "field.leaven.sourdough": "Sourdough",
+  "field.leaven.hybrid": "Hybrid",
+  "field.yeastForm": "Yeast form",
+  "field.yeast.fresh": "Fresh yeast",
+  "field.yeast.active_dry": "Active dry yeast",
+  "field.yeast.instant": "Instant yeast",
+  "field.mixing": "Mixing method",
+  "field.mixing.hand": "By hand",
+  "field.mixing.dlx": "DLX / oblique",
+  "field.mixing.planetary": "Stand mixer",
+  "field.mixing.spiral": "Spiral mixer",
+  "field.mixing.help": "Friction heat: {n} \xB0C.",
+  "field.starterHydration": "Starter hydration",
+  "field.starterHydration.help": "100% means equal flour and water. A stiff levain sits at 50\u201360%.",
+  "field.usePreferment": "Use {type}",
+  "field.usePreferment.help": "Turn off to make the same style as a straight dough.",
+  "field.startTime": "Start time",
+  "field.startTime.help": "When you mix the dough. The schedule is built from that moment.",
+  "field.recommended": "Recommended: {value}",
+  "field.styleDefault": "Style default: {value}",
+  "unit.ball": "ball",
+  "unit.balls": "balls",
+  "unit.loaf": "loaf",
+  "unit.loaves": "loaves",
+  "unit.hours": "h",
+  "unit.minutes": "min",
+  "unit.grams": "g",
+  "action.showRecipe": "Show recipe",
+  "action.print": "Print",
+  "action.share": "Copy link",
+  "action.shared": "Link copied",
+  "action.copy": "Copy recipe",
+  "action.copied": "Recipe copied",
+  "action.save": "Save to bake log",
+  "action.saved": "Saved",
+  "action.delete": "Delete",
+  "action.load": "Open",
+  "action.startOver": "Start over",
+  "action.download": "Download as text",
+  // ── Recipe view ──
+  "recipe.title": "Recipe",
+  "recipe.for": "{count} \xD7 {weight} g {unit}",
+  "recipe.ingredients": "Ingredients",
+  "recipe.overview": "Overview",
+  "recipe.process": "Process",
+  "recipe.timeline": "Timeline",
+  "recipe.notes": "Notes",
+  "recipe.sourdough": "Sourdough",
+  "recipe.why": "Why",
+  "recipe.grams": "Grams",
+  "recipe.percent": "Baker's %",
+  "recipe.ingredient": "Ingredient",
+  "recipe.totalDough": "Total dough",
+  "recipe.targetDough": "Target",
+  "recipe.perPiece": "Per {unit}",
+  "recipe.totalFlour": "Total flour",
+  "recipe.waterTemp": "Water temperature",
+  "recipe.bulk": "Bulk",
+  "recipe.proof": "Final proof",
+  "recipe.coldRetard": "Cold retard",
+  "recipe.yeast": "Yeast",
+  "recipe.inoculation": "Inoculation",
+  "recipe.roomEquiv": "Room-equivalent time",
+  "recipe.readyAt": "Ready {time}",
+  "recipe.startAt": "Start {time}",
+  "recipe.trueHydration": "True hydration",
+  "recipe.percentBasis": "Percentages are on total flour ({flour} g).",
+  "recipe.sectionTotal": "Total {grams} g",
+  "recipe.printedBy": "Calculated with Baker's Calculator",
+  "section.final": "Final dough",
+  "section.poolish": "Poolish",
+  "section.biga": "Biga",
+  "section.levain": "Levain",
+  "section.meta": "{hours} h at {temp} \xB0C",
+  // ── DDT card ──
+  "ddt.title": "Water temperature",
+  "ddt.formula": "{factors} \xD7 {ddt} \u2212 flour {flour} \u2212 room {room} \u2212 friction {friction}{preferment} = {result} \xB0C",
+  "ddt.prefermentTerm": " \u2212 preferment {temp}",
+  "ddt.ice": "Swap {grams} g of the water for ice to reach {temp} \xB0C.",
+  "ddt.explain": "Mixing heats the dough, and water is the only ingredient you can easily temper, so it absorbs the whole correction. Hitting the dough temperature matters more than watching the clock: a dough 2 \xB0C warmer ferments about 15% faster.",
+  // ── Sourdough panel ──
+  "sd.title": "Sourdough",
+  "sd.ratio": "{onFlour}% levain on flour",
+  "sd.body": "{grams} g of ripe levain at {hydration}% hydration. That is {onFlour}% against the dough flour \u2014 the figure most recipes mean by \u201Cinoculation\u201D \u2014 or {inoculation}% of the total flour if you count the starter's flour separately.",
+  "sd.peak": "The levain needs roughly {hours} h to peak at {temp} \xB0C.",
+  "sd.base": "The reference for this style is {base}% at {temp} \xB0C over {hours} h. The dose scales with Q10: twice the time \u2248 half the starter, +10 \xB0C \u2248 {q10}\xD7 faster fermentation.",
+  "sd.now": "Right now: {total} h at {temp} \xB0C{cold}.",
+  "sd.nowCold": " ({cold} h cold \u2192 {equiv} h room-equivalent)",
+  "sd.checklist": "Is the starter ripe?",
+  "sd.check.0": "Fed 1:2:2 (e.g. 20 g starter + 40 g flour + 40 g water)",
+  "sd.check.1": "At least doubled, ideally 2\u20133\xD7 since feeding",
+  "sd.check.2": "The dome is at its peak or just flattening, not collapsed",
+  "sd.check.3": "Float test: a spoonful floats in room-temperature water",
+  "sd.check.4": "Smell: tangy and fruity, not sharp vinegar or acetone",
+  "sd.check.5": "A web of bubbles is visible down the sides of the jar",
+  "sd.checkFoot": "A sluggish or freshly fed starter ferments slower than the model assumes \u2014 give it the extra hour.",
+  "sd.sensitivity": "Sensitivity: time and temperature",
+  "sd.sensitivityLead": "Levain as % of the dough flour, with starter flour as a share of the total in brackets. Your setting is highlighted.",
+  "sd.sensitivityFoot": "The table assumes room temperature throughout. Cold hours convert to room-equivalent time before the dose is set.",
+  "sd.time": "Time",
+  // ── Yeast explainer ──
+  "yeast.title": "How the yeast dose was derived",
+  "yeast.base": "Base dose {base}% fresh yeast at {hours} h and {temp} \xB0C",
+  "yeast.time": "Time: {hours} h of effective fermentation",
+  "yeast.temperature": "Temperature: {temp} \xB0C against the reference {ref} \xB0C",
+  "yeast.salt": "Salt {pct}%",
+  "yeast.sugar": "Sugar {pct}%",
+  "yeast.hydration": "Hydration {pct}%",
+  "yeast.fat": "Fat {pct}%",
+  "yeast.form": "Conversion to {form}",
+  "yeast.preferment": "The preferment carries part of the lift",
+  "yeast.result": "Final dose {pct}% = {grams} g",
+  "yeast.factor": "\xD7{value}",
+  // ── Timeline ──
+  "timeline.now": "Now",
+  "timeline.day": "Day {n}",
+  "timeline.duration": "{value}",
+  "timeline.dayBefore": "The day before",
+  "timeline.relative": "T{sign}{time}",
+  "process.autolyse": "Autolyse",
+  "process.autolyse.body": "Mix flour and water only, then rest {minutes} min. Gluten starts building itself without kneading.",
+  "process.mix": "Mix the dough",
+  "process.mix.body": "Work the dough for {minutes} min until it comes together and looks smooth.",
+  "process.bulk": "Bulk fermentation",
+  "process.bulk.body": "{hours} h at {temp} \xB0C. Aim for 50\u201360% growth through the bulk \u2014 the dough should be supple and hold its shape, not sticky.",
+  "process.fold": "Fold {index} of {count}",
+  "process.fold.body": "{technique}",
+  "process.fold.slapfold": "Slap and fold on the bench until the dough tightens",
+  "process.fold.coil": "Coil fold in the tub with wet hands",
+  "process.fold.stretchfold": "Stretch and fold, one round of the bowl",
+  "process.fold.letterfold": "Letter fold \u2014 fold the dough in thirds",
+  "process.fold.bowlfold": "Fold the dough over itself in the bowl, four sides",
+  "process.divide": "Divide",
+  "process.divide.body": "Divide into {pieces} equal pieces.",
+  "process.preshape": "Pre-shape and rest",
+  "process.preshape.body": "Pre-shape loosely and rest {minutes} min under a cloth.",
+  "process.proof": "Final proof",
+  "process.proof.body": "{hours} h at {temp} \xB0C. Poke test: the dent should spring back slowly.",
+  "process.cold.bulk": "Bulk in the fridge",
+  "process.cold.bulk.body": "{hours} h at {temp} \xB0C. Flavour builds while fermentation slows.",
+  "process.cold.proof": "Final proof in the fridge",
+  "process.cold.proof.body": "{hours} h at {temp} \xB0C. Bake straight from cold \u2014 chilled dough scores far better.",
+  "process.preheat": "Preheat the oven",
+  "process.preheat.body": "Preheat to {temp} \xB0C for at least {minutes} min, with the stone or pot inside.",
+  "process.done": "Done",
+  "process.done.body": "Cool {minutes} min before slicing \u2014 the crumb sets as the loaf cools, and sourdough cut warm turns gummy.",
+  "process.preferment.poolish": "Build the poolish",
+  "process.preferment.poolish.body": "Mix and leave {hours} h at {temp} \xB0C until bubbly and just starting to fall.",
+  "process.preferment.biga": "Build the biga",
+  "process.preferment.biga.body": "Mix to a shaggy, dry dough and leave {hours} h at {temp} \xB0C.",
+  "process.preferment.levain": "Build the levain",
+  "process.preferment.levain.body": "Mix and leave {hours} h at {temp} \xB0C.",
+  "process.preferment.ready": "Preferment ready",
+  "process.preferment.ready.body": "The dome should have peaked and the smell be tangy and nutty.",
+  "process.levain.build": "Feed the levain",
+  "process.levain.build.body": "Feed the starter and let it reach its peak \u2014 roughly {hours} h at {temp} \xB0C. That time is for your kitchen: at 18 \xB0C the same feed takes nearly twice as long as at 26 \xB0C.",
+  "process.shape.balls": "Ball up",
+  "process.shape.balls.body": "Shape {pieces} balls with a taut surface and proof them in a tray.",
+  "process.shape.pan": "Into the pan",
+  "process.shape.pan.body": "Oil the pan well and press the dough out to the corners.",
+  "process.shape.tray": "Into the tray",
+  "process.shape.tray.body": "Oil the tray and gently stretch the dough to the edges.",
+  "process.shape.deepdish": "Line the pan",
+  "process.shape.deepdish.body": "Roll out and line the greased pan, up the sides.",
+  "process.shape.batard": "Shape a b\xE2tard",
+  "process.shape.batard.body": "Shape into an oblong with a taut skin, seam up in the banneton.",
+  "process.shape.boule": "Shape a boule",
+  "process.shape.boule.body": "Shape into a round with a taut skin, into a floured banneton.",
+  "process.shape.baguette": "Shape baguettes",
+  "process.shape.baguette.body": "Roll out {pieces} baguettes and lay them in a pleated couche.",
+  "process.shape.ciabatta": "Cut the ciabatta",
+  "process.shape.ciabatta.body": "Turn out onto a floured bench and cut into {pieces} rectangles \u2014 do not reshape.",
+  "process.shape.pullman": "Into the tin",
+  "process.shape.pullman.body": "Shape into a loaf and place in a greased tin.",
+  "process.shape.discs": "Roll out",
+  "process.shape.discs.body": "Roll {pieces} rounds about 5 mm thick.",
+  "process.shape.tin": "Into the tin",
+  "process.shape.tin.body": "Shape and place seam-down in a greased loaf tin.",
+  "process.shape.tortilla": "Ball and roll",
+  "process.shape.tortilla.body": "Divide into {pieces} balls, rest under a cloth and roll thin just before cooking.",
+  "process.shape.rolls": "Roll and pan",
+  "process.shape.rolls.body": "Roll each piece out, coil it up and pack them into a greased tin.",
+  "process.shape.brioche": "Shape the brioche",
+  "process.shape.brioche.body": "Shape the cold dough quickly so the butter stays firm.",
+  "process.shape.braid": "Braid",
+  "process.shape.braid.body": "Roll out strands, braid, and brush with egg.",
+  "process.bake.neapolitan": "Bake",
+  "process.bake.neapolitan.body": "{temp} \xB0C for {minutes} min. Home oven: 250 \xB0C on a steel near the top, 6\u20138 min.",
+  "process.bake.steel": "Bake",
+  "process.bake.steel.body": "{temp} \xB0C on a baking steel, {minutes} min until the base is golden.",
+  "process.bake.pan": "Bake in the pan",
+  "process.bake.pan.body": "{temp} \xB0C for {minutes} min. The cheese should caramelise against the rim.",
+  "process.bake.tray": "Bake on the tray",
+  "process.bake.tray.body": "{temp} \xB0C for {minutes} min, low in the oven to start.",
+  "process.bake.deepdish": "Bake",
+  "process.bake.deepdish.body": "{temp} \xB0C for {minutes} min until the rim is deep golden.",
+  "process.bake.dutchoven": "Bake in a Dutch oven",
+  "process.bake.dutchoven.body": "{temp} \xB0C covered for {steam} min, then {dropTemp} \xB0C uncovered for the rest ({minutes} min total).",
+  "process.bake.steam": "Bake with steam",
+  "process.bake.steam.body": "{temp} \xB0C with steam for {steam} min, then {dropTemp} \xB0C dry ({minutes} min total).",
+  "process.bake.focaccia": "Bake",
+  "process.bake.focaccia.body": "{temp} \xB0C for {minutes} min. Drizzle olive oil over it as it comes out.",
+  "process.bake.pullman": "Bake in the tin",
+  "process.bake.pullman.body": "{temp} \xB0C for {minutes} min. With the lid on you get square corners.",
+  "process.bake.pita": "Bake",
+  "process.bake.pita.body": "{temp} \xB0C on a hot stone, {minutes} min \u2014 they should puff completely.",
+  "process.bake.rye": "Bake",
+  "process.bake.rye.body": "{temp} \xB0C with steam for {steam} min, then {dropTemp} \xB0C ({minutes} min total). Rye must cool fully before slicing.",
+  "process.bake.tin": "Bake in the tin",
+  "process.bake.tin.body": "{temp} \xB0C with steam for {steam} min, then {dropTemp} \xB0C ({minutes} min total).",
+  "process.bake.skillet": "Cook in a skillet",
+  "process.bake.skillet.body": "Dry, hot pan. 20\u201330 seconds a side until they puff.",
+  "process.bake.enriched": "Bake",
+  "process.bake.enriched.body": "{temp} \xB0C for {minutes} min. Tent with foil if the top darkens early.",
+  // ── Ingredients ──
+  "ing.flour": "Flour",
+  "ing.water": "Water",
+  "ing.milk": "Milk",
+  "ing.egg": "Egg",
+  "ing.salt": "Salt",
+  "ing.sugar": "Sugar",
+  "ing.honey": "Honey",
+  "ing.malt": "Malt extract",
+  "ing.oil": "Oil",
+  "ing.oliveoil": "Olive oil",
+  "ing.butter": "Butter",
+  "ing.melted_butter": "Melted butter",
+  "ing.milk_powder": "Milk powder",
+  "ing.seeds_soaker": "Seed soaker",
+  "ing.yeast_fresh": "Fresh yeast",
+  "ing.yeast_active_dry": "Active dry yeast",
+  "ing.yeast_instant": "Instant yeast",
+  "ing.starter_seed": "Starter seed",
+  "ing.levain_ripe": "Ripe levain",
+  "ing.poolish_all": "All of the poolish",
+  "ing.biga_all": "All of the biga",
+  "ing.levain_all": "All of the levain",
+  "flour.bread": "Bread flour",
+  "flour.bread_high": "High-protein bread flour",
+  "flour.ap": "All-purpose flour",
+  "flour.tipo00": "Tipo 00",
+  "flour.tipo0": "Tipo 0",
+  "flour.tipo1": "Tipo 1",
+  "flour.t65": "T65",
+  "flour.semolina": "Semolina rimacinata",
+  "flour.wholewheat": "Whole wheat",
+  "flour.rye": "Rye flour",
+  "flour.spelt": "Spelt flour",
+  "flour.caputo_pizzeria": "Caputo Pizzeria",
+  "flour.vigevano_oro": "Vigevano Oro di Macina",
+  "flour.vigevano_tramonti": "Vigevano Tramonti Oro",
+  "flour.pizzuti": "Molino Pizzuti Costa d'Amalfi",
+  "region.napoli": "Naples, Italy",
+  "region.newyork": "New York, USA",
+  "region.detroit": "Detroit, USA",
+  "region.rome": "Rome, Italy",
+  "region.chicago": "Chicago, USA",
+  "region.sicily": "Sicily, Italy",
+  "region.france": "France",
+  "region.italy": "Italy",
+  "region.puglia": "Puglia, Italy",
+  "region.genoa": "Genoa, Italy",
+  "region.levant": "The Levant",
+  "region.sweden": "Sweden",
+  "region.nordic": "Nordics",
+  "region.mexico": "Mexico",
+  "region.japan": "Japan",
+  "region.ashkenaz": "Central Europe",
+  // ── Notes ──
+  "note.cold_clamped": "The cold time exceeded the total time and was capped at {hours} h.",
+  "note.water_clamped": "The calculated water temperature ({raw} \xB0C) falls outside a practical range and was adjusted to {used} \xB0C, so the dough will not land exactly on your target.",
+  "note.use_ice": "Swap {grams} g of the water for ice to reach {temp} \xB0C.",
+  "note.water_hot": "The water is above {limit} \xB0C. Never pour it straight onto the yeast \u2014 mix it into the flour first.",
+  "note.cold_retard": "Cold retard: {cold} of {total} h sit at {coldTemp} \xB0C ({phase}). That is worth about {equiv} h at room temperature, and the dose is set for that figure.",
+  "note.yeast_clamped": "The dose hit the model's limit and stops at {pct}% ({grams} g). Adjust time or temperature instead.",
+  "note.tiny_yeast": "Only {grams} g of yeast. Use a 0.01 g scale, or dissolve a larger amount in water and use part of the solution.",
+  "note.levain_ratio": "Starter ratio: {onFlour}% ripe levain on the dough flour \u2014 the figure most recipes mean by \u201Cinoculation\u201D. That is {grams} g of levain at {hydration}% hydration, which is {inoculation}% of the total flour counted as starter flour.",
+  "note.levain_ripe": "Use the levain at its peak \u2014 roughly {hours} h at {temp} \xB0C after a normal feed. A high-dilution feed like 1:5:5 takes longer, and a sluggish starter ferments slower than the model assumes.",
+  "note.levain_high": "High inoculation ({pct}%). The dough moves fast and turns tangier \u2014 start checking at the halfway mark.",
+  "note.levain_generic": "This style has no sourdough reference of its own, so a generic 20% base is used.",
+  "note.high_hydration": "{pct}% hydration. Wet hands for folding, and a light touch when shaping.",
+  "note.true_hydration": "Stated hydration is {stated}%, but counting milk, eggs and soakers the dough is really {actual}% water on flour.",
+  "note.low_salt": "Only {pct}% salt. The dough will be slack and ferment unpredictably \u2014 1.8\u20132.2% is normal.",
+  "note.high_salt": "{pct}% salt slows the yeast noticeably. The dose has been raised to compensate.",
+  "note.rich_dough": "{pct}% fat. Add it once the gluten is developed, otherwise the dough never takes hold.",
+  "note.preferment": "The preferment's flour and water are subtracted from the final dough, so the totals still add up.",
+  "note.percent_basis": "All percentages are on total flour ({flour} g), including flour in the preferment and starter.",
+  "note.flour_overdrawn": "The preferment and starter draw more flour than the recipe contains. Reduce one of them.",
+  "note.water_overdrawn": "The preferment and starter hold more water than {hydration}% hydration allows. Raise hydration or use a stiffer starter.",
+  "note.from_section": "from its own section",
+  // ── Flour advisor ──
+  "flourAdvice.title": "Flour strength",
+  "flourAdvice.ok": "The blend averages about {protein}% protein, which is enough for this style.",
+  "flourAdvice.weak": "The blend averages about {protein}% protein but this style wants at least {min}%. Over {hours} h the gluten risks breaking down \u2014 use a stronger flour or shorten the ferment.",
+  "flourAdvice.long": "At {hours} h of fermentation the flour needs to be strong (W300+ / 13% protein). Weak flour turns sticky and loses its shape.",
+  // ── Saved recipes ──
+  "saved.title": "Bake log",
+  "saved.lead": "Saved recipes live in this browser. Share a recipe with its link rather than moving files around.",
+  "saved.empty": "Nothing saved yet. Calculate a recipe and hit \u201CSave to bake log\u201D.",
+  "saved.name": "Name",
+  "saved.date": "Saved",
+  "saved.note": "Note",
+  "saved.notePlaceholder": "How did it turn out? Crumb, crust, fermentation\u2026",
+  "saved.confirmDelete": "Delete \u201C{name}\u201D?",
+  // ── Misc ──
+  "theme.light": "Light mode",
+  "theme.dark": "Dark mode",
+  "lang.label": "Language",
+  "error.title": "Something went wrong",
+  "error.body": "The recipe could not be calculated with these values. Try resetting the parameters.",
+  "notFound.title": "Page not found",
+  "notFound.body": "That link goes nowhere.",
+  "notFound.cta": "Back to the start"
+};
+
+// src/i18n/styles.sv.ts
+var stylesSv = {
+  "style.neapolitan.desc": "Mjuk, snabbgr\xE4ddad pizza med uppbl\xE5st kant. Lite j\xE4st och l\xE5ng tid i rumstemperatur g\xF6r smaken mj\xF6lig snarare \xE4n syrlig.",
+  "style.neapolitan.char.0": "265 g bollar",
+  "style.neapolitan.char.1": "L\xE5ng bulk i rumstemperatur",
+  "style.neapolitan.char.2": "Ingen olja, inget socker",
+  "style.neapolitan.char.3": "Vedugn eller bakst\xE5l",
+  "style.ny_style.desc": "Tunn men seg amerikansk pizza som g\xE5r att vika. Olja och socker ger mjukhet och f\xE4rg vid l\xE4gre ugnstemperatur.",
+  "style.ny_style.char.0": "Kall j\xE4sning 2\u20133 dygn",
+  "style.ny_style.char.1": "Olja och socker i degen",
+  "style.ny_style.char.2": "Starkt vetemj\xF6l",
+  "style.ny_style.char.3": "Stora skivor som viks",
+  "style.detroit.desc": "Rektangul\xE4r pannpizza med frityrstekt ostkant. Bl\xF6t deg som f\xE5r j\xE4sa till sig i formen.",
+  "style.detroit.char.0": "H\xF6g hydrering i form",
+  "style.detroit.char.1": "Ost \xE4nda ut i kanterna",
+  "style.detroit.char.2": "S\xE5s ovanp\xE5 osten",
+  "style.detroit.char.3": "St\xE5lform, v\xE4l oljad",
+  "style.roman.desc": "Romersk pl\xE5tpizza med mycket h\xF6g hydrering. L\xE5ngsam kall j\xE4sning ger stora, oregelbundna h\xE5l och knaprig botten.",
+  "style.roman.char.0": "80% hydrering",
+  "style.roman.char.1": "Kall bulk 20 h+",
+  "style.roman.char.2": "Mycket \xF6ppen krumma",
+  "style.roman.char.3": "Sk\xE4rs i rektanglar",
+  "style.chicago_deep.desc": "Djup pizza med sm\xF6rig, n\xE4stan pajaktig botten. L\xE5g hydrering och mycket fett g\xF6r degen m\xF6r ist\xE4llet f\xF6r seg.",
+  "style.chicago_deep.char.0": "Sm\xF6r i degen",
+  "style.chicago_deep.char.1": "L\xE5g hydrering",
+  "style.chicago_deep.char.2": "Ost i botten, s\xE5s p\xE5 toppen",
+  "style.chicago_deep.char.3": "L\xE5ng gr\xE4ddning",
+  "style.sicilian_pizza.desc": "Tjock pl\xE5tpizza fr\xE5n Palermo med semolina i degen. Luftig krumma och oljestekt botten.",
+  "style.sicilian_pizza.char.0": "Semolina i mj\xF6lblandningen",
+  "style.sicilian_pizza.char.1": "Olivolja i pl\xE5ten",
+  "style.sicilian_pizza.char.2": "L\xF6k och str\xF6br\xF6d som topping",
+  "style.sicilian_pizza.char.3": "J\xE4ser i pl\xE5ten",
+  "style.pizza_poolish.desc": "Napolitansk deg d\xE4r en tredjedel av mj\xF6let f\xF6rj\xE4ses som bl\xF6t poolish. Ger doft av br\xF6d och mjukare kant.",
+  "style.pizza_poolish.char.0": "35% av mj\xF6let i poolish",
+  "style.pizza_poolish.char.1": "Honung i poolishen",
+  "style.pizza_poolish.char.2": "Kort slutj\xE4sning",
+  "style.pizza_poolish.char.3": "Tydlig leopardering",
+  "style.pizza_biga.desc": "Allt mj\xF6l f\xF6rj\xE4ses som torr biga i 18 timmar. Kr\xE4ver starkt mj\xF6l men ger en extremt luftig, l\xE4tt kant.",
+  "style.pizza_biga.char.0": "100% biga",
+  "style.pizza_biga.char.1": "Kr\xE4ver W300+ mj\xF6l",
+  "style.pizza_biga.char.2": "Isvatten i slutdegen",
+  "style.pizza_biga.char.3": "Windowpane innan bollning",
+  "style.poolish_bread.desc": "Rustikt vetebr\xF6d d\xE4r halva mj\xF6let f\xF6rj\xE4ses som poolish. Mild syra, n\xF6tig doft och tunn knaprig skorpa.",
+  "style.poolish_bread.char.0": "50% av mj\xF6let i poolish",
+  "style.poolish_bread.char.1": "Fullkorn f\xF6r smak",
+  "style.poolish_bread.char.2": "Bakas i gryta",
+  "style.poolish_bread.char.3": "\xD6ppen krumma",
+  "style.biga_pane.desc": "Italienskt lantbr\xF6d p\xE5 styv biga. Torrare f\xF6rj\xE4sning ger mer s\xF6tma och en t\xE4tare, mer tuggig krumma \xE4n poolish.",
+  "style.biga_pane.char.0": "60% av mj\xF6let i biga",
+  "style.biga_pane.char.1": "Biga vid 45% hydrering",
+  "style.biga_pane.char.2": "N\xF6tig, s\xF6t smak",
+  "style.biga_pane.char.3": "H\xE5ller sig i flera dagar",
+  "style.baguette.desc": "Fransk baguette p\xE5 poolish, utan tillsatser. Kort kn\xE5dning och varsam formning bevarar h\xE5len.",
+  "style.baguette.char.0": "40% av mj\xF6let i poolish",
+  "style.baguette.char.1": "Autolys innan salt",
+  "style.baguette.char.2": "Snitt precis f\xF6re gr\xE4ddning",
+  "style.baguette.char.3": "\xC5nga f\xF6rsta 12 min",
+  "style.ciabatta.desc": "Mycket bl\xF6t italiensk deg som knappt formas alls. Bigan ger styrka nog att b\xE4ra 82% hydrering.",
+  "style.ciabatta.char.0": "82% hydrering",
+  "style.ciabatta.char.1": "50% av mj\xF6let i biga",
+  "style.ciabatta.char.2": "Delas, formas inte om",
+  "style.ciabatta.char.3": "Stora oregelbundna h\xE5l",
+  "style.country_sourdough.desc": "Franskt lantbr\xF6d p\xE5 surdeg med en gnutta fullkorn och r\xE5g. Bulk i rumstemperatur, slutj\xE4sning i kyl.",
+  "style.country_sourdough.char.0": "Surdeg, ingen j\xE4st",
+  "style.country_sourdough.char.1": "Kall slutj\xE4sning",
+  "style.country_sourdough.char.2": "Gr\xE4ddas i gryta",
+  "style.country_sourdough.char.3": "Tjock, m\xF6rk skorpa",
+  "style.focaccia.desc": "Genovesisk focaccia: bl\xF6t deg, mycket olivolja och saltlake p\xE5 ytan. Mjuk krumma med j\xE4mna h\xE5l.",
+  "style.focaccia.char.0": "Rikligt med olivolja",
+  "style.focaccia.char.1": "Fingergropar i degen",
+  "style.focaccia.char.2": "Saltlake p\xE5 ytan",
+  "style.focaccia.char.3": "J\xE4ser i pl\xE5ten",
+  "style.pain_de_mie.desc": "Franskt formbr\xF6d med mj\xF6lk och sm\xF6r. Fin, j\xE4mn krumma som h\xE5ller ihop i en macka.",
+  "style.pain_de_mie.char.0": "Halva v\xE4tskan mj\xF6lk",
+  "style.pain_de_mie.char.1": "Mjuk, tunn skorpa",
+  "style.pain_de_mie.char.2": "Kvadratisk med lock",
+  "style.pain_de_mie.char.3": "Perfekt f\xF6r rostning",
+  "style.pita.desc": "Fickbr\xF6d som bl\xE5ser upp i het ugn. Kort j\xE4sning och tunn utkavling \xE4r hela hemligheten.",
+  "style.pita.char.0": "Snabb deg, klar p\xE5 en f\xF6rmiddag",
+  "style.pita.char.1": "Mycket het sten",
+  "style.pita.char.2": "Bl\xE5ser upp till ficka",
+  "style.pita.char.3": "Svalna under duk",
+  "style.sourdough_rye.desc": "Svenskt r\xE5gsurdegsbr\xF6d i form. R\xE5gen ger t\xE4t, saftig krumma och l\xE5ng h\xE5llbarhet.",
+  "style.sourdough_rye.char.0": "40% r\xE5g",
+  "style.sourdough_rye.char.1": "Bakas i form",
+  "style.sourdough_rye.char.2": "Varm degtemperatur",
+  "style.sourdough_rye.char.3": "Sk\xE4r f\xF6rst n\xE4sta dag",
+  "style.multigrain_sourdough.desc": "Nordiskt flerkornsbr\xF6d med bl\xF6tlagda fr\xF6n. H\xF6g hydrering och spelt ger saftighet och n\xF6tig smak.",
+  "style.multigrain_sourdough.char.0": "Bl\xF6tlagda fr\xF6n",
+  "style.multigrain_sourdough.char.1": "Vete, r\xE5g och spelt",
+  "style.multigrain_sourdough.char.2": "82% hydrering",
+  "style.multigrain_sourdough.char.3": "Kall slutj\xE4sning",
+  "style.sourdough_form_bread.desc": "Enkelt svenskt surdegsformbr\xF6d med h\xF6g inokulering. Klart p\xE5 en dag, inga vikningar p\xE5 b\xE4nken.",
+  "style.sourdough_form_bread.char.0": "H\xF6g andel surdeg",
+  "style.sourdough_form_bread.char.1": "Vikning i bunken",
+  "style.sourdough_form_bread.char.2": "Bakas i form",
+  "style.sourdough_form_bread.char.3": "Klart samma dag",
+  "style.sourdough_tortillas.desc": "Mjuka vetetortillas p\xE5 surdeg och sm\xE4lt sm\xF6r. Het v\xE4tska g\xF6r degen smidig och l\xE4tt att kavla tunt.",
+  "style.sourdough_tortillas.char.0": "Sm\xE4lt sm\xF6r i degen",
+  "style.sourdough_tortillas.char.1": "Het v\xE4tska",
+  "style.sourdough_tortillas.char.2": "Steks i torr panna",
+  "style.sourdough_tortillas.char.3": "Mjuka \xE4ven kalla",
+  "style.milkbread.desc": "Japanskt mj\xF6lkbr\xF6d med tangzhong. Den kokta mj\xF6lbasen binder extra v\xE4tska och h\xE5ller br\xF6det mjukt i dagar.",
+  "style.milkbread.char.0": "Tangzhong-metoden",
+  "style.milkbread.char.1": "Torrmj\xF6lkspulver",
+  "style.milkbread.char.2": "Extremt mjuk krumma",
+  "style.milkbread.char.3": "H\xE5ller sig i dagar",
+  "style.pain_de_mie_traditional.desc": "Klassiskt franskt formbr\xF6d med mycket sm\xF6r och honung ist\xE4llet f\xF6r socker. Rikt utan att bli s\xF6tt.",
+  "style.pain_de_mie_traditional.char.0": "Mj\xF6lk och vatten 50/50",
+  "style.pain_de_mie_traditional.char.1": "Honung ist\xE4llet f\xF6r socker",
+  "style.pain_de_mie_traditional.char.2": "14% sm\xF6r",
+  "style.pain_de_mie_traditional.char.3": "Kvadratisk form",
+  "style.brioche.desc": "Fransk sm\xF6rdeg med \xE4gg. Sm\xF6ret arbetas in kallt efter glutenutveckling och degen j\xE4ser i kyl \xF6ver natten.",
+  "style.brioche.char.0": "45% sm\xF6r",
+  "style.brioche.char.1": "\xC4gg som huvudv\xE4tska",
+  "style.brioche.char.2": "Kall j\xE4sning \xF6ver natten",
+  "style.brioche.char.3": "Forma kall",
+  "style.challah.desc": "Fl\xE4tat \xE4ggbr\xF6d med olja ist\xE4llet f\xF6r sm\xF6r. L\xE4tt s\xF6tt, glansigt och mjukt hela v\xE4gen igenom.",
+  "style.challah.char.0": "\xC4gg och olja",
+  "style.challah.char.1": "Fl\xE4tas i tre eller sex delar",
+  "style.challah.char.2": "\xC4ggpensling ger glans",
+  "style.challah.char.3": "L\xE4tt s\xF6tt"
+};
+
+// src/i18n/styles.en.ts
+var stylesEn = {
+  "style.neapolitan.desc": "Soft, fast-baked pizza with a puffed rim. Very little yeast over a long room-temperature ferment keeps the flavour wheaty rather than sour.",
+  "style.neapolitan.char.0": "265 g balls",
+  "style.neapolitan.char.1": "Long room-temperature bulk",
+  "style.neapolitan.char.2": "No oil, no sugar",
+  "style.neapolitan.char.3": "Wood oven or baking steel",
+  "style.ny_style.desc": "Thin but chewy American pizza you can fold. Oil and sugar give softness and colour at a lower oven temperature.",
+  "style.ny_style.char.0": "Cold ferment 2\u20133 days",
+  "style.ny_style.char.1": "Oil and sugar in the dough",
+  "style.ny_style.char.2": "High-protein flour",
+  "style.ny_style.char.3": "Big foldable slices",
+  "style.detroit.desc": "Rectangular pan pizza with a fried cheese edge. A wet dough that proofs to fill the pan.",
+  "style.detroit.char.0": "High hydration, panned",
+  "style.detroit.char.1": "Cheese to the very edge",
+  "style.detroit.char.2": "Sauce on top of the cheese",
+  "style.detroit.char.3": "Steel pan, well oiled",
+  "style.roman.desc": "Roman tray pizza at very high hydration. A slow cold ferment gives big, irregular holes and a crisp base.",
+  "style.roman.char.0": "80% hydration",
+  "style.roman.char.1": "Cold bulk 20 h+",
+  "style.roman.char.2": "Very open crumb",
+  "style.roman.char.3": "Cut into rectangles",
+  "style.chicago_deep.desc": "Deep pizza with a buttery, almost pastry-like base. Low hydration and plenty of fat make it short rather than chewy.",
+  "style.chicago_deep.char.0": "Butter in the dough",
+  "style.chicago_deep.char.1": "Low hydration",
+  "style.chicago_deep.char.2": "Cheese below, sauce above",
+  "style.chicago_deep.char.3": "Long bake",
+  "style.sicilian_pizza.desc": "Thick tray pizza from Palermo with semolina in the blend. Airy crumb over an oil-fried base.",
+  "style.sicilian_pizza.char.0": "Semolina in the blend",
+  "style.sicilian_pizza.char.1": "Olive oil in the tray",
+  "style.sicilian_pizza.char.2": "Onion and breadcrumb topping",
+  "style.sicilian_pizza.char.3": "Proofs in the tray",
+  "style.pizza_poolish.desc": "Neapolitan dough where a third of the flour is pre-fermented as a wet poolish. Bready aroma and a softer rim.",
+  "style.pizza_poolish.char.0": "35% of the flour in poolish",
+  "style.pizza_poolish.char.1": "Honey in the poolish",
+  "style.pizza_poolish.char.2": "Short final proof",
+  "style.pizza_poolish.char.3": "Pronounced leoparding",
+  "style.pizza_biga.desc": "All the flour pre-ferments as a dry biga for 18 hours. Needs strong flour but gives an extremely light, airy rim.",
+  "style.pizza_biga.char.0": "100% biga",
+  "style.pizza_biga.char.1": "Needs W300+ flour",
+  "style.pizza_biga.char.2": "Ice water in the final mix",
+  "style.pizza_biga.char.3": "Windowpane before balling",
+  "style.poolish_bread.desc": "Rustic wheat loaf with half the flour pre-fermented as poolish. Mild acidity, nutty aroma, thin crisp crust.",
+  "style.poolish_bread.char.0": "50% of the flour in poolish",
+  "style.poolish_bread.char.1": "Whole wheat for flavour",
+  "style.poolish_bread.char.2": "Baked in a Dutch oven",
+  "style.poolish_bread.char.3": "Open crumb",
+  "style.biga_pane.desc": "Italian country loaf on a stiff biga. The drier preferment gives more sweetness and a tighter, chewier crumb than poolish.",
+  "style.biga_pane.char.0": "60% of the flour in biga",
+  "style.biga_pane.char.1": "Biga at 45% hydration",
+  "style.biga_pane.char.2": "Nutty, sweet flavour",
+  "style.biga_pane.char.3": "Keeps for days",
+  "style.baguette.desc": "French baguette on poolish, nothing added. Short mixing and gentle shaping preserve the holes.",
+  "style.baguette.char.0": "40% of the flour in poolish",
+  "style.baguette.char.1": "Autolyse before salt",
+  "style.baguette.char.2": "Score just before baking",
+  "style.baguette.char.3": "Steam for the first 12 min",
+  "style.ciabatta.desc": "A very wet Italian dough that is barely shaped at all. The biga gives it enough strength to carry 82% hydration.",
+  "style.ciabatta.char.0": "82% hydration",
+  "style.ciabatta.char.1": "50% of the flour in biga",
+  "style.ciabatta.char.2": "Cut, never reshaped",
+  "style.ciabatta.char.3": "Big irregular holes",
+  "style.country_sourdough.desc": "French country loaf on sourdough with a little whole wheat and rye. Bulk warm, final proof in the fridge.",
+  "style.country_sourdough.char.0": "Sourdough, no yeast",
+  "style.country_sourdough.char.1": "Cold final proof",
+  "style.country_sourdough.char.2": "Baked in a Dutch oven",
+  "style.country_sourdough.char.3": "Thick, dark crust",
+  "style.focaccia.desc": "Genoese focaccia: wet dough, plenty of olive oil, brine on top. Soft crumb with an even, bubbly structure.",
+  "style.focaccia.char.0": "Generous olive oil",
+  "style.focaccia.char.1": "Dimpled with fingertips",
+  "style.focaccia.char.2": "Brine on the surface",
+  "style.focaccia.char.3": "Proofs in the tray",
+  "style.pain_de_mie.desc": "French sandwich loaf with milk and butter. A fine, even crumb that holds together in a sandwich.",
+  "style.pain_de_mie.char.0": "Half the liquid is milk",
+  "style.pain_de_mie.char.1": "Soft, thin crust",
+  "style.pain_de_mie.char.2": "Square with a lid",
+  "style.pain_de_mie.char.3": "Ideal for toast",
+  "style.pita.desc": "Pocket bread that puffs in a hot oven. A short ferment and thin rolling are the whole trick.",
+  "style.pita.char.0": "Quick dough, done in a morning",
+  "style.pita.char.1": "Very hot stone",
+  "style.pita.char.2": "Puffs into a pocket",
+  "style.pita.char.3": "Cool under a cloth",
+  "style.sourdough_rye.desc": "Swedish rye sourdough baked in a tin. Rye gives a dense, moist crumb and a long shelf life.",
+  "style.sourdough_rye.char.0": "40% rye",
+  "style.sourdough_rye.char.1": "Baked in a tin",
+  "style.sourdough_rye.char.2": "Warm dough temperature",
+  "style.sourdough_rye.char.3": "Slice the next day",
+  "style.multigrain_sourdough.desc": "Nordic multigrain loaf with a seed soaker. High hydration and spelt give moisture and a nutty flavour.",
+  "style.multigrain_sourdough.char.0": "Soaked seeds",
+  "style.multigrain_sourdough.char.1": "Wheat, rye and spelt",
+  "style.multigrain_sourdough.char.2": "82% hydration",
+  "style.multigrain_sourdough.char.3": "Cold final proof",
+  "style.sourdough_form_bread.desc": "Simple Swedish sourdough tin loaf at high inoculation. Done in a day, with no bench work at all.",
+  "style.sourdough_form_bread.char.0": "High starter ratio",
+  "style.sourdough_form_bread.char.1": "Folds in the bowl",
+  "style.sourdough_form_bread.char.2": "Baked in a tin",
+  "style.sourdough_form_bread.char.3": "Same-day bake",
+  "style.sourdough_tortillas.desc": "Soft flour tortillas on sourdough and melted butter. Hot liquid makes the dough supple and easy to roll thin.",
+  "style.sourdough_tortillas.char.0": "Melted butter in the dough",
+  "style.sourdough_tortillas.char.1": "Hot liquid",
+  "style.sourdough_tortillas.char.2": "Cooked in a dry pan",
+  "style.sourdough_tortillas.char.3": "Stay soft when cold",
+  "style.milkbread.desc": "Japanese milk bread with tangzhong. The cooked flour paste binds extra liquid and keeps the loaf soft for days.",
+  "style.milkbread.char.0": "Tangzhong method",
+  "style.milkbread.char.1": "Milk powder",
+  "style.milkbread.char.2": "Extremely soft crumb",
+  "style.milkbread.char.3": "Keeps for days",
+  "style.pain_de_mie_traditional.desc": "Classic French tin loaf with plenty of butter and honey instead of sugar. Rich without tasting sweet.",
+  "style.pain_de_mie_traditional.char.0": "Milk and water 50/50",
+  "style.pain_de_mie_traditional.char.1": "Honey instead of sugar",
+  "style.pain_de_mie_traditional.char.2": "14% butter",
+  "style.pain_de_mie_traditional.char.3": "Square pullman tin",
+  "style.brioche.desc": "French butter dough enriched with eggs. Cold butter goes in after the gluten is built, then it retards overnight.",
+  "style.brioche.char.0": "45% butter",
+  "style.brioche.char.1": "Eggs as the main liquid",
+  "style.brioche.char.2": "Overnight cold proof",
+  "style.brioche.char.3": "Shape it cold",
+  "style.challah.desc": "Braided egg bread made with oil rather than butter. Lightly sweet, glossy and soft all the way through.",
+  "style.challah.char.0": "Eggs and oil",
+  "style.challah.char.1": "Braided in three or six",
+  "style.challah.char.2": "Egg wash for shine",
+  "style.challah.char.3": "Lightly sweet"
+};
+
+// src/i18n/translate.ts
+var DICTIONARIES = {
+  sv: { ...sv, ...stylesSv },
+  en: { ...en, ...stylesEn }
+};
+function interpolate(template, values) {
+  if (!values) return template;
+  return template.replace(
+    /\{(\w+)\}/g,
+    (match, name) => name in values ? String(values[name]) : match
+  );
+}
+function createTranslator(lang) {
+  const primary = DICTIONARIES[lang];
+  const fallback = DICTIONARIES[lang === "sv" ? "en" : "sv"];
+  return (key, values) => {
+    const template = primary[key] ?? fallback[key];
+    if (template === void 0) return key;
+    return interpolate(template, values);
+  };
+}
+
+// src/lib/mcp/shared.ts
+import { z } from "npm:zod@^3.25.76";
+
+// src/core/constants.ts
+var Q10 = 2;
+var Q10_STARTER = 3.8;
+var STARTER_PEAK_REF_HOURS = 7.5;
+var STARTER_PEAK_REF_TEMP_C = 22;
+var LEVAIN_SEED_SHARE = 0.2;
+var REFERENCE_TEMP_C = 23;
+var FRIDGE_COOLDOWN_HOURS = 1.5;
+var DEFAULT_COLD_TEMP_C = 4;
+var YEAST_CONVERSION = {
+  fresh: 1,
+  active_dry: 0.4,
+  instant: 0.33
+};
+var FRICTION_FACTOR_C = {
+  hand: 2,
+  dlx: 4,
+  planetary: 6,
+  spiral: 8
+};
+var WATER_TEMP_MIN_C = 1;
+var WATER_TEMP_MAX_C = 55;
+var YEAST_DANGER_TEMP_C = 50;
+var YEAST_PCT_MIN = 5e-3;
+var YEAST_PCT_MAX = 4;
+var INOCULATION_MIN = 3;
+var INOCULATION_MAX = 50;
+var INOCULATION_HIGH = 20;
+var CORRECTION_CLAMP = {
+  salt: [0.75, 1.5],
+  sugar: [0.8, 1.6],
+  hydration: [0.7, 1.3],
+  fat: [0.85, 1.4]
+};
+var CORRECTION_SLOPE = {
+  saltPerPctOver2: 0.07,
+  sugarPerPctUnder8: -5e-3,
+  sugarPerPctOver8: 0.03,
+  hydrationPerPctOver62: -5e-3,
+  fatPerPctOver5: 0.01
+};
+var round = (value, decimals = 0) => {
+  const f = 10 ** decimals;
+  return Math.round((value + Number.EPSILON) * f) / f;
+};
+var clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+var rateRatio = (temp, reference = REFERENCE_TEMP_C, q10 = Q10) => q10 ** ((temp - reference) / 10);
+
+// src/core/fermentation.ts
+function computeRoomEquivHours({
+  totalHours,
+  coldHours,
+  roomTemp,
+  coldTemp = DEFAULT_COLD_TEMP_C
+}) {
+  const total = Math.max(0, totalHours);
+  const cold = clamp(coldHours, 0, total);
+  const warm = total - cold;
+  const lag = Math.min(cold, FRIDGE_COOLDOWN_HOURS);
+  const settled = cold - lag;
+  const lagTemp = (roomTemp + coldTemp) / 2;
+  const equiv = warm + lag * rateRatio(lagTemp, roomTemp) + settled * rateRatio(coldTemp, roomTemp);
+  return Math.max(0.25, equiv);
+}
+function computeYeastDose(input) {
+  const identity = {
+    time: 1,
+    temperature: 1,
+    salt: 1,
+    sugar: 1,
+    hydration: 1,
+    fat: 1,
+    form: 1,
+    preferment: 1
+  };
+  if (input.leavenType === "sourdough" || input.baseFreshPct <= 0) {
+    return { pct: 0, freshPct: 0, clamped: false, corrections: identity };
+  }
+  const time = input.refHours / Math.max(0.25, input.effectiveHours);
+  const temperature = 1 / rateRatio(input.roomTemp, input.refTempC);
+  const salt = clamp(
+    1 + CORRECTION_SLOPE.saltPerPctOver2 * (input.saltPct - 2),
+    ...CORRECTION_CLAMP.salt
+  );
+  const sugarRaw = input.sugarPct <= 8 ? 1 + CORRECTION_SLOPE.sugarPerPctUnder8 * input.sugarPct : 1 + CORRECTION_SLOPE.sugarPerPctUnder8 * 8 + CORRECTION_SLOPE.sugarPerPctOver8 * (input.sugarPct - 8);
+  const sugar = clamp(sugarRaw, ...CORRECTION_CLAMP.sugar);
+  const hydration = clamp(
+    1 + CORRECTION_SLOPE.hydrationPerPctOver62 * (input.hydrationPct - 62),
+    ...CORRECTION_CLAMP.hydration
+  );
+  const fat = clamp(
+    1 + CORRECTION_SLOPE.fatPerPctOver5 * Math.max(0, input.fatPct - 5),
+    ...CORRECTION_CLAMP.fat
+  );
+  const preferment = 1 - 0.6 * clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
+  const hybrid = input.leavenType === "hybrid" ? 0.5 : 1;
+  const freshRaw = input.baseFreshPct * time * temperature * salt * sugar * hydration * fat * preferment * hybrid;
+  const form = YEAST_CONVERSION[input.yeastForm];
+  const dosed = freshRaw * form;
+  const pct = clamp(dosed, YEAST_PCT_MIN, YEAST_PCT_MAX);
+  return {
+    pct: round(pct, 4),
+    freshPct: round(freshRaw, 4),
+    clamped: Math.abs(pct - dosed) > 1e-9,
+    corrections: { time, temperature, salt, sugar, hydration, fat, form, preferment }
+  };
+}
+function computeInoculationPct(input) {
+  if (input.leavenType === "commercial" || input.basePct <= 0) return 0;
+  const time = input.refHours / Math.max(0.25, input.effectiveHours);
+  const temperature = 1 / rateRatio(input.roomTemp, input.refTempC);
+  const hybrid = input.leavenType === "hybrid" ? 0.5 : 1;
+  const scaled = input.basePct * time * temperature * hybrid;
+  return round(clamp(scaled, INOCULATION_MIN, INOCULATION_MAX), 1);
+}
+function computeWaterTemp(params) {
+  const hasPreferment = typeof params.prefermentTempC === "number";
+  const factors = hasPreferment ? 4 : 3;
+  const known = params.flourTempC + params.roomTempC + params.frictionC + (hasPreferment ? params.prefermentTempC : 0);
+  return { rawTempC: params.desiredDoughTempC * factors - known, factors };
+}
+function computeIceSplit(waterGrams, targetTempC, tapTempC = 12) {
+  if (waterGrams <= 0 || targetTempC >= tapTempC) return 0;
+  const iceFraction = (tapTempC - targetTempC) / (80 + tapTempC);
+  return round(clamp(iceFraction, 0, 0.9) * waterGrams, 0);
+}
+function levainOnFlourPct(inoculationPct, starterHydrationPct = 100) {
+  if (inoculationPct <= 0 || inoculationPct >= 100) return 0;
+  const levain = inoculationPct * (1 + starterHydrationPct / 100);
+  return round(levain / (100 - inoculationPct) * 100, 1);
+}
+function starterPeakHours(tempC) {
+  const hours = STARTER_PEAK_REF_HOURS / rateRatio(tempC, STARTER_PEAK_REF_TEMP_C, Q10_STARTER);
+  return round(clamp(hours, 2, 24), 1);
+}
+
+// src/core/schedule.ts
+var MIN = 6e4;
+var at = (start, offsetMin) => new Date(start.getTime() + offsetMin * MIN).toISOString();
+function buildSchedule(input) {
+  const { style, startTime } = input;
+  const p = style.process;
+  const steps = [];
+  const push = (offsetMin, durationMin, phase, key, values, tempC) => {
+    steps.push({
+      offsetMin: Math.round(offsetMin),
+      at: at(startTime, offsetMin),
+      durationMin: Math.round(durationMin),
+      phase,
+      key,
+      values,
+      tempC
+    });
+  };
+  const autolyseMin = p.autolyseMin ?? 0;
+  if (input.usePreferment && input.prefermentHours) {
+    const offset = -(input.prefermentHours * 60 + autolyseMin);
+    push(offset, input.prefermentHours * 60, "preferment", `process.preferment.${input.prefermentType}`, {
+      hours: input.prefermentHours,
+      temp: input.prefermentTempC ?? input.roomTempC
+    }, input.prefermentTempC);
+    push(-autolyseMin, 0, "preferment", "process.preferment.ready", {
+      type: input.prefermentType ?? "poolish"
+    });
+  }
+  if (input.usesLevain) {
+    const offset = -(input.levainHours * 60 + autolyseMin);
+    push(offset, input.levainHours * 60, "levain", "process.levain.build", {
+      hours: input.levainHours,
+      temp: input.levainTempC
+    }, input.levainTempC);
+  }
+  let cursor = 0;
+  if (autolyseMin > 0) {
+    push(-autolyseMin, autolyseMin, "autolyse", "process.autolyse", { minutes: autolyseMin });
+  }
+  push(cursor, p.mixMin, "mix", "process.mix", { minutes: p.mixMin });
+  cursor += p.mixMin;
+  const bulkMin = Math.max(0, input.bulkHours * 60);
+  const proofMin = Math.max(0, input.proofHours * 60);
+  const coldMin = Math.max(0, input.coldHours * 60);
+  let bulkColdMin = 0;
+  let proofColdMin = 0;
+  if (input.coldPhase === "bulk") {
+    bulkColdMin = Math.min(coldMin, bulkMin);
+    proofColdMin = Math.min(coldMin - bulkColdMin, proofMin);
+  } else {
+    proofColdMin = Math.min(coldMin, proofMin);
+    bulkColdMin = Math.min(coldMin - proofColdMin, bulkMin);
+  }
+  const bulkWarmMin = bulkMin - bulkColdMin;
+  const proofWarmMin = proofMin - proofColdMin;
+  const bulkStart = cursor;
+  if (bulkWarmMin > 0) {
+    push(bulkStart, bulkWarmMin, "bulk", "process.bulk", {
+      hours: round1(bulkWarmMin / 60),
+      temp: input.roomTempC
+    }, input.roomTempC);
+  }
+  if (p.folds && bulkWarmMin > 0) {
+    const first = p.benchRestMin ?? p.folds.intervalMin;
+    for (let i = 0; i < p.folds.count; i += 1) {
+      const offset = bulkStart + first + i * p.folds.intervalMin;
+      if (offset >= bulkStart + bulkWarmMin) break;
+      push(offset, 0, "fold", "process.fold", {
+        index: i + 1,
+        count: p.folds.count,
+        technique: p.folds.techniqueKey
+      });
+    }
+  }
+  if (bulkColdMin > 0) {
+    push(bulkStart + bulkWarmMin, bulkColdMin, "cold", "process.cold.bulk", {
+      hours: round1(bulkColdMin / 60),
+      temp: input.coldTempC
+    }, input.coldTempC);
+  }
+  cursor = bulkStart + bulkMin;
+  if (input.pieces > 1) {
+    push(cursor, 0, "divide", "process.divide", { pieces: input.pieces });
+  }
+  if (p.preshapeRestMin) {
+    push(cursor, p.preshapeRestMin, "divide", "process.preshape", {
+      minutes: p.preshapeRestMin
+    });
+    cursor += p.preshapeRestMin;
+  }
+  push(cursor, 0, "shape", p.shapeKey, { pieces: input.pieces });
+  const proofStart = cursor;
+  if (proofWarmMin > 0) {
+    push(proofStart, proofWarmMin, "proof", "process.proof", {
+      hours: round1(proofWarmMin / 60),
+      temp: input.roomTempC
+    }, input.roomTempC);
+  }
+  if (proofColdMin > 0) {
+    push(proofStart + proofWarmMin, proofColdMin, "cold", "process.cold.proof", {
+      hours: round1(proofColdMin / 60),
+      temp: input.coldTempC
+    }, input.coldTempC);
+  }
+  cursor = proofStart + proofMin;
+  const preheatMin = p.bakeTempC >= 400 ? 60 : p.steamMinutes ? 45 : 30;
+  push(Math.max(bulkStart, cursor - preheatMin), preheatMin, "bake", "process.preheat", {
+    temp: p.bakeTempC,
+    minutes: preheatMin
+  });
+  push(cursor, p.bakeMinutes, "bake", p.bakeKey, {
+    temp: p.bakeTempC,
+    dropTemp: p.bakeDropTempC ?? p.bakeTempC,
+    minutes: p.bakeMinutes,
+    steam: p.steamMinutes ?? 0,
+    pieces: input.pieces
+  }, p.bakeTempC);
+  cursor += p.bakeMinutes;
+  push(cursor, 0, "done", "process.done", { minutes: coolingMinutes(style) });
+  steps.sort((a, b) => a.offsetMin - b.offsetMin);
+  return { steps, readyAt: at(startTime, cursor) };
+}
+function coolingMinutes(style) {
+  if (style.category === "pizza") return 2;
+  if (style.category === "enriched") return 45;
+  return 60;
+}
+var round1 = (v) => Math.round(v * 10) / 10;
+
+// src/core/calculations.ts
+var YEAST_KEY = {
+  fresh: "ing.yeast_fresh",
+  active_dry: "ing.yeast_active_dry",
+  instant: "ing.yeast_instant"
+};
+var formatGrams = (grams) => grams < 10 ? grams.toFixed(2) : Math.round(grams).toString();
+function calculateRecipe(inputs) {
+  const { style } = inputs;
+  const notes = [];
+  const hydration = clamp(inputs.hydration ?? style.defaultParams.hydration_pct, 30, 120);
+  const salt = clamp(inputs.salt ?? style.defaultParams.salt_pct, 0, 6);
+  const sugar = clamp(inputs.sugar ?? style.defaultParams.sugar_pct, 0, 40);
+  const fat = clamp(inputs.oil ?? style.defaultParams.oil_pct, 0, 60);
+  const starterHydration = clamp(inputs.starterHydration ?? 100, 40, 200);
+  const roomTemp = clamp(inputs.roomTemp, 4, 40);
+  const coldTemp = clamp(inputs.coldTemp ?? DEFAULT_COLD_TEMP_C, -2, 18);
+  const totalTime = Math.max(0.5, inputs.totalTime);
+  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
+  const coldHours = Math.min(requestedCold, totalTime);
+  const coldPhase = inputs.coldPhase ?? style.process.coldPhase;
+  const desiredDoughTemp = clamp(inputs.desiredDoughTemp, 15, 35);
+  const flourTemp = inputs.flourTemp ?? roomTemp;
+  const mixing = inputs.mixing;
+  const yeastForm = inputs.yeastForm;
+  const leavenType = inputs.leavenType;
+  const usePreferment = (inputs.usePreferment ?? true) && Boolean(style.preferment);
+  const preferment = usePreferment ? style.preferment : void 0;
+  if (requestedCold > totalTime) {
+    notes.push({ code: "note.cold_clamped", severity: "warn", values: { hours: round(coldHours, 1) } });
+  }
+  const roomEquivHours = computeRoomEquivHours({
+    totalHours: totalTime,
+    coldHours,
+    roomTemp,
+    coldTemp
+  });
+  const dose = computeYeastDose({
+    baseFreshPct: style.fermentation.base_yeast_fresh_pct,
+    refHours: style.fermentation.yeast_ref_hours,
+    refTempC: style.fermentation.yeast_ref_temp_c,
+    effectiveHours: roomEquivHours,
+    roomTemp,
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+    yeastForm,
+    leavenType,
+    prefermentFlourPct: preferment?.flour_pct
+  });
+  const usesLevain = leavenType === "sourdough" || leavenType === "hybrid";
+  const baseInoculation = style.fermentation.base_inoculation_pct ?? 20;
+  const levainRefHours = style.fermentation.levain_ref_hours ?? 6;
+  const levainRefTemp = style.fermentation.levain_ref_temp_c ?? 24;
+  const inoculationPct = usesLevain ? computeInoculationPct({
+    basePct: baseInoculation,
+    refHours: levainRefHours,
+    refTempC: levainRefTemp,
+    effectiveHours: roomEquivHours,
+    roomTemp,
+    leavenType
+  }) : 0;
+  const levainPeakHours = starterPeakHours(roomTemp);
+  if (usesLevain && style.fermentation.base_inoculation_pct === void 0) {
+    notes.push({ code: "note.levain_generic", severity: "info", values: { style: style.name } });
+  }
+  const extras = style.extras ?? [];
+  const extrasPct = extras.reduce((sum, e) => sum + e.pct, 0);
+  const prefermentExtrasPct = preferment ? (preferment.extras ?? []).reduce(
+    (sum, e) => sum + e.pct * (preferment.flour_pct / 100),
+    0
+  ) : 0;
+  const totalPct = 100 + hydration + salt + sugar + fat + extrasPct + prefermentExtrasPct + dose.pct;
+  const pieces = Math.max(1, Math.round(inputs.ballCount || 1));
+  const scaleMode = inputs.scaleMode ?? "pieces";
+  let totalFlour;
+  let targetDoughWeight;
+  if (scaleMode === "flour" && inputs.targetFlour) {
+    totalFlour = Math.max(1, inputs.targetFlour);
+    targetDoughWeight = totalFlour * (totalPct / 100);
+  } else if (scaleMode === "dough" && inputs.targetDough) {
+    targetDoughWeight = Math.max(1, inputs.targetDough);
+    totalFlour = targetDoughWeight / (totalPct / 100);
+  } else {
+    targetDoughWeight = Math.max(1, (inputs.ballWeight || 1) * pieces);
+    totalFlour = targetDoughWeight / (totalPct / 100);
+  }
+  const totalWater = totalFlour * (hydration / 100);
+  const prefermentFlour = preferment ? totalFlour * (preferment.flour_pct / 100) : 0;
+  const prefermentWater = preferment ? prefermentFlour * (preferment.hydration_pct / 100) : 0;
+  const prefermentSalt = preferment?.salt_pct ? prefermentFlour * (preferment.salt_pct / 100) : 0;
+  const prefermentYeast = preferment?.yeast_fresh_pct ? prefermentFlour * (preferment.yeast_fresh_pct / 100) * (yeastForm === "fresh" ? 1 : yeastForm === "instant" ? 0.33 : 0.4) : 0;
+  const levainFlour = totalFlour * (inoculationPct / 100);
+  const levainWater = levainFlour * (starterHydration / 100);
+  const levainTotal = levainFlour + levainWater;
+  const finalFlour = totalFlour - prefermentFlour - levainFlour;
+  const finalWater = totalWater - prefermentWater - levainWater;
+  if (finalFlour < 0) {
+    notes.push({ code: "note.flour_overdrawn", severity: "warn" });
+  }
+  if (finalWater < 0) {
+    notes.push({
+      code: "note.water_overdrawn",
+      severity: "warn",
+      values: { hydration: round(hydration, 1) }
+    });
+  }
+  const sections = [];
+  const pct = (grams) => totalFlour > 0 ? round(grams / totalFlour * 100, 2) : 0;
+  if (usesLevain && levainTotal > 0) {
+    const levainIngredients = [
+      {
+        key: "ing.starter_seed",
+        grams: round(levainTotal * LEVAIN_SEED_SHARE, 1),
+        percentage: pct(levainTotal * LEVAIN_SEED_SHARE),
+        type: "starter"
+      },
+      { key: "ing.flour", grams: round(levainFlour, 1), percentage: pct(levainFlour), type: "flour" },
+      { key: "ing.water", grams: round(levainWater, 1), percentage: pct(levainWater), type: "water" }
+    ];
+    sections.push({
+      id: "levain",
+      titleKey: "section.levain",
+      // The build time the baker needs is the one for their kitchen, not the
+      // reference conditions the dose happens to be calibrated against.
+      meta: { hours: levainPeakHours, tempC: roomTemp, type: "levain" },
+      ingredients: levainIngredients,
+      totalGrams: round(levainTotal, 1)
+    });
+  }
+  let prefermentExtrasGrams = 0;
+  if (preferment) {
+    const prefIngredients = [
+      { key: "ing.flour", grams: round(prefermentFlour, 1), percentage: pct(prefermentFlour), type: "flour" },
+      { key: "ing.water", grams: round(prefermentWater, 1), percentage: pct(prefermentWater), type: "water" }
+    ];
+    if (prefermentYeast > 0) {
+      prefIngredients.push({
+        key: YEAST_KEY[yeastForm],
+        grams: round(prefermentYeast, 2),
+        percentage: pct(prefermentYeast),
+        type: "yeast"
+      });
+    }
+    if (prefermentSalt > 0) {
+      prefIngredients.push({
+        key: "ing.salt",
+        grams: round(prefermentSalt, 1),
+        percentage: pct(prefermentSalt),
+        type: "salt"
+      });
+    }
+    for (const extra of preferment.extras ?? []) {
+      const grams = prefermentFlour * (extra.pct / 100);
+      prefermentExtrasGrams += grams;
+      prefIngredients.push({
+        key: extra.key,
+        grams: round(grams, 1),
+        percentage: pct(grams),
+        type: extra.type
+      });
+    }
+    sections.push({
+      id: "preferment",
+      titleKey: `section.${preferment.type}`,
+      meta: { hours: preferment.hours, tempC: preferment.temp_c, type: preferment.type },
+      ingredients: prefIngredients.filter((i) => i.grams > 4e-3),
+      totalGrams: round(
+        prefIngredients.reduce((sum, i) => sum + i.grams, 0),
+        1
+      )
+    });
+  }
+  const finalIngredients = [];
+  const blend = style.flourBlend;
+  if (blend?.length) {
+    for (const component of blend) {
+      const grams = finalFlour * (component.percentage / 100);
+      finalIngredients.push({
+        key: component.key,
+        grams: round(grams, 1),
+        percentage: pct(grams),
+        type: "flour"
+      });
+    }
+  } else {
+    finalIngredients.push({
+      key: "ing.flour",
+      grams: round(finalFlour, 1),
+      percentage: pct(finalFlour),
+      type: "flour"
+    });
+  }
+  let trueWater = 0;
+  const liquids = style.liquids ?? [{ key: "ing.water", share: 1, waterFraction: 1, type: "water" }];
+  for (const liquid of liquids) {
+    const grams = finalWater * liquid.share;
+    trueWater += grams * liquid.waterFraction;
+    finalIngredients.push({
+      key: liquid.key,
+      grams: round(grams, 1),
+      percentage: pct(grams),
+      type: liquid.type
+    });
+  }
+  trueWater += prefermentWater + levainWater;
+  finalIngredients.push({
+    key: "ing.salt",
+    grams: round(totalFlour * (salt / 100) - prefermentSalt, 1),
+    percentage: pct(totalFlour * (salt / 100) - prefermentSalt),
+    type: "salt"
+  });
+  if (usesLevain && levainTotal > 0) {
+    finalIngredients.push({
+      key: "ing.levain_ripe",
+      grams: round(levainTotal, 1),
+      percentage: pct(levainTotal),
+      type: "starter"
+    });
+  }
+  if (dose.pct > 0) {
+    finalIngredients.push({
+      key: YEAST_KEY[yeastForm],
+      grams: round(totalFlour * (dose.pct / 100), 2),
+      percentage: pct(totalFlour * (dose.pct / 100)),
+      type: "yeast"
+    });
+  }
+  if (preferment) {
+    const prefermentTotal = prefermentFlour + prefermentWater + prefermentYeast + prefermentSalt + prefermentExtrasGrams;
+    finalIngredients.push({
+      key: `ing.${preferment.type}_all`,
+      grams: round(prefermentTotal, 1),
+      percentage: pct(prefermentTotal),
+      type: "other",
+      note: "note.from_section"
+    });
+  }
+  if (sugar > 0) {
+    const grams = totalFlour * (sugar / 100);
+    finalIngredients.push({
+      key: style.defaultParams.sugarKey ?? "ing.sugar",
+      grams: round(grams, 1),
+      percentage: pct(grams),
+      type: "sugar"
+    });
+  }
+  if (fat > 0) {
+    const grams = totalFlour * (fat / 100);
+    finalIngredients.push({
+      key: style.defaultParams.fatKey ?? "ing.oil",
+      grams: round(grams, 1),
+      percentage: pct(grams),
+      type: "fat"
+    });
+  }
+  for (const extra of extras) {
+    const grams = totalFlour * (extra.pct / 100);
+    trueWater += grams * (extra.waterFraction ?? 0);
+    finalIngredients.push({
+      key: extra.key,
+      grams: round(grams, 1),
+      percentage: pct(grams),
+      type: extra.type
+    });
+  }
+  const finalLines = finalIngredients.filter((i) => i.grams > 4e-3);
+  sections.push({
+    id: "final",
+    titleKey: "section.final",
+    ingredients: finalLines,
+    totalGrams: round(
+      finalLines.reduce((sum, i) => sum + i.grams, 0),
+      1
+    )
+  });
+  const frictionC = FRICTION_FACTOR_C[mixing];
+  const { rawTempC, factors } = computeWaterTemp({
+    desiredDoughTempC: desiredDoughTemp,
+    flourTempC: flourTemp,
+    roomTempC: roomTemp,
+    frictionC,
+    prefermentTempC: preferment ? preferment.temp_c : void 0
+  });
+  const waterTempC = clamp(rawTempC, WATER_TEMP_MIN_C, WATER_TEMP_MAX_C);
+  const clampedWater = Math.abs(rawTempC - waterTempC) > 0.05;
+  const iceGrams = computeIceSplit(finalWater, waterTempC);
+  const ratioSum = style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
+  const bulkHours = totalTime * (style.fermentation.bulk_ratio / ratioSum);
+  const proofHours = totalTime * (style.fermentation.proof_ratio / ratioSum);
+  const startTime = inputs.startTime ?? /* @__PURE__ */ new Date();
+  const { steps, readyAt } = buildSchedule({
+    style,
+    startTime,
+    bulkHours,
+    proofHours,
+    coldHours,
+    coldPhase,
+    roomTempC: roomTemp,
+    coldTempC: coldTemp,
+    pieces,
+    usePreferment: Boolean(preferment),
+    prefermentHours: preferment?.hours,
+    prefermentTempC: preferment?.temp_c,
+    prefermentType: preferment?.type,
+    usesLevain: usesLevain && levainTotal > 0,
+    levainHours: levainPeakHours,
+    levainTempC: roomTemp
+  });
+  const doughWeight = sections.filter((s) => s.id === "final").reduce((sum, s) => sum + s.totalGrams, 0);
+  const trueHydrationPct = totalFlour > 0 ? round(trueWater / totalFlour * 100, 1) : 0;
+  notes.push(
+    ...buildNotes({
+      style,
+      hydration,
+      trueHydrationPct,
+      salt,
+      fat,
+      waterTempC,
+      rawTempC,
+      clampedWater,
+      iceGrams,
+      dose,
+      inoculationPct,
+      starterHydration,
+      leavenType,
+      coldHours,
+      coldPhase,
+      roomEquivHours,
+      totalTime,
+      roomTemp,
+      coldTemp,
+      totalFlour,
+      levainTotal,
+      levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
+      levainPeakHours,
+      preferment: Boolean(preferment)
+    })
+  );
+  const mergedIngredients = mergeIngredients(sections);
+  return {
+    sections,
+    ingredients: mergedIngredients,
+    totals: {
+      flour: round(totalFlour, 1),
+      water: round(totalWater, 1),
+      trueWater: round(trueWater, 1),
+      trueHydrationPct,
+      doughWeight: round(doughWeight, 1),
+      targetDoughWeight: round(targetDoughWeight, 1),
+      perPiece: round(doughWeight / pieces, 1),
+      pieces
+    },
+    water: {
+      tempC: round(waterTempC, 1),
+      rawTempC: round(rawTempC, 1),
+      clamped: clampedWater,
+      factors,
+      frictionC,
+      flourTempC: flourTemp,
+      desiredDoughTempC: desiredDoughTemp,
+      iceGrams
+    },
+    fermentation: {
+      bulkHours: round(bulkHours, 2),
+      proofHours: round(proofHours, 2),
+      coldHours: round(coldHours, 2),
+      coldPhase,
+      roomEquivHours: round(roomEquivHours, 2),
+      totalHours: round(totalTime, 2),
+      yeastPct: dose.pct,
+      yeastForm,
+      inoculationPct,
+      starterPct: round(inoculationPct * (1 + starterHydration / 100), 1),
+      // Recipes quote the levain against the flour it joins, not against the
+      // total including the levain's own flour. Report both so a baker can
+      // compare this recipe with any other they read.
+      levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
+      baseInoculationPct: baseInoculation,
+      levainRefHours,
+      levainRefTempC: levainRefTemp,
+      levainPeakHours,
+      levainSeedShare: LEVAIN_SEED_SHARE,
+      leavenType,
+      roomTempC: roomTemp,
+      coldTempC: coldTemp,
+      corrections: {
+        time: round(dose.corrections.time, 3),
+        temperature: round(dose.corrections.temperature, 3),
+        salt: round(dose.corrections.salt, 3),
+        sugar: round(dose.corrections.sugar, 3),
+        hydration: round(dose.corrections.hydration, 3),
+        fat: round(dose.corrections.fat, 3),
+        form: dose.corrections.form
+      }
+    },
+    params: {
+      hydration,
+      salt,
+      sugar,
+      oil: fat,
+      starterHydration,
+      prefermentFlourPct: preferment?.flour_pct ?? 0
+    },
+    timeline: steps,
+    notes,
+    readyAt
+  };
+}
+function mergeIngredients(sections) {
+  const merged = /* @__PURE__ */ new Map();
+  for (const section of sections) {
+    for (const ing of section.ingredients) {
+      if (ing.note === "note.from_section") continue;
+      const existing = merged.get(ing.key);
+      if (existing) {
+        existing.grams = round(existing.grams + ing.grams, 2);
+        existing.percentage = round(existing.percentage + ing.percentage, 2);
+      } else {
+        merged.set(ing.key, { ...ing });
+      }
+    }
+  }
+  return [...merged.values()].filter((i) => i.grams > 4e-3);
+}
+function buildNotes(c) {
+  const notes = [];
+  if (c.clampedWater) {
+    notes.push({
+      code: "note.water_clamped",
+      severity: "warn",
+      values: { raw: round(c.rawTempC, 1), used: round(c.waterTempC, 1) }
+    });
+  }
+  if (c.iceGrams > 0) {
+    notes.push({
+      code: "note.use_ice",
+      severity: "tip",
+      values: { grams: c.iceGrams, temp: round(c.waterTempC, 1) }
+    });
+  }
+  if (c.waterTempC > YEAST_DANGER_TEMP_C) {
+    notes.push({ code: "note.water_hot", severity: "warn", values: { limit: YEAST_DANGER_TEMP_C } });
+  }
+  if (c.coldHours > 0) {
+    notes.push({
+      code: "note.cold_retard",
+      severity: "info",
+      values: {
+        cold: round(c.coldHours, 1),
+        total: round(c.totalTime, 1),
+        equiv: round(c.roomEquivHours, 1),
+        coldTemp: c.coldTemp,
+        phase: c.coldPhase
+      }
+    });
+  }
+  if (c.dose.clamped && c.dose.pct > 0) {
+    notes.push({
+      code: "note.yeast_clamped",
+      severity: "warn",
+      values: { pct: c.dose.pct, grams: round(c.totalFlour * (c.dose.pct / 100), 2) }
+    });
+  }
+  if (c.dose.pct > 0 && c.totalFlour * (c.dose.pct / 100) < 0.5) {
+    notes.push({
+      code: "note.tiny_yeast",
+      severity: "tip",
+      values: { grams: round(c.totalFlour * (c.dose.pct / 100), 2) }
+    });
+  }
+  if (c.inoculationPct > 0) {
+    notes.push({
+      code: "note.levain_ratio",
+      severity: "info",
+      values: {
+        inoculation: c.inoculationPct,
+        starter: round(c.inoculationPct * (1 + c.starterHydration / 100), 1),
+        onFlour: c.levainOnFlourPct,
+        grams: round(c.levainTotal, 0),
+        hydration: c.starterHydration
+      }
+    });
+    notes.push({
+      code: "note.levain_ripe",
+      severity: "tip",
+      values: { hours: c.levainPeakHours, temp: round(c.roomTemp, 1) }
+    });
+  }
+  if (c.inoculationPct >= INOCULATION_HIGH) {
+    notes.push({ code: "note.levain_high", severity: "warn", values: { pct: c.inoculationPct } });
+  }
+  if (c.hydration > 78) {
+    notes.push({ code: "note.high_hydration", severity: "tip", values: { pct: round(c.hydration, 1) } });
+  }
+  if (c.trueHydrationPct > 0 && Math.abs(c.trueHydrationPct - c.hydration) > 1) {
+    notes.push({
+      code: "note.true_hydration",
+      severity: "info",
+      values: { stated: round(c.hydration, 1), actual: c.trueHydrationPct }
+    });
+  }
+  if (c.salt < 1.5) {
+    notes.push({ code: "note.low_salt", severity: "warn", values: { pct: round(c.salt, 1) } });
+  }
+  if (c.salt > 3.2) {
+    notes.push({ code: "note.high_salt", severity: "warn", values: { pct: round(c.salt, 1) } });
+  }
+  if (c.fat > 12) {
+    notes.push({ code: "note.rich_dough", severity: "tip", values: { pct: round(c.fat, 1) } });
+  }
+  if (c.preferment) {
+    notes.push({ code: "note.preferment", severity: "info" });
+  }
+  notes.push({ code: "note.percent_basis", severity: "info", values: { flour: round(c.totalFlour, 0) } });
+  return notes;
+}
+
+// src/lib/mcp/shared.ts
+var languageSchema = z.enum(["en", "sv"]).optional().describe("Language for human-readable text. Default 'en'.");
+var recipeInputSchema = {
+  style_id: z.string().min(1).describe("Style id, e.g. 'neapolitan' (see list_styles)."),
+  ball_weight: z.number().positive().optional().describe("Weight per ball or loaf in grams. Defaults to the style's own."),
+  ball_count: z.number().int().positive().optional().describe("Number of balls or loaves. Defaults to the style's own."),
+  target_flour: z.number().positive().optional().describe("Scale by a total flour weight in grams instead of by pieces."),
+  target_dough: z.number().positive().optional().describe("Scale by a total dough weight in grams instead of by pieces."),
+  total_time: z.number().positive().optional().describe("Fermentation hours for the final dough. Defaults to the style's own."),
+  room_temp: z.number().optional().describe("Room temperature in \xB0C. Defaults to the style's own."),
+  cold_hours: z.number().min(0).optional().describe("Hours of the total spent in the fridge."),
+  cold_temp: z.number().optional().describe("Fridge temperature in \xB0C. Default 4."),
+  cold_phase: z.enum(["bulk", "proof"]).optional().describe("Which phase the retard sits in. Defaults to the style's convention."),
+  hydration: z.number().optional().describe("Override hydration in baker's %."),
+  salt: z.number().optional().describe("Override salt in baker's %."),
+  sugar: z.number().optional().describe("Override sugar in baker's %."),
+  oil: z.number().optional().describe("Override fat in baker's %."),
+  leaven_type: z.enum(["commercial", "sourdough", "hybrid"]).optional().describe("Leavening. Defaults to the style's own."),
+  yeast_form: z.enum(["fresh", "active_dry", "instant"]).optional().describe("Default 'instant'."),
+  mixing: z.enum(["hand", "dlx", "planetary", "spiral"]).optional().describe("Mixing method, which sets the friction factor. Default 'hand'."),
+  desired_dough_temp: z.number().optional().describe("Target dough temperature in \xB0C. Defaults to the style's own."),
+  flour_temp: z.number().optional().describe("Flour temperature in \xB0C. Defaults to room temp."),
+  starter_hydration: z.number().optional().describe("Levain hydration in %. Default 100."),
+  use_preferment: z.boolean().optional().describe("Whether to use the style's preferment. Default true."),
+  start_time: z.string().optional().describe("ISO timestamp for the start of the schedule. Defaults to now."),
+  language: languageSchema
+};
+function resolveRecipe(input) {
+  const style = getStyleById(input.style_id);
+  if (!style) {
+    return { error: `Unknown style id: ${input.style_id}. Use list_styles to see valid ids.` };
+  }
+  const lang = input.language ?? "en";
+  const d = style.defaults;
+  const startTime = input.start_time ? new Date(input.start_time) : /* @__PURE__ */ new Date();
+  if (Number.isNaN(startTime.getTime())) {
+    return { error: `Invalid start_time: ${input.start_time}. Use an ISO timestamp.` };
+  }
+  const scaleMode = input.target_flour ? "flour" : input.target_dough ? "dough" : "pieces";
+  const results = calculateRecipe({
+    style,
+    scaleMode,
+    ballWeight: input.ball_weight ?? d.ballWeight,
+    ballCount: input.ball_count ?? d.ballCount,
+    targetFlour: input.target_flour,
+    targetDough: input.target_dough,
+    totalTime: input.total_time ?? d.totalTime,
+    roomTemp: input.room_temp ?? d.roomTemp,
+    coldTemp: input.cold_temp,
+    coldHours: input.cold_hours ?? d.coldHours,
+    coldPhase: input.cold_phase,
+    hydration: input.hydration,
+    salt: input.salt,
+    sugar: input.sugar,
+    oil: input.oil,
+    leavenType: input.leaven_type ?? d.leavenType,
+    yeastForm: input.yeast_form ?? "instant",
+    mixing: input.mixing ?? "hand",
+    desiredDoughTemp: input.desired_dough_temp ?? d.doughTemp,
+    flourTemp: input.flour_temp,
+    starterHydration: input.starter_hydration,
+    usePreferment: input.use_preferment,
+    startTime
+  });
+  return { style, results, t: createTranslator(lang), lang };
+}
+function toReadable({ style, results, t }) {
+  return {
+    style: {
+      id: style.id,
+      name: style.name,
+      category: style.category,
+      region: t(style.regionKey),
+      description: t(`style.${style.id}.desc`)
+    },
+    totals: results.totals,
+    water: results.water,
+    fermentation: results.fermentation,
+    params: results.params,
+    sections: results.sections.map((section) => ({
+      id: section.id,
+      title: t(section.titleKey),
+      meta: section.meta,
+      total_grams: section.totalGrams,
+      ingredients: section.ingredients.map((ing) => ({
+        name: t(ing.key),
+        grams: ing.grams,
+        bakers_percent: ing.percentage,
+        type: ing.type
+      }))
+    })),
+    timeline: results.timeline.map((step) => ({
+      at: step.at,
+      offset_minutes: step.offsetMin,
+      duration_minutes: step.durationMin,
+      phase: step.phase,
+      title: t(step.key, resolveTechnique(step.values, t)),
+      detail: t(`${step.key}.body`, resolveTechnique(step.values, t))
+    })),
+    notes: results.notes.map((note) => ({
+      severity: note.severity,
+      text: t(note.code, note.values)
+    })),
+    ready_at: results.readyAt
+  };
+}
+function resolveTechnique(values, t) {
+  if (!values?.technique) return values;
+  return { ...values, technique: t(String(values.technique)) };
+}
 
 // src/lib/mcp/tools/list-styles.ts
 var list_styles_default = defineTool({
   name: "list_styles",
   title: "List dough styles",
-  description: "List all built-in bread and pizza styles with their id, name, region and category. Optionally filter by category.",
+  description: "List every built-in bread and pizza style with its id, name, region, category, default hydration and salt, whether it uses a preferment or sourdough, and its default batch size and timing. Optionally filter by category.",
   inputSchema: {
-    category: z.enum(["pizza", "bread", "enriched", "preferment"]).optional().describe("Optional category filter.")
+    category: z2.enum(["pizza", "bread", "enriched", "preferment"]).optional().describe("Optional category filter."),
+    language: languageSchema
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: ({ category }) => {
+  handler: ({ category, language }) => {
+    const t = createTranslator(language ?? "en");
     const styles = BREAD_STYLES.filter((s) => !category || s.category === category).map((s) => ({
       id: s.id,
       name: s.name,
       category: s.category,
-      region: s.region,
-      description: s.description
+      region: t(s.regionKey),
+      description: t(`style.${s.id}.desc`),
+      hydration_pct: s.defaultParams.hydration_pct,
+      salt_pct: s.defaultParams.salt_pct,
+      preferment: s.preferment ? s.preferment.type : null,
+      default_leaven: s.defaults.leavenType,
+      default_batch: `${s.defaults.ballCount} \xD7 ${s.defaults.ballWeight} g`,
+      default_fermentation_hours: s.defaults.totalTime,
+      default_cold_hours: s.defaults.coldHours
     }));
     return {
       content: [{ type: "text", text: JSON.stringify(styles, null, 2) }],
@@ -620,731 +3022,51 @@ var list_styles_default = defineTool({
 
 // src/lib/mcp/tools/get-style.ts
 import { defineTool as defineTool2, ToolError } from "npm:@lovable.dev/mcp-js@0.26.3";
-import { z as z2 } from "npm:zod@^3.25.76";
+import { z as z3 } from "npm:zod@^3.25.76";
 var get_style_default = defineTool2({
   name: "get_style",
   title: "Get dough style details",
-  description: "Get the full definition of one style: default hydration, salt, sugar, oil, preferment, fermentation ratios, flour blend and characteristics.",
+  description: "Get the full definition of one style: default hydration, salt, sugar and fat, its preferment spec, the reference yeast dose and levain inoculation with the time and temperature they were measured at, the flour blend, the process (folds, shaping, bake) and the style's default batch size.",
   inputSchema: {
-    style_id: z2.string().min(1).describe("Style id, e.g. 'neapolitan' (see list_styles).")
+    style_id: z3.string().min(1).describe("Style id, e.g. 'neapolitan' (see list_styles)."),
+    language: languageSchema
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: ({ style_id }) => {
+  handler: ({ style_id, language }) => {
     const style = getStyleById(style_id);
     if (!style) throw new ToolError(`Unknown style id: ${style_id}. Use list_styles to see valid ids.`);
+    const t = createTranslator(language ?? "en");
+    const payload = {
+      ...style,
+      region: t(style.regionKey),
+      description: t(`style.${style.id}.desc`),
+      characteristics: Array.from(
+        { length: style.characteristicCount },
+        (_, i) => t(`style.${style.id}.char.${i}`)
+      ),
+      flourBlend: style.flourBlend?.map((f) => ({ ...f, name: t(f.key) })),
+      liquids: style.liquids?.map((l) => ({ ...l, name: t(l.key) })),
+      extras: style.extras?.map((e) => ({ ...e, name: t(e.key) }))
+    };
     return {
-      content: [{ type: "text", text: JSON.stringify(style, null, 2) }],
-      structuredContent: { style }
+      content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+      structuredContent: { style: payload }
     };
   }
 });
 
 // src/lib/mcp/tools/calculate-recipe.ts
 import { defineTool as defineTool3, ToolError as ToolError2 } from "npm:@lovable.dev/mcp-js@0.26.3";
-import { z as z3 } from "npm:zod@^3.25.76";
-
-// src/core/calculations.ts
-var YEAST_CONVERSIONS = {
-  fresh_to_ady: 0.4,
-  fresh_to_idy: 0.33,
-  ady_to_idy: 0.82
-};
-function getTemperatureFactor(temp, refTemp = 23, q10 = 2.2) {
-  return Math.pow(q10, (temp - refTemp) / 10);
-}
-var REFERENCE_LEVAIN_TIME = 6;
-var INOCULATION_MIN = 3;
-var INOCULATION_MAX = 25;
-function computeRoomEquivTime(totalTime, coldHours = 0) {
-  const coldRetardFactor = 0.3;
-  const effectiveColdHours = Math.min(Math.max(coldHours, 0), totalTime);
-  return Math.max(0.5, totalTime - effectiveColdHours + effectiveColdHours * coldRetardFactor);
-}
-function computeInoculationPct(baseInoculation, roomEquivTime, roomTemp, leavenType = "sourdough") {
-  if (leavenType === "commercial") return 0;
-  const tempFactor = getTemperatureFactor(roomTemp);
-  const scaled = baseInoculation * (REFERENCE_LEVAIN_TIME / roomEquivTime) / tempFactor;
-  let pct = Math.min(Math.max(scaled, INOCULATION_MIN), INOCULATION_MAX);
-  if (leavenType === "hybrid") pct *= 0.5;
-  return Math.round(pct * 10) / 10;
-}
-function calculateRecipe(inputs) {
-  const { style, ballWeight, ballCount, totalTime, roomTemp, leavenType, yeastForm, mixing, desiredDoughTemp, coldTemp = 4, coldHours = 0 } = inputs;
-  const hydrationPct = inputs.hydration ?? style.defaultParams.hydration_pct;
-  const saltPct = inputs.salt ?? style.defaultParams.salt_pct;
-  const sugarPct = inputs.sugar ?? style.defaultParams.sugar_pct;
-  const oilPct = inputs.oil ?? style.defaultParams.oil_pct;
-  const totalDoughWeight = Math.max(0, ballWeight * ballCount);
-  const extrasPct = style.id === "milkbread" ? 4.6 : 0;
-  const totalPercentage = 100 + hydrationPct + saltPct + sugarPct + oilPct + extrasPct;
-  const totalFlour = totalDoughWeight / (totalPercentage / 100);
-  const effectiveColdHours = Math.min(Math.max(coldHours, 0), totalTime);
-  const roomEquivTime = computeRoomEquivTime(totalTime, effectiveColdHours);
-  let yeastPercentage = 0;
-  if (leavenType === "commercial" || leavenType === "hybrid") {
-    const baseFreshYeast = style.fermentation.base_yeast_fresh_pct || 0.3;
-    const tempFactor = getTemperatureFactor(roomTemp);
-    const timeFactor = 24 / roomEquivTime;
-    const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-    const saltCorrection = clamp(1 + 0.05 * (saltPct - 2), 0.8, 1.4);
-    const sugarCorrection = clamp(1 + 0.02 * sugarPct, 0.8, 1.5);
-    const hydrationCorrection = clamp(1 - 5e-3 * (hydrationPct - 62), 0.7, 1.3);
-    let freshYeastPct = baseFreshYeast * timeFactor / tempFactor * saltCorrection * sugarCorrection * hydrationCorrection;
-    if (leavenType === "hybrid") freshYeastPct *= 0.5;
-    if (yeastForm === "active_dry") {
-      yeastPercentage = freshYeastPct * YEAST_CONVERSIONS.fresh_to_ady;
-    } else if (yeastForm === "instant") {
-      yeastPercentage = freshYeastPct * YEAST_CONVERSIONS.fresh_to_idy;
-    } else {
-      yeastPercentage = freshYeastPct;
-    }
-  }
-  const usesStarter = leavenType === "sourdough" || leavenType === "hybrid";
-  const baseInoculation = style.fermentation.base_inoculation_pct ?? 20;
-  const inoculationPct = usesStarter ? computeInoculationPct(baseInoculation, roomEquivTime, roomTemp, leavenType) : 0;
-  const ingredients = [];
-  if (style.flourBlend && style.flourBlend.length > 0) {
-    style.flourBlend.forEach((flour) => {
-      ingredients.push({
-        name: flour.name,
-        grams: Math.round(totalFlour * (flour.percentage / 100) * 10) / 10,
-        percentage: flour.percentage,
-        type: "flour"
-      });
-    });
-  } else {
-    ingredients.push({
-      name: "Mj\xF6l (Tipo 00/Vetemj\xF6l)",
-      grams: Math.round(totalFlour * 10) / 10,
-      percentage: 100,
-      type: "flour"
-    });
-  }
-  ingredients.push({
-    name: "Vatten",
-    grams: Math.round(totalFlour * (hydrationPct / 100) * 10) / 10,
-    percentage: hydrationPct,
-    type: "water"
-  });
-  ingredients.push({
-    name: "Salt",
-    grams: Math.round(totalFlour * (saltPct / 100) * 10) / 10,
-    percentage: saltPct,
-    type: "salt"
-  });
-  if (yeastPercentage > 0) {
-    const yeastNames = {
-      fresh: "F\xE4rsk j\xE4st",
-      active_dry: "Torrj\xE4st (aktiv)",
-      instant: "Torrj\xE4st (instant)"
-    };
-    ingredients.push({
-      name: yeastNames[yeastForm],
-      grams: Math.round(totalFlour * (yeastPercentage / 100) * 100) / 100,
-      percentage: Math.round(yeastPercentage * 100) / 100,
-      type: "yeast"
-    });
-  }
-  if (usesStarter && inoculationPct > 0) {
-    const starterFlour = totalFlour * (inoculationPct / 100);
-    const starterWater = starterFlour;
-    const totalStarter = starterFlour + starterWater;
-    ingredients.push({
-      name: "Surdeg (100% hydrering)",
-      grams: Math.round(totalStarter * 10) / 10,
-      percentage: Math.round(inoculationPct * 2 * 10) / 10,
-      // flour + water
-      type: "starter"
-    });
-    const firstFlourIndex = ingredients.findIndex((ing) => ing.type === "flour");
-    const waterIndex = ingredients.findIndex((ing) => ing.type === "water");
-    if (firstFlourIndex !== -1) {
-      ingredients[firstFlourIndex].grams = Math.round(Math.max(0, ingredients[firstFlourIndex].grams - starterFlour) * 10) / 10;
-      ingredients[firstFlourIndex].name += " (ut\xF6ver surdegen)";
-    }
-    if (waterIndex !== -1) {
-      ingredients[waterIndex].grams = Math.round(Math.max(0, ingredients[waterIndex].grams - starterWater) * 10) / 10;
-      ingredients[waterIndex].name += " (ut\xF6ver surdegen)";
-    }
-  }
-  if (sugarPct > 0) {
-    const sugarName = style.id === "pain_de_mie_traditional" ? "Honung" : style.id === "milkbread" ? "Str\xF6socker" : "Socker";
-    ingredients.push({
-      name: sugarName,
-      grams: Math.round(totalFlour * (sugarPct / 100) * 10) / 10,
-      percentage: sugarPct,
-      type: "sugar"
-    });
-  }
-  if (style.id === "milkbread") {
-    ingredients.push({
-      name: "Torrmj\xF6lkspulver",
-      grams: Math.round(totalFlour * 0.046 * 10) / 10,
-      percentage: 4.6,
-      type: "flour"
-      // Treat as flour for calculation purposes
-    });
-  }
-  if (style.id === "pain_de_mie_traditional") {
-    const waterIndex = ingredients.findIndex((ing) => ing.type === "water");
-    if (waterIndex !== -1) {
-      const totalLiquid = ingredients[waterIndex].grams;
-      const waterAmount = totalLiquid / 2;
-      const milkAmount = totalLiquid / 2;
-      ingredients[waterIndex].grams = Math.round(waterAmount * 10) / 10;
-      ingredients[waterIndex].name = "Fingervarmt vatten";
-      ingredients[waterIndex].percentage = Math.round(waterAmount / totalFlour * 1e3) / 10;
-      ingredients.push({
-        name: "Standardmj\xF6lk",
-        grams: Math.round(milkAmount * 10) / 10,
-        percentage: Math.round(milkAmount / totalFlour * 1e3) / 10,
-        type: "water"
-      });
-    }
-  }
-  if (style.id === "sourdough_tortillas") {
-    const waterIndex = ingredients.findIndex((ing) => ing.type === "water");
-    if (waterIndex !== -1) {
-      ingredients[waterIndex].name = "Hett vatten";
-    }
-  }
-  if (oilPct > 0) {
-    const oilName = style.id === "brioche" ? "Sm\xF6r" : style.id === "focaccia" ? "Olivolja" : style.id === "milkbread" ? "Sm\xF6r" : style.id === "pain_de_mie_traditional" ? "Sm\xF6r" : style.id === "sourdough_tortillas" ? "Sm\xE4lt sm\xF6r" : "Olja";
-    ingredients.push({
-      name: oilName,
-      grams: Math.round(totalFlour * (oilPct / 100) * 10) / 10,
-      percentage: oilPct,
-      type: "oil"
-    });
-  }
-  const frictionFactors = { hand: 2, spiral: 8, planetary: 6, dlx: 4 };
-  const frictionFactor = frictionFactors[mixing];
-  const flourTemp = roomTemp;
-  const rawWaterTemp = desiredDoughTemp * 3 - flourTemp - roomTemp - frictionFactor;
-  const waterTemp = Math.min(Math.max(rawWaterTemp, 1), 55);
-  const ratioSum = style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
-  const bulkTime = totalTime * (style.fermentation.bulk_ratio / ratioSum);
-  const proofTime = totalTime * (style.fermentation.proof_ratio / ratioSum);
-  ingredients.forEach((ing) => {
-    const pct = totalFlour > 0 ? ing.grams / totalFlour * 100 : 0;
-    ing.percentage = ing.type === "yeast" ? Math.round(pct * 1e3) / 1e3 : Math.round(pct * 10) / 10;
-  });
-  const timeline = generateTimeline(bulkTime, proofTime, mixing, style);
-  const notes = generateNotes(inputs, yeastPercentage, waterTemp, {
-    hydrationPct,
-    oilPct,
-    rawWaterTemp,
-    coldHours: effectiveColdHours
-  });
-  if (usesStarter && inoculationPct > 0) {
-    notes.push(
-      `\u2139\uFE0F Procenten visar varje ingrediens andel av det totala mj\xF6let (${Math.round(totalFlour)}g), d\xE4r surdegens mj\xF6l (${Math.round(totalFlour * (inoculationPct / 100))}g) och vatten redan \xE4r avr\xE4knade fr\xE5n mj\xF6l- och vattenposten. Total hydrering blir ${hydrationPct}%.`
-    );
-    notes.push(
-      `\u{1FAD9} Surdegsratio: ${inoculationPct}% av mj\xF6lvikten kommer fr\xE5n surdegen, dvs ${Math.round(inoculationPct * 2 * 10) / 10}% f\xE4rdig surdeg (100% hydrering) p\xE5 mj\xF6let. Basen \xE4r ${baseInoculation}% vid 23\xB0C och ~6h j\xE4sning \u2013 m\xE4ngden skalas ned vid l\xE4ngre tid eller varmare rum och begr\xE4nsas till 3\u201325%.`
-    );
-    notes.push(
-      "\u{1FAD9} Anv\xE4nd mogen surdeg: mata 1:5:5 och anv\xE4nd den p\xE5 toppen (ca 4\u20136h vid 23\xB0C). Tr\xF6g eller nymatad surdeg = l\xE4ngre j\xE4sning \xE4n ber\xE4knat."
-    );
-  }
-  return {
-    ingredients,
-    waterTemp: Math.round(waterTemp * 10) / 10,
-    bulkTime: Math.round(bulkTime * 10) / 10,
-    proofTime: Math.round(proofTime * 10) / 10,
-    totalFlour: Math.round(totalFlour),
-    yeastPercentage: Math.round(yeastPercentage * 1e3) / 1e3,
-    timeline,
-    notes,
-    params: {
-      hydration: hydrationPct,
-      salt: saltPct,
-      sugar: sugarPct,
-      oil: oilPct,
-      roomEquivTime: Math.round(roomEquivTime * 10) / 10,
-      coldHours: effectiveColdHours,
-      totalTime,
-      totalDoughWeight,
-      inoculationPct,
-      baseInoculationPct: baseInoculation,
-      leavenType,
-      roomTemp
-    }
-  };
-}
-function generateTimeline(bulkTime, proofTime, mixing, style) {
-  const timeline = [];
-  switch (style.id) {
-    case "neapolitan":
-      return generateNeapolitanTimeline(bulkTime, proofTime);
-    case "pizza_poolish":
-      return generatePoolishTimeline(bulkTime, proofTime);
-    case "pizza_biga":
-      return generateBigaTimeline(bulkTime, proofTime);
-    case "milkbread":
-      return generateMilkbreadTimeline(bulkTime, proofTime);
-    case "pain_de_mie_traditional":
-      return generatePainDeMieTimeline(bulkTime, proofTime);
-    case "sourdough_form_bread":
-      return generateSourdoughFormTimeline(bulkTime, proofTime);
-    case "sourdough_tortillas":
-      return generateTortillaTimeline(bulkTime, proofTime);
-    case "country_sourdough":
-      return generateCountrySourdoughTimeline(bulkTime, proofTime);
-    case "baguette":
-      return generateBaguetteTimeline(bulkTime, proofTime);
-    default:
-      return generateGenericTimeline(bulkTime, proofTime, mixing, style);
-  }
-}
-function generateNeapolitanTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "00:00",
-      action: "Blanda vatten, salt och j\xE4st",
-      description: "15\xB0C vatten, 28-30g salt, 0.25g f\xE4rsk j\xE4st - r\xF6r tills uppl\xF6st"
-    },
-    {
-      time: "00:05",
-      action: "Tills\xE4tt mj\xF6l",
-      description: "H\xE4ll i 1000g mj\xF6l (Caputo Pizzeria + Vigevano), blanda snabbt f\xF6r hand"
-    },
-    {
-      time: "00:30",
-      action: "F\xF6rsta vikningen",
-      description: "Vik degen 4-5 g\xE5nger tills sp\xE4nd och sl\xE4t, vila 15 min"
-    },
-    {
-      time: "00:45",
-      action: "Andra vikningen",
-      description: "Upprepa vikning, vila 15 min"
-    },
-    {
-      time: "01:00",
-      action: "Tredje vikningen",
-      description: "Sista vikning, ta ut 80g f\xF6r j\xE4sningskontroll"
-    },
-    {
-      time: formatTime(bulkTime),
-      action: "Dela och bolla",
-      description: "Dela till 265g bollar, bolla med sp\xE4nning"
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: "Klart f\xF6r utbakning",
-      description: "Kontrollera j\xE4sning (25-29 p\xE5 regnm\xE4tare), kavla f\xF6rsiktigt"
-    }
-  ];
-}
-function generatePoolishTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "DAG 1 - 00:00",
-      action: "G\xF6r poolish",
-      description: "175g mj\xF6l + 175g ljummet vatten + 3g honung + 1g torrj\xE4st"
-    },
-    {
-      time: "DAG 1 - 02:00",
-      action: "Poolish i kyl",
-      description: "Poolish till kylsk\xE5p i 18-24h"
-    },
-    {
-      time: "DAG 2 - 00:00",
-      action: "Poolish till rumstemperatur",
-      description: "Ta ut poolish 1h f\xF6re anv\xE4ndning"
-    },
-    {
-      time: "DAG 2 - 01:00",
-      action: "Blanda slutdeg",
-      description: "Poolish + 125g vatten + 325g mj\xF6l + 12g salt, kn\xE5da 5-8 min"
-    },
-    {
-      time: `DAG 2 - ${formatTime(1 + bulkTime)}`,
-      action: "Dela och bolla",
-      description: "Dela till 270g bollar, vila 20 min"
-    },
-    {
-      time: `DAG 2 - ${formatTime(1 + bulkTime + proofTime)}`,
-      action: "Klart f\xF6r utbakning",
-      description: "Degen ska vara luftig och l\xE4tt att str\xE4cka"
-    }
-  ];
-}
-function generateBigaTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "DAG 1 - 00:00",
-      action: "G\xF6r biga",
-      description: "1000g mj\xF6l + 450-500ml vatten + 2-3g j\xE4st, blanda till j\xE4mn deg"
-    },
-    {
-      time: "DAG 1 - 18:00",
-      action: "Biga f\xE4rdig",
-      description: "Biga klar efter 18h vid 16\xB0C, ska lukta tydligt"
-    },
-    {
-      time: "DAG 2 - 00:00",
-      action: "Kn\xE5da slutdeg",
-      description: "Biga + 200-250ml isvatten + 28g salt + 10g malt"
-    },
-    {
-      time: "DAG 2 - 00:30",
-      action: "Windowpane-test",
-      description: "Degen ska klara windowpane-test och k\xE4nnas tuggumiaktig"
-    },
-    {
-      time: `DAG 2 - ${formatTime(0.5 + bulkTime)}`,
-      action: "Dela och bolla",
-      description: "Dela till 260-280g bollar f\xF6r 36cm pizzor"
-    },
-    {
-      time: `DAG 2 - ${formatTime(0.5 + bulkTime + proofTime)}`,
-      action: "Klart f\xF6r utbakning",
-      description: "Degbollar redo efter 3h vid rumstemperatur"
-    }
-  ];
-}
-function generateMilkbreadTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "00:00",
-      action: "G\xF6r tangzhong",
-      description: "Koka 30g mj\xF6l + 150ml mj\xF6lk/vatten till tjock konsistens, kyl"
-    },
-    {
-      time: "00:30",
-      action: "Blanda deg",
-      description: "Mj\xF6l, socker, salt, torrj\xE4st, tangzhong, mj\xF6lk - kn\xE5da 8 min"
-    },
-    {
-      time: "00:38",
-      action: "Tills\xE4tt sm\xF6r",
-      description: "Rumstempererat sm\xF6r portionsvis, kn\xE5da till sl\xE4tt"
-    },
-    {
-      time: formatTime(bulkTime),
-      action: "Forma br\xF6d",
-      description: "Dela degen, forma och l\xE4gg i sm\xF6rd form"
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: "Pensla och gr\xE4dda",
-      description: "Pensla med mj\xF6lk, gr\xE4dda 180\xB0C i 30-35 min"
-    }
-  ];
-}
-function generatePainDeMieTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "00:00",
-      action: "L\xF6s j\xE4st i mj\xF6lk",
-      description: "Blanda j\xE4st i fingervarmt mj\xF6lk/vatten (50/50)"
-    },
-    {
-      time: "00:05",
-      action: "Tills\xE4tt mj\xF6l och honung",
-      description: "Blanda mj\xF6l, honung och j\xE4stblandning"
-    },
-    {
-      time: "00:15",
-      action: "Kn\xE5da med sm\xF6r",
-      description: "Kn\xE5da 10-15 min till sl\xE4t deg med sm\xF6r"
-    },
-    {
-      time: formatTime(bulkTime),
-      action: "Forma och l\xE4gg i form",
-      description: "Forma till limpa, l\xE4gg i sm\xF6rd form med lock"
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: "Gr\xE4dda",
-      description: "Gr\xE4dda 220\xB0C till dubbel storlek, s\xE4nk till 190\xB0C"
-    }
-  ];
-}
-function generateSourdoughFormTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "00:00",
-      action: "Autolys",
-      description: "Blanda mj\xF6l och vatten, vila 30 min"
-    },
-    {
-      time: "00:30",
-      action: "Tills\xE4tt surdeg och salt",
-      description: "Arbeta in aktiv surdeg och salt f\xF6rsiktigt"
-    },
-    {
-      time: "01:00",
-      action: "F\xF6rsta vikningen",
-      description: "Vikning i bunke, vila 30 min"
-    },
-    {
-      time: "01:30",
-      action: "Andra vikningen",
-      description: "Upprepa vikning, vila 30 min"
-    },
-    {
-      time: "02:00",
-      action: "Tredje vikningen",
-      description: "Sista vikning i bunke"
-    },
-    {
-      time: formatTime(bulkTime),
-      action: "Forma till limpa",
-      description: "Forma till avl\xE5ng limpa, l\xE4gg i korg"
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: "Gr\xE4dda",
-      description: "Gr\xE4dda med \xE5nga 230\xB0C i 20 min, sedan 200\xB0C"
-    }
-  ];
-}
-function generateTortillaTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "00:00",
-      action: "MMS-metod: Het v\xE4tska",
-      description: "Blanda hett vatten (80\xB0C) med sm\xE4lt sm\xF6r"
-    },
-    {
-      time: "00:05",
-      action: "Tills\xE4tt mj\xF6l och surdeg",
-      description: "Blanda mj\xF6l, surdeg och het v\xE4tskeblandning"
-    },
-    {
-      time: "00:15",
-      action: "Kn\xE5da till sl\xE4t deg",
-      description: "Kn\xE5da till mjuk, elastisk deg"
-    },
-    {
-      time: formatTime(bulkTime),
-      action: "Dela och vila",
-      description: "Dela till 8 bitar, forma bollar, vila under handduk"
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: "Kavla och stek",
-      description: "Kavla tunna, stek i torr panna 20-30 sek per sida"
-    }
-  ];
-}
-function generateCountrySourdoughTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "00:00",
-      action: "Autolys",
-      description: "Blanda mj\xF6l och vatten, vila 30-60 min"
-    },
-    {
-      time: "01:00",
-      action: "Tills\xE4tt surdeg och salt",
-      description: "Arbeta in aktiv surdeg och salt"
-    },
-    {
-      time: "01:30",
-      action: "F\xF6rsta set vikningar",
-      description: "Stretch & fold var 30:e minut, 4 set totalt"
-    },
-    {
-      time: formatTime(bulkTime),
-      action: "F\xF6rbollning",
-      description: "Forma till boll, vila 20-30 min"
-    },
-    {
-      time: formatTime(bulkTime + 0.5),
-      action: "Slutformning",
-      description: "Forma till limpa, l\xE4gg i banneton"
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: "Gr\xE4dda",
-      description: "Gr\xE4dda med \xE5nga 250\xB0C i 20 min, sedan 230\xB0C"
-    }
-  ];
-}
-function generateBaguetteTimeline(bulkTime, proofTime) {
-  return [
-    {
-      time: "00:00",
-      action: "Blanda grunddeg",
-      description: "Mj\xF6l, vatten, salt, j\xE4st - blanda till j\xE4mn deg"
-    },
-    {
-      time: "00:45",
-      action: "F\xF6rsta vikningen",
-      description: "Bokvikning i bunke, vila 45 min"
-    },
-    {
-      time: "01:30",
-      action: "Andra vikningen",
-      description: "Upprepa vikning, vila 45 min"
-    },
-    {
-      time: formatTime(bulkTime),
-      action: "F\xF6rforma",
-      description: "Dela degen, f\xF6rforma till korta stockar"
-    },
-    {
-      time: formatTime(bulkTime + 0.5),
-      action: "Slutforma baguetter",
-      description: "Forma till l\xE5nga baguetter, l\xE4gg i dukkorg"
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: "Sk\xE4r och gr\xE4dda",
-      description: "G\xF6r snitt, gr\xE4dda med \xE5nga 240\xB0C"
-    }
-  ];
-}
-function generateGenericTimeline(bulkTime, proofTime, mixing, style) {
-  const timeline = [];
-  timeline.push({
-    time: "00:00",
-    action: "Blanda ingredienser",
-    description: `Blanda mj\xF6l, vatten (${mixing === "hand" ? "f\xF6r hand" : "med maskin"})`
-  });
-  if (style.defaultParams.hydration_pct > 65 && style.defaultParams.sugar_pct < 5) {
-    timeline.push({
-      time: "00:30",
-      action: "Autolys",
-      description: "Vila degen 30 min f\xF6r glutenutveckling"
-    });
-  }
-  timeline.push({
-    time: style.defaultParams.hydration_pct > 65 ? "01:00" : "00:30",
-    action: "Tills\xE4tt salt och j\xE4st",
-    description: "Arbeta in salt och j\xE4st, b\xF6rja bulkj\xE4sning"
-  });
-  if (mixing === "hand" && style.defaultParams.hydration_pct > 65) {
-    timeline.push({
-      time: "01:30",
-      action: "F\xF6rsta vikningen",
-      description: "Coil fold eller stretch & fold"
-    });
-    timeline.push({
-      time: "02:15",
-      action: "Andra vikningen",
-      description: "Coil fold eller stretch & fold"
-    });
-  }
-  timeline.push({
-    time: formatTime(bulkTime),
-    action: style.category === "pizza" ? "Dela och bolla" : "Forma",
-    description: style.category === "pizza" ? "Dela degen och forma bollar" : "Forma br\xF6d och l\xE4gg i korg/form"
-  });
-  timeline.push({
-    time: formatTime(bulkTime + proofTime),
-    action: "Klar att gr\xE4dda",
-    description: style.category === "pizza" ? "Kavla ut och toppa pizza" : "Baka br\xF6det"
-  });
-  return timeline;
-}
-function formatTime(hours) {
-  const h = Math.floor(hours);
-  const m = Math.round(hours % 1 * 60);
-  return h.toString().padStart(2, "0") + ":" + m.toString().padStart(2, "0");
-}
-function generateNotes(inputs, yeastPct, waterTemp, eff) {
-  const notes = [];
-  if (eff.rawWaterTemp !== waterTemp) {
-    notes.push(`\u26A0\uFE0F Ber\xE4knad vattentemperatur (${eff.rawWaterTemp.toFixed(1)}\xB0C) ligger utanf\xF6r praktiskt intervall och har justerats till ${waterTemp.toFixed(1)}\xB0C.`);
-  }
-  if ((inputs.coldHours ?? 0) > inputs.totalTime) {
-    notes.push(`\u26A0\uFE0F Kyltiden var l\xE4ngre \xE4n den totala tiden och har begr\xE4nsats till ${eff.coldHours}h.`);
-  }
-  if (waterTemp < 5) {
-    notes.push("\u26A0\uFE0F Vattentemperaturen \xE4r mycket l\xE5g. \xD6verv\xE4g kortare j\xE4sningstid eller h\xF6gre rumstemperatur.");
-  } else if (waterTemp > 50) {
-    notes.push("\u26A0\uFE0F Vattentemperaturen \xE4r h\xF6g. Kontrollera att j\xE4sten inte d\xF6das (max 50\xB0C f\xF6r f\xE4rsk j\xE4st).");
-  }
-  if (eff.hydrationPct > 75) {
-    notes.push("\u{1F4A1} H\xF6g hydrering: Anv\xE4nd v\xE5ta h\xE4nder vid vikning och var f\xF6rsiktig vid formning.");
-  }
-  if (inputs.leavenType !== "sourdough" && yeastPct > 0 && yeastPct < 0.02) {
-    notes.push("\u26A0\uFE0F Mycket lite j\xE4st ber\xE4knat. Kontrollera j\xE4sningstid och temperatur.");
-  }
-  if (eff.oilPct > 10) {
-    notes.push("\u{1F4A1} Fet deg: Tills\xE4tt fett efter glutenutveckling f\xF6r b\xE4sta resultat.");
-  }
-  switch (inputs.style.id) {
-    case "neapolitan":
-      notes.push("\u{1F355} Traditionell napolitansk: Vikning 3x med 15min vila. Bulkj\xE4sning 12-14h vid 21\xB0C.");
-      notes.push("\u{1F355} Gr\xE4ddas vid 900\xB0C i 60-90 sekunder. Hemugn: 250\xB0C med bakst\xE5l, 8-12 min.");
-      break;
-    case "ny_style":
-      notes.push("\u{1F355} Gr\xE4ddas vid 250\xB0C i 12-15 minuter. Anv\xE4nd bakst\xE5l f\xF6r b\xE4sta resultat.");
-      break;
-    case "pizza_poolish":
-      notes.push("\u{1F355} Poolish dag 1: Blanda och j\xE4s 2h rumstemperatur, sedan 18-24h i kyl.");
-      notes.push("\u{1F355} Dag 2: Kn\xE5da slutdeg, 2h rumstemperatur f\xF6re utbakning. M\xE5l: leopard spotting.");
-      break;
-    case "pizza_biga":
-      notes.push("\u{1F355} Biga dag 1: Torr biga 18h vid 16\xB0C. Kr\xE4ver W300+ mj\xF6l f\xF6r styrka.");
-      notes.push("\u{1F355} Dag 2: Kn\xE5da med isvatten + malt. Windowpane-test m\xE5ste klara. 3h bollning.");
-      break;
-    case "country_sourdough":
-      notes.push("\u{1F35E} Gr\xE4ddas med \xE5nga f\xF6rsta 20 min, sedan utan lock. 230\xB0C \u2192 200\xB0C.");
-      break;
-    case "baguette":
-      notes.push("\u{1F956} G\xF6r snitt precis f\xF6re gr\xE4ddning. \xC5nga f\xF6rsta 15 min.");
-      break;
-    case "milkbread":
-      notes.push("\u{1F35E} Tangzhong-metod: Koka 30g mj\xF6l + 150ml mj\xF6lk/vatten till tjock konsistens.");
-      notes.push("\u{1F35E} Tills\xE4tt 25g torrmj\xF6lkspulver f\xF6r extra mjukhet. Pensla med mj\xF6lk.");
-      break;
-    case "pain_de_mie_traditional":
-      notes.push("\u{1F35E} Blanda j\xE4st i fingervarmt vatten. Kn\xE5da 10-15 min till sl\xE4t deg.");
-      notes.push("\u{1F35E} Baka i lock till dubbel storlek vid 220\xB0C, s\xE4nk till 190\xB0C.");
-      break;
-    case "sourdough_form_bread":
-      notes.push("\u{1F35E} Vikning i bunke flera g\xE5nger. 30 min vila mellan vikningar.");
-      notes.push("\u{1F35E} Forma till avl\xE5ng limpa. 3-4h j\xE4sning vid rumstemperatur.");
-      break;
-    case "sourdough_tortillas":
-      notes.push("\u{1F32E} MMS-metoden: Hett vatten + sm\xE4lt sm\xF6r = mjuka tortillas.");
-      notes.push("\u{1F32E} Stek i torr panna 20-30 sek per sida tills de bubblar.");
-      break;
-  }
-  return notes;
-}
-
-// src/lib/mcp/tools/calculate-recipe.ts
 var calculate_recipe_default = defineTool3({
   name: "calculate_recipe",
   title: "Calculate dough recipe",
-  description: "Calculate a full dough recipe for a style: ingredient weights in grams, baker's percentages, water temperature, bulk and proof times, timeline and notes.",
-  inputSchema: {
-    style_id: z3.string().min(1).describe("Style id, e.g. 'neapolitan' (see list_styles)."),
-    ball_weight: z3.number().describe("Weight per dough ball/loaf in grams, e.g. 265."),
-    ball_count: z3.number().int().describe("Number of dough balls/loaves, e.g. 8."),
-    total_time: z3.number().describe("Total fermentation time in hours, e.g. 24."),
-    room_temp: z3.number().describe("Room temperature in \xB0C, e.g. 23."),
-    cold_hours: z3.number().optional().describe("Hours of cold fermentation at 4\xB0C. Default 0."),
-    leaven_type: z3.enum(["commercial", "sourdough", "hybrid"]).optional().describe("Leavening type. Default 'commercial'."),
-    yeast_form: z3.enum(["fresh", "active_dry", "instant"]).optional().describe("Yeast form. Default 'instant'."),
-    mixing: z3.enum(["hand", "spiral", "planetary", "dlx"]).optional().describe("Mixing method. Default 'hand'."),
-    desired_dough_temp: z3.number().optional().describe("Desired dough temperature in \xB0C. Default 24.")
-  },
+  description: "Calculate a full dough recipe: ingredient weights in grams and baker's percentages, split into preferment, levain and final-dough sections; water temperature from the DDT rule; bulk and proof times; a wall-clock schedule from autolyse to bake; and any warnings. Every parameter falls back to the style's own default, so `style_id` alone returns a complete, sensible recipe.",
+  inputSchema: recipeInputSchema,
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: (input) => {
-    const style = getStyleById(input.style_id);
-    if (!style) throw new ToolError2(`Unknown style id: ${input.style_id}. Use list_styles to see valid ids.`);
-    const results = calculateRecipe({
-      style,
-      ballWeight: input.ball_weight,
-      ballCount: input.ball_count,
-      totalTime: input.total_time,
-      roomTemp: input.room_temp,
-      coldTemp: 4,
-      coldHours: input.cold_hours ?? 0,
-      leavenType: input.leaven_type ?? "commercial",
-      yeastForm: input.yeast_form ?? "instant",
-      mixing: input.mixing ?? "hand",
-      desiredDoughTemp: input.desired_dough_temp ?? 24
-    });
-    const payload = { style: { id: style.id, name: style.name }, ...results };
+    const resolved = resolveRecipe(input);
+    if ("error" in resolved) throw new ToolError2(resolved.error);
+    const payload = toReadable(resolved);
     return {
       content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
       structuredContent: payload
@@ -1354,107 +3076,125 @@ var calculate_recipe_default = defineTool3({
 
 // src/lib/mcp/tools/explain-recipe.ts
 import { defineTool as defineTool4, ToolError as ToolError3 } from "npm:@lovable.dev/mcp-js@0.26.3";
-import { z as z4 } from "npm:zod@^3.25.76";
 var explain_recipe_default = defineTool4({
   name: "explain_recipe",
   title: "Explain dough recipe",
-  description: "Calculate a recipe and return a human-friendly, plain-language explanation of it, including the 'why' behind every key correction: yeast scaling for time and temperature (Q10), salt/sugar/hydration corrections, cold-retard equivalence, DDT water temperature and the bulk/proof split.",
-  inputSchema: {
-    style_id: z4.string().min(1).describe("Style id, e.g. 'neapolitan' (see list_styles)."),
-    ball_weight: z4.number().describe("Weight per dough ball/loaf in grams, e.g. 265."),
-    ball_count: z4.number().int().describe("Number of dough balls/loaves, e.g. 8."),
-    total_time: z4.number().describe("Total fermentation time in hours, e.g. 24."),
-    room_temp: z4.number().describe("Room temperature in \xB0C, e.g. 23."),
-    cold_hours: z4.number().optional().describe("Hours of cold fermentation at 4\xB0C. Default 0."),
-    hydration: z4.number().optional().describe("Override hydration in baker's %, e.g. 65."),
-    salt: z4.number().optional().describe("Override salt in baker's %, e.g. 2.5."),
-    leaven_type: z4.enum(["commercial", "sourdough", "hybrid"]).optional().describe("Leavening type. Default 'commercial'."),
-    yeast_form: z4.enum(["fresh", "active_dry", "instant"]).optional().describe("Yeast form. Default 'instant'."),
-    mixing: z4.enum(["hand", "spiral", "planetary", "dlx"]).optional().describe("Mixing method. Default 'hand'."),
-    desired_dough_temp: z4.number().optional().describe("Desired dough temperature in \xB0C. Default 24.")
-  },
+  description: "Calculate a recipe and return a plain-language walkthrough of the reasoning behind every number: how the yeast or levain dose was scaled for time and temperature (Q10), what each correction did, how cold hours convert to room-equivalent time, why the water is at that temperature, how a preferment is subtracted from the final dough, and how bulk and proof were split.",
+  inputSchema: recipeInputSchema,
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: (input) => {
-    const style = getStyleById(input.style_id);
-    if (!style) throw new ToolError3(`Unknown style id: ${input.style_id}. Use list_styles to see valid ids.`);
-    const roomTemp = input.room_temp;
-    const leavenType = input.leaven_type ?? "commercial";
-    const yeastForm = input.yeast_form ?? "instant";
-    const mixing = input.mixing ?? "hand";
-    const ddt = input.desired_dough_temp ?? 24;
-    const r = calculateRecipe({
-      style,
-      ballWeight: input.ball_weight,
-      ballCount: input.ball_count,
-      totalTime: input.total_time,
-      roomTemp,
-      coldTemp: 4,
-      coldHours: input.cold_hours ?? 0,
-      hydration: input.hydration,
-      salt: input.salt,
-      leavenType,
-      yeastForm,
-      mixing,
-      desiredDoughTemp: ddt
-    });
+    const resolved = resolveRecipe(input);
+    if ("error" in resolved) throw new ToolError3(resolved.error);
+    const { style, results: r, t } = resolved;
+    const f = r.fermentation;
     const p = r.params;
-    const q10 = Math.pow(2.2, (roomTemp - 23) / 10);
-    const friction = { hand: 2, spiral: 8, planetary: 6, dlx: 4 }[mixing];
+    const num = (value, decimals = 2) => value.toFixed(decimals).replace(/\.?0+$/, "");
     const sections = [];
     sections.push(
-      `# ${style.name} \u2014 ${input.ball_count} \xD7 ${input.ball_weight} g (${p.totalDoughWeight} g dough)
-${style.description} (${style.region}).`
+      `# ${style.name} \u2014 ${r.totals.pieces} \xD7 ${formatGrams(r.totals.perPiece)} g (${formatGrams(r.totals.doughWeight)} g of dough)
+${t(`style.${style.id}.desc`)} (${t(style.regionKey)})`
     );
+    const ingredientLines = r.sections.map((section) => {
+      const meta = section.meta ? ` \u2014 ${section.meta.hours} h at ${section.meta.tempC} \xB0C` : "";
+      const rows = section.ingredients.map((i) => `  - ${t(i.key)}: ${formatGrams(i.grams)} g (${i.percentage.toFixed(2)}%)`).join("\n");
+      return `### ${t(section.titleKey)}${meta}
+${rows}
+  Total: ${formatGrams(section.totalGrams)} g`;
+    }).join("\n\n");
     sections.push(
       `## Ingredients
-` + r.ingredients.map((i) => `- ${i.name}: ${i.grams < 10 ? i.grams.toFixed(2) : Math.round(i.grams)} g (${i.percentage}% of flour)`).join("\n") + `
+${ingredientLines}
 
-Why: everything is expressed in baker's percentages against ${r.totalFlour} g of flour. The flour weight is derived by dividing the target dough weight by the sum of all percentages (100% flour + ${p.hydration}% water + ${p.salt}% salt` + (p.sugar ? ` + ${p.sugar}% sugar` : "") + (p.oil ? ` + ${p.oil}% fat` : "") + `), so the finished dough lands on the weight you asked for instead of overshooting it.`
+Why these weights: everything is a percentage of the **total** flour (${formatGrams(r.totals.flour)} g), including the flour inside any preferment or starter. The flour weight itself is solved backwards from the dough weight you asked for \u2014 target \xF7 (100% flour + ${num(p.hydration, 1)}% water + ${num(p.salt, 1)}% salt` + (p.sugar ? ` + ${num(p.sugar, 1)}% sugar` : "") + (p.oil ? ` + ${num(p.oil, 1)}% fat` : "") + `) \u2014 so the finished dough lands on ${formatGrams(r.totals.doughWeight)} g rather than overshooting it.`
     );
-    const timeExplain = p.coldHours > 0 ? `You asked for ${p.totalTime} h total with ${p.coldHours} h in the fridge. Cold fermentation at 4 \xB0C runs at roughly 30% of room-temperature speed, so those ${p.coldHours} h count as about ${(p.coldHours * 0.3).toFixed(1)} h of activity. The dough therefore behaves like a ${p.roomEquivTime} h room-temperature ferment, and the yeast is dosed for that \u2014 not for the ${p.totalTime} h on the clock.` : `The whole ${p.totalTime} h runs at room temperature, so clock time and effective fermentation time are the same (${p.roomEquivTime} h).`;
-    const yeastExplain = leavenType === "sourdough" ? `This is a sourdough build: ${p.inoculationPct}% inoculation (starter flour as a share of total flour). The starter's flour and water are subtracted from the main flour and water so the final hydration stays at ${p.hydration}%.` : leavenType === "hybrid" ? `Hybrid leavening: ${p.inoculationPct}% starter for flavour plus ${r.yeastPercentage}% ${yeastForm.replace("_", " ")} yeast for reliable lift. Both doses are halved versus their solo equivalents so the dough doesn't over-ferment.` : `Yeast: ${r.yeastPercentage}% ${yeastForm.replace("_", " ")} yeast.
+    const timeExplain = f.coldHours > 0 ? `You asked for ${num(f.totalHours, 1)} h in total, with ${num(f.coldHours, 1)} h at ${num(f.coldTempC, 1)} \xB0C. Fermentation follows a Q10 law \u2014 every 10 \xB0C roughly multiplies the rate by ${Q10} \u2014 so fridge hours are worth far less than room hours. The model also credits the first 1.5 h in the fridge at the midpoint temperature, because a tub of dough takes hours to actually cool down and ferments briskly on the way. Net effect: this schedule behaves like a **${num(f.roomEquivHours, 1)} h** ferment at ${num(f.roomTempC, 1)} \xB0C, and the leavening is dosed for that number, not for the ${num(f.totalHours, 1)} h on the clock.` : `The whole ${num(f.totalHours, 1)} h runs at ${num(f.roomTempC, 1)} \xB0C, so clock time and effective fermentation time are the same.`;
+    let leavenExplain;
+    if (f.leavenType === "sourdough") {
+      leavenExplain = `This is a levain build at **${num(f.inoculationPct, 1)}% inoculation** \u2014 that share of the total flour arrives already fermented in the starter, which is ${num(f.starterPct, 1)}% ripe levain on flour at ${num(p.starterHydration, 0)}% hydration.
 
-Why that number \u2014 each correction in turn:
-- Base dose: ${style.fermentation.base_yeast_fresh_pct || 0.3}% fresh yeast, the reference dose for this style over 24 h at 23 \xB0C.
-- Time: the dose scales as 24 / ${p.roomEquivTime} h. Less time needs proportionally more yeast; a long ferment needs very little.
-- Temperature (Q10 = 2.2): at ${roomTemp} \xB0C the dough ferments ${q10.toFixed(2)}\xD7 as fast as at 23 \xB0C, so the dose is divided by ${q10.toFixed(2)}. Every 10 \xB0C roughly doubles yeast activity.
-- Salt at ${p.salt}%: salt draws water out of yeast cells and slows them, so above 2% the dose is nudged up (and below 2%, down).
-` + (p.sugar ? `- Sugar at ${p.sugar}%: sugar feeds the yeast at low levels but at high levels its osmotic pressure stresses them, so the dose is raised slightly.
-` : "") + `- Hydration at ${p.hydration}%: a wetter dough is more mobile and ferments faster, so wetter doughs get slightly less yeast.
-` + (yeastForm !== "fresh" ? `- Form conversion: fresh yeast \u2192 ${yeastForm.replace("_", " ")} using ${yeastForm === "instant" ? "\xD70.33" : "\xD70.40"}, because dried yeast is far more concentrated.
-` : "") + `All corrections are clamped, so extreme inputs can never produce a negative or absurd dose.`;
+Why that number: the reference for this style is ${num(f.baseInoculationPct, 1)}% over ${num(f.levainRefHours, 1)} h at ${num(f.levainRefTempC, 1)} \xB0C. Scaling for time (${num(f.levainRefHours, 1)} / ${num(f.roomEquivHours, 1)} h) and for temperature (Q10 = ${Q10}) gives ${num(f.inoculationPct, 1)}%. The starter's flour and water are then subtracted from the main flour and water, so the final hydration still lands on ${num(p.hydration, 1)}%.`;
+    } else {
+      const c = f.corrections;
+      const lines = [
+        `- **Base dose**: ${num(style.fermentation.base_yeast_fresh_pct, 3)}% fresh yeast, measured over ${num(style.fermentation.yeast_ref_hours, 1)} h at ${num(style.fermentation.yeast_ref_temp_c, 1)} \xB0C. Every style carries its own reference conditions, so a 2 h enriched dough and a 24 h pizza dough are directly comparable.`,
+        `- **Time** \xD7${num(c.time)}: the dose scales as reference hours \xF7 ${num(f.roomEquivHours, 1)} effective hours. Half the time needs twice the yeast.`,
+        `- **Temperature** \xD7${num(c.temperature)}: at ${num(f.roomTempC, 1)} \xB0C the dough ferments differently than at the reference, by Q10 = ${Q10}.`,
+        `- **Salt at ${num(p.salt, 1)}%** \xD7${num(c.salt)}: salt draws water out of yeast cells, so more salt needs more yeast.`,
+        `- **Sugar at ${num(p.sugar, 1)}%** \xD7${num(c.sugar)}: sugar feeds yeast at low doses but stresses it osmotically above ~8%.`,
+        `- **Hydration at ${num(p.hydration, 1)}%** \xD7${num(c.hydration)}: a wetter dough is more mobile and ferments faster, so it needs slightly less.`,
+        `- **Fat at ${num(p.oil, 1)}%** \xD7${num(c.fat)}: fat coats the gluten and slows gas capture, so rich doughs need a nudge up.`,
+        f.yeastForm !== "fresh" ? `- **Form conversion** \xD7${num(c.form)}: fresh yeast \u2192 ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}, because dried yeast is far more concentrated.` : null,
+        p.prefermentFlourPct > 0 ? `- **Preferment discount**: ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented and full of active yeast, so the final dough needs less.` : null,
+        f.leavenType === "hybrid" ? `- **Hybrid**: the levain carries half the lift, so both doses are halved against their solo equivalents.` : null
+      ].filter(Boolean);
+      leavenExplain = `Yeast: **${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g.
+
+Each correction in turn:
+${lines.join("\n")}
+
+Every correction is clamped, so an extreme input can bend the answer but never produce a negative or absurd dose.`;
+    }
     sections.push(`## Fermentation
 ${timeExplain}
 
-${yeastExplain}`);
+${leavenExplain}`);
+    const prefermentTerm = r.sections.find((s) => s.id === "preferment")?.meta;
     sections.push(
-      `## Water temperature \u2014 ${r.waterTemp} \xB0C
-Desired dough temperature is ${ddt} \xB0C. Using the standard DDT rule for a three-factor dough: water = 3 \xD7 ${ddt} \u2212 flour temp (${roomTemp} \xB0C) \u2212 room temp (${roomTemp} \xB0C) \u2212 friction (${friction} \xB0C for ${mixing} mixing).
+      `## Water temperature \u2014 ${num(r.water.tempC, 1)} \xB0C
+Target dough temperature is ${num(r.water.desiredDoughTempC, 1)} \xB0C. The bakery rule multiplies that target by the number of temperature factors in the mix and subtracts everything you cannot control:
 
-Why: mixing itself heats the dough, and the more powerful the mixer the more it adds (${mixing} \u2248 ${friction} \xB0C). Water is the only ingredient you can easily temper, so it absorbs the whole correction. Hitting the dough temperature matters more than the clock \u2014 a dough 2 \xB0C warmer ferments roughly 15% faster.`
+\`${r.water.factors} \xD7 ${num(r.water.desiredDoughTempC, 1)} \u2212 flour ${num(r.water.flourTempC, 1)} \u2212 room ${num(f.roomTempC, 1)} \u2212 friction ${r.water.frictionC}` + (prefermentTerm ? ` \u2212 preferment ${num(prefermentTerm.tempC, 1)}` : "") + ` = ${num(r.water.rawTempC, 1)} \xB0C\`
+
+Why: mixing itself heats the dough, and the more powerful the mixer the more it adds. Water is the only ingredient you can easily temper, so it absorbs the whole correction. ` + (prefermentTerm ? `Because a preferment goes into this mix, it counts as a fourth temperature factor rather than three.
+
+` : `A straight dough has three factors: flour, room and friction.
+
+`) + (r.water.clamped ? `Note: ${num(r.water.rawTempC, 1)} \xB0C is outside a practical range, so the recipe uses ${num(r.water.tempC, 1)} \xB0C and the dough will land a little off target.
+
+` : "") + (r.water.iceGrams > 0 ? `To get there, swap ${r.water.iceGrams} g of the water for ice \u2014 melting ice absorbs 80 cal/g, so a little goes a long way.
+
+` : "") + `Hitting the dough temperature matters more than watching the clock: a dough 2 \xB0C warmer ferments roughly 15% faster.`
     );
     sections.push(
-      `## Bulk and proof \u2014 ${r.bulkTime} h bulk, ${r.proofTime} h final proof
-The ${p.totalTime} h are split using this style's ratio (${style.fermentation.bulk_ratio} bulk / ${style.fermentation.proof_ratio} proof, normalised to sum to 1). Why: bulk fermentation builds flavour and strength while the dough is one mass; the final proof after shaping only needs enough time to relax and inflate the shaped piece. ${style.category === "pizza" ? "Pizza styles are bulk-heavy so the balls stay easy to open." : "Loaf styles keep a longer final proof so the shaped piece can fully expand."}`
+      `## Bulk and proof \u2014 ${num(f.bulkHours, 1)} h bulk, ${num(f.proofHours, 1)} h final proof
+The ${num(f.totalHours, 1)} h are split on this style's ratio (${style.fermentation.bulk_ratio} bulk / ${style.fermentation.proof_ratio} proof, normalised to sum to 1)` + (f.coldHours > 0 ? `, with the retard placed in the ${f.coldPhase}` : "") + `.
+
+Why: bulk fermentation builds flavour and strength while the dough is still one mass; the final proof only needs enough time for the shaped piece to relax and inflate. ` + (style.category === "pizza" ? `Pizza styles are bulk-heavy so the balls stay easy to open.` : `Loaf styles keep a longer final proof so the shaped piece can fully expand.`)
     );
-    if (r.notes.length) sections.push(`## Notes
-${r.notes.map((n) => `- ${n}`).join("\n")}`);
-    sections.push(`## Timeline
-${r.timeline.map((t) => `- ${t.time} \u2014 ${t.action}: ${t.description}`).join("\n")}`);
+    if (r.notes.length) {
+      sections.push(
+        `## Notes
+${r.notes.map((n) => `- ${t(n.code, n.values)}`).join("\n")}`
+      );
+    }
+    sections.push(
+      `## Schedule
+${r.timeline.map((step) => {
+        const values = step.values?.technique ? { ...step.values, technique: t(String(step.values.technique)) } : step.values;
+        const clock = new Date(step.at).toISOString().slice(11, 16);
+        const duration = step.durationMin > 0 ? ` (${step.durationMin} min)` : "";
+        return `- ${clock} \u2014 **${t(step.key, values)}**${duration}: ${t(`${step.key}.body`, values)}`;
+      }).join("\n")}
+
+Ready at ${new Date(r.readyAt).toISOString().slice(0, 16).replace("T", " ")} UTC.`
+    );
     const explanation = sections.join("\n\n");
     return {
       content: [{ type: "text", text: explanation }],
-      structuredContent: { style: { id: style.id, name: style.name }, explanation, recipe: r }
+      structuredContent: {
+        style: { id: style.id, name: style.name },
+        explanation
+      }
     };
   }
 });
 
 // src/lib/mcp/index.ts
 var mcp_default = defineMcp({
-  name: "dough-designer-pro",
-  title: "dough-designer-pro",
-  version: "0.1.0",
-  instructions: "Tools for the Baker's Calculator. Use `list_styles` to browse bread and pizza styles, `get_style` for a style's default parameters, `calculate_recipe` to compute ingredient weights, water temperature, fermentation times and a baking timeline, and `explain_recipe` for a plain-language walkthrough of the same recipe including the reasoning behind each correction.",
+  name: "bakers-calculator",
+  title: "Baker's Calculator",
+  version: "1.0.0",
+  instructions: "Tools for the Baker's Calculator, a dough engine covering pizza, bread, enriched doughs and preferments. Use `list_styles` to browse the styles, `get_style` for one style's full definition, `calculate_recipe` to compute ingredient weights in grams and baker's percentages (split into preferment, levain and final-dough sections) plus water temperature, fermentation times and a wall-clock schedule, and `explain_recipe` when the user wants the reasoning rather than the numbers. Every parameter on the recipe tools is optional except `style_id` \u2014 omitted values fall back to the style's own defaults, so start there and only override what the user actually specified. All tools accept `language: 'en' | 'sv'` for the human-readable text.",
   tools: [list_styles_default, get_style_default, calculate_recipe_default, explain_recipe_default]
 });
 

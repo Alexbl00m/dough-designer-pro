@@ -1,73 +1,107 @@
-# Welcome to your Lovable project
+# Baker's Calculator
 
-## Project info
+A baker's-percentage calculator for pizza and bread that models fermentation
+rather than just dividing numbers. Pick a style, set your kitchen's conditions,
+and get ingredient weights, a water temperature, and a schedule with real clock
+times on it.
 
-**URL**: https://lovable.dev/projects/951bdbb3-f109-46e4-b7ec-8760c14a7b8a
+## What it does
 
-## How can I edit this code?
+- **24 styles** across pizza, bread, enriched doughs and preferments, each
+  carrying its own hydration, salt, timing, process and default batch size.
+- **Q10 fermentation model.** The yeast dose or levain inoculation is scaled to
+  the time and temperature you actually have, not to the one the recipe assumed.
+- **Cold retards done properly.** Fridge hours convert to room-equivalent hours,
+  including the time the dough is still warm on its way down.
+- **Preferments.** Poolish, biga and levain are built as their own sections and
+  subtracted from the final dough, so hydration and dough weight still land where
+  you asked.
+- **DDT water temperature**, with the arithmetic shown and an ice split when the
+  target is below tap temperature.
+- **A schedule with clock times** — levain build, autolyse, folds, fridge,
+  shaping, preheat and bake, laid out from the moment you say you'll start.
+- **Swedish and English**, light and dark, and a print stylesheet that produces a
+  clean bake sheet.
+- **Share by link.** Every recipe is fully described by its URL. There is no
+  backend and no account.
+- **An MCP server** exposing the same engine to AI assistants.
 
-There are several ways of editing your application.
+## The model
 
-**Use Lovable**
+Two ideas carry the engine:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/951bdbb3-f109-46e4-b7ec-8760c14a7b8a) and start prompting.
+1. Fermentation *rate* follows a Q10 law — every 10 °C multiplies it by a
+   constant.
+2. Total gas produced is rate × time, so to keep a dough ready at a different
+   time or temperature you scale the dose by the inverse of the change.
 
-Changes made via Lovable will be committed automatically to this repo.
+Everything else — salt, sugar, hydration, fat, cold retards, preferment
+discounts, yeast-form conversion — is a correction on top of those two, and each
+one is clamped so extreme input can bend the answer but never break it.
 
-**Use your preferred IDE**
+Constants live in `src/core/constants.ts` with the reasoning attached. Two of
+them are calibrated against published figures rather than picked:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+| Constant | Value | Calibrated against |
+| --- | --- | --- |
+| `Q10` (dough) | 2.0 | Full Proof Baking's bulk times at a fixed 20% levain — 7 h at 21.1 °C, 6 h at 23.3 °C, 4.5–5 h at 26.7 °C. Reproduced to within 0.2%. |
+| `Q10_STARTER` | 3.8 | Russell Peace Baker's starter peak windows — 10–14 h at 18 °C, 6–8 h at 22 °C, 3–5 h at 26 °C. |
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+A starter and a dough deliberately do **not** share a coefficient: a starter has
+to eat through a fixed amount of fresh flour before it peaks, so temperature
+compresses its lag phase and growth rate together.
 
-Follow these steps:
+`src/core/__tests__/references.test.ts` pins the model to those sources, so a
+retuned constant that drifts away from what happens on a bench fails the suite.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Two levain conventions
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Recipes usually quote inoculation as **ripe levain as a share of the flour it is
+added to** ("20% levain"). The engine works internally in **starter flour as a
+share of total flour**, because that is what makes the percentages add up. Both
+are reported; the UI leads with the first, since that is the one you can compare
+against any other recipe.
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Layout
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+  core/           the engine — no React, no per-style branches
+    constants.ts    every modelling constant, with its reasoning
+    fermentation.ts Q10, cold retards, yeast and levain dosing, DDT
+    schedule.ts     process spec → wall-clock timeline
+    calculations.ts puts it together
+  data/styles.ts  every style, as data
+  i18n/           sv + en dictionaries and a framework-free translator
+  lib/            formatting, URL state, bake log, text export
+  lib/mcp/        the four MCP tools
+  components/     UI
 ```
 
-**Edit a file directly in GitHub**
+Adding a style means adding data to `src/data/styles.ts` and its copy to the two
+dictionaries. It never means touching the engine — a test enforces that every key
+a style can emit exists in both languages.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Develop
 
-**Use GitHub Codespaces**
+```sh
+npm install
+npm run dev        # http://localhost:8080
+npm test           # engine, schedule and i18n coverage
+npm run typecheck
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## MCP server
 
-## What technologies are used for this project?
+Four tools over the same engine:
 
-This project is built with:
+| Tool | Purpose |
+| --- | --- |
+| `list_styles` | Browse styles with their defaults |
+| `get_style` | One style's full definition |
+| `calculate_recipe` | Weights, percentages, water temperature, schedule |
+| `explain_recipe` | The reasoning behind every number, in prose |
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/951bdbb3-f109-46e4-b7ec-8760c14a7b8a) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Only `style_id` is required — everything else falls back to the style's own
+defaults. All four accept `language: "en" | "sv"`.
