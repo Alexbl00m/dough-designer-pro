@@ -111,6 +111,7 @@ export default function Calculator() {
         desiredDoughTemp: params.doughTemp,
         flourTemp: params.flourTemp ?? undefined,
         starterHydration: params.starterHydration,
+        percentBasis: params.percentBasis,
         usePreferment: params.usePreferment,
         startTime,
       });

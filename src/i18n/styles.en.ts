@@ -84,6 +84,15 @@ export const stylesEn: Record<string, string> = {
   'style.ciabatta.char.2': 'Cut, never reshaped',
   'style.ciabatta.char.3': 'Big irregular holes',
 
+  'region.uk': 'United Kingdom',
+
+  'style.strong_white_sourdough.desc':
+    'A straight white sourdough on strong bread flour — the most fundamental loaf to learn. Progressive hydration: start at 67.5% and work more water in until the dough feels right.',
+  'style.strong_white_sourdough.char.0': 'Only flour, water, starter and salt',
+  'style.strong_white_sourdough.char.1': 'Progressive hydration (bassinage)',
+  'style.strong_white_sourdough.char.2': 'Warm dough, 26–28 °C',
+  'style.strong_white_sourdough.char.3': 'Same-day or overnight cold proof',
+
   'style.country_sourdough.desc':
     'French country loaf on sourdough with a little whole wheat and rye. Bulk warm, final proof in the fridge.',
   'style.country_sourdough.char.0': 'Sourdough, no yeast',

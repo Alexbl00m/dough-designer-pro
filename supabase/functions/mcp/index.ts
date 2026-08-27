@@ -528,6 +528,53 @@ var BREAD_STYLES = [
   },
   // ─────────────────────────── BREAD ───────────────────────────
   {
+    id: "strong_white_sourdough",
+    name: "Strong White Sourdough",
+    category: "bread",
+    regionKey: "region.uk",
+    defaultParams: { hydration_pct: 70.5, salt_pct: 1.8, sugar_pct: 0, oil_pct: 0 },
+    fermentation: {
+      bulk_ratio: 0.7,
+      proof_ratio: 0.3,
+      base_yeast_fresh_pct: 0,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 23,
+      // 80 g of 100%-hydration starter on 400 g of dough flour is 40 g of
+      // starter flour in 440 g total — 9.1% in the engine's convention — over a
+      // bulk at 26–28 °C plus a same-day proof.
+      base_inoculation_pct: 9,
+      levain_ref_hours: 7,
+      levain_ref_temp_c: 27
+    },
+    process: {
+      autolyseMin: 45,
+      mixMin: 3,
+      benchRestMin: 30,
+      folds: { count: 4, intervalMin: 40, techniqueKey: "process.fold.coil" },
+      preshapeRestMin: 20,
+      shapeKey: "process.shape.boule",
+      bakeKey: "process.bake.dutchoven",
+      bakeTempC: 240,
+      bakeDropTempC: 220,
+      bakeMinutes: 43,
+      steamMinutes: 20,
+      coldPhase: "proof"
+    },
+    defaults: {
+      ballWeight: 758,
+      ballCount: 1,
+      totalTime: 7,
+      coldHours: 0,
+      roomTemp: 27,
+      doughTemp: 28,
+      leavenType: "sourdough"
+    },
+    flourBlend: [{ key: "flour.bread_high", percentage: 100, protein_pct: 12.7 }],
+    minProteinPct: 12,
+    bulkRisePct: [30, 50],
+    characteristicCount: 4
+  },
+  {
     id: "country_sourdough",
     name: "Pain de Campagne",
     category: "bread",
@@ -1074,6 +1121,10 @@ var sv = {
   "field.ballCount": "Antal {unit}",
   "field.targetFlour": "Mj\xF6l totalt",
   "field.targetDough": "Degvikt totalt",
+  "field.percentBasis": "Procentbas",
+  "field.percentBasis.total": "Totalt mj\xF6l",
+  "field.percentBasis.dough": "Degens mj\xF6l",
+  "field.percentBasis.help": "Vilket mj\xF6l procenten r\xE4knas p\xE5. \u201CTotalt mj\xF6l\u201D r\xE4knar in surdegens och f\xF6rj\xE4sningens mj\xF6l; \u201Cdegens mj\xF6l\u201D bara det du v\xE4ger upp separat. Recept anv\xE4nder b\xE5da och skriver s\xE4llan vilket \u2013 byt hit om siffrorna inte st\xE4mmer med receptet du l\xE4ser.",
   "field.hydration": "Hydrering",
   "field.hydration.help": "Vatten i procent av mj\xF6lvikten.",
   "field.salt": "Salt",
@@ -1146,6 +1197,8 @@ var sv = {
   "recipe.why": "Varf\xF6r",
   "recipe.grams": "Gram",
   "recipe.percent": "Baker's %",
+  "recipe.percentTotal": "Baker's % (totalt mj\xF6l)",
+  "recipe.percentDough": "Baker's % (degens mj\xF6l)",
   "recipe.ingredient": "Ingrediens",
   "recipe.totalDough": "Total degvikt",
   "recipe.targetDough": "M\xE5lvikt",
@@ -1219,7 +1272,7 @@ var sv = {
   "process.mix": "Blanda degen",
   "process.mix.body": "Arbeta degen {minutes} min tills den \xE4r sammanh\xE5llen och sl\xE4t.",
   "process.bulk": "Bulkj\xE4sning",
-  "process.bulk.body": "{hours} h vid {temp} \xB0C. Sikta p\xE5 50\u201360% volym\xF6kning under bulken \u2013 degen ska vara sp\xE4nstig och h\xE5lla formen, inte klibbig.",
+  "process.bulk.body": "{hours} h vid {temp} \xB0C. Sikta p\xE5 {riseMin}\u2013{riseMax}% volym\xF6kning \u2013 degen ska vara sp\xE4nstig och h\xE5lla formen, inte klibbig.",
   "process.fold": "Vikning {index} av {count}",
   "process.fold.body": "{technique}",
   "process.fold.slapfold": "Slap & fold p\xE5 b\xE4nken tills degen sp\xE4nner upp",
@@ -1381,7 +1434,8 @@ var sv = {
   "note.high_salt": "{pct}% salt bromsar j\xE4sten m\xE4rkbart. J\xE4stm\xE4ngden \xE4r uppjusterad f\xF6r att kompensera.",
   "note.rich_dough": "{pct}% fett. Tills\xE4tt fettet f\xF6rst n\xE4r glutenet \xE4r utvecklat, annars f\xE5r degen aldrig f\xE4ste.",
   "note.preferment": "F\xF6rj\xE4sningens mj\xF6l och vatten \xE4r avr\xE4knade fr\xE5n huvuddegen, s\xE5 totalerna st\xE4mmer.",
-  "note.percent_basis": "Alla procent r\xE4knas p\xE5 totalt mj\xF6l ({flour} g), inklusive mj\xF6let i f\xF6rj\xE4sning och surdeg.",
+  "note.percent_basis_total": "Procenten r\xE4knas p\xE5 det totala mj\xF6let ({total} g), inklusive mj\xF6let i f\xF6rj\xE4sning och surdeg.",
+  "note.percent_basis_dough": "Procenten r\xE4knas p\xE5 mj\xF6let som g\xE5r direkt i degen ({flour} g), inte p\xE5 det totala ({total} g). M\xE5nga recept skriver s\xE5 \u2013 men inte alla, s\xE5 j\xE4mf\xF6r alltid basen innan du j\xE4mf\xF6r siffror.",
   "note.flour_overdrawn": "F\xF6rj\xE4sning och surdeg drar mer mj\xF6l \xE4n receptet inneh\xE5ller. Minska f\xF6rj\xE4sningen eller inokuleringen.",
   "note.water_overdrawn": "F\xF6rj\xE4sning och surdeg inneh\xE5ller mer vatten \xE4n {hydration}% hydrering till\xE5ter. H\xF6j hydreringen eller s\xE4nk surdegens hydrering.",
   "note.from_section": "fr\xE5n egen sektion",
@@ -1482,6 +1536,10 @@ var en = {
   "field.ballCount": "Number of {unit}",
   "field.targetFlour": "Total flour",
   "field.targetDough": "Total dough",
+  "field.percentBasis": "Percentage basis",
+  "field.percentBasis.total": "Total flour",
+  "field.percentBasis.dough": "Dough flour",
+  "field.percentBasis.help": "Which flour the percentages divide by. \u201CTotal flour\u201D counts the flour inside the starter and preferment; \u201Cdough flour\u201D counts only what you weigh out separately. Recipes use both and rarely say which \u2014 switch here if the numbers do not match the recipe you are reading.",
   "field.hydration": "Hydration",
   "field.hydration.help": "Water as a percentage of flour weight.",
   "field.salt": "Salt",
@@ -1554,6 +1612,8 @@ var en = {
   "recipe.why": "Why",
   "recipe.grams": "Grams",
   "recipe.percent": "Baker's %",
+  "recipe.percentTotal": "Baker's % (total flour)",
+  "recipe.percentDough": "Baker's % (dough flour)",
   "recipe.ingredient": "Ingredient",
   "recipe.totalDough": "Total dough",
   "recipe.targetDough": "Target",
@@ -1627,7 +1687,7 @@ var en = {
   "process.mix": "Mix the dough",
   "process.mix.body": "Work the dough for {minutes} min until it comes together and looks smooth.",
   "process.bulk": "Bulk fermentation",
-  "process.bulk.body": "{hours} h at {temp} \xB0C. Aim for 50\u201360% growth through the bulk \u2014 the dough should be supple and hold its shape, not sticky.",
+  "process.bulk.body": "{hours} h at {temp} \xB0C. Aim for {riseMin}\u2013{riseMax}% growth \u2014 the dough should be supple and hold its shape, not sticky.",
   "process.fold": "Fold {index} of {count}",
   "process.fold.body": "{technique}",
   "process.fold.slapfold": "Slap and fold on the bench until the dough tightens",
@@ -1789,7 +1849,8 @@ var en = {
   "note.high_salt": "{pct}% salt slows the yeast noticeably. The dose has been raised to compensate.",
   "note.rich_dough": "{pct}% fat. Add it once the gluten is developed, otherwise the dough never takes hold.",
   "note.preferment": "The preferment's flour and water are subtracted from the final dough, so the totals still add up.",
-  "note.percent_basis": "All percentages are on total flour ({flour} g), including flour in the preferment and starter.",
+  "note.percent_basis_total": "Percentages are on total flour ({total} g), including the flour in the preferment and starter.",
+  "note.percent_basis_dough": "Percentages are on the flour added directly to the dough ({flour} g), not the total ({total} g). Plenty of recipes are written this way \u2014 but not all, so check the basis before comparing numbers.",
   "note.flour_overdrawn": "The preferment and starter draw more flour than the recipe contains. Reduce one of them.",
   "note.water_overdrawn": "The preferment and starter hold more water than {hydration}% hydration allows. Raise hydration or use a stiffer starter.",
   "note.from_section": "from its own section",
@@ -1880,6 +1941,12 @@ var stylesSv = {
   "style.ciabatta.char.1": "50% av mj\xF6let i biga",
   "style.ciabatta.char.2": "Delas, formas inte om",
   "style.ciabatta.char.3": "Stora oregelbundna h\xE5l",
+  "region.uk": "Storbritannien",
+  "style.strong_white_sourdough.desc": "Rakt vitt surdegsbr\xF6d p\xE5 starkt vetemj\xF6l \u2013 den mest grundl\xE4ggande limpan att l\xE4ra sig. Progressiv hydrering: b\xF6rja p\xE5 67,5% och arbeta in mer vatten tills degen k\xE4nns r\xE4tt.",
+  "style.strong_white_sourdough.char.0": "Bara mj\xF6l, vatten, surdeg och salt",
+  "style.strong_white_sourdough.char.1": "Progressiv hydrering (bassinage)",
+  "style.strong_white_sourdough.char.2": "Varm deg, 26\u201328 \xB0C",
+  "style.strong_white_sourdough.char.3": "Samma dag eller kall j\xE4sning \xF6ver natten",
   "style.country_sourdough.desc": "Franskt lantbr\xF6d p\xE5 surdeg med en gnutta fullkorn och r\xE5g. Bulk i rumstemperatur, slutj\xE4sning i kyl.",
   "style.country_sourdough.char.0": "Surdeg, ingen j\xE4st",
   "style.country_sourdough.char.1": "Kall slutj\xE4sning",
@@ -2004,6 +2071,12 @@ var stylesEn = {
   "style.ciabatta.char.1": "50% of the flour in biga",
   "style.ciabatta.char.2": "Cut, never reshaped",
   "style.ciabatta.char.3": "Big irregular holes",
+  "region.uk": "United Kingdom",
+  "style.strong_white_sourdough.desc": "A straight white sourdough on strong bread flour \u2014 the most fundamental loaf to learn. Progressive hydration: start at 67.5% and work more water in until the dough feels right.",
+  "style.strong_white_sourdough.char.0": "Only flour, water, starter and salt",
+  "style.strong_white_sourdough.char.1": "Progressive hydration (bassinage)",
+  "style.strong_white_sourdough.char.2": "Warm dough, 26\u201328 \xB0C",
+  "style.strong_white_sourdough.char.3": "Same-day or overnight cold proof",
   "style.country_sourdough.desc": "French country loaf on sourdough with a little whole wheat and rye. Bulk warm, final proof in the fridge.",
   "style.country_sourdough.char.0": "Sourdough, no yeast",
   "style.country_sourdough.char.1": "Cold final proof",
@@ -2285,9 +2358,12 @@ function buildSchedule(input) {
   const proofWarmMin = proofMin - proofColdMin;
   const bulkStart = cursor;
   if (bulkWarmMin > 0) {
+    const [riseMin, riseMax] = style.bulkRisePct ?? [50, 60];
     push(bulkStart, bulkWarmMin, "bulk", "process.bulk", {
       hours: round1(bulkWarmMin / 60),
-      temp: input.roomTempC
+      temp: input.roomTempC,
+      riseMin,
+      riseMax
     }, input.roomTempC);
   }
   if (p.folds && bulkWarmMin > 0) {
@@ -2385,6 +2461,7 @@ function calculateRecipe(inputs) {
   const leavenType = inputs.leavenType;
   const usePreferment = (inputs.usePreferment ?? true) && Boolean(style.preferment);
   const preferment = usePreferment ? style.preferment : void 0;
+  const percentBasis = inputs.percentBasis ?? "total";
   if (requestedCold > totalTime) {
     notes.push({ code: "note.cold_clamped", severity: "warn", values: { hours: round(coldHours, 1) } });
   }
@@ -2430,7 +2507,18 @@ function calculateRecipe(inputs) {
     (sum, e) => sum + e.pct * (preferment.flour_pct / 100),
     0
   ) : 0;
-  const totalPct = 100 + hydration + salt + sugar + fat + extrasPct + prefermentExtrasPct + dose.pct;
+  const prefFlourFrac = preferment ? preferment.flour_pct / 100 : 0;
+  const prefWaterFrac = prefFlourFrac * ((preferment?.hydration_pct ?? 0) / 100);
+  const levainFlourFrac = inoculationPct / 100;
+  const levainWaterFrac = levainFlourFrac * (starterHydration / 100);
+  const basisShare = percentBasis === "dough" ? Math.max(0.05, 1 - prefFlourFrac - levainFlourFrac) : 1;
+  const saltFrac = basisShare * (salt / 100);
+  const sugarFrac = basisShare * (sugar / 100);
+  const fatFrac = basisShare * (fat / 100);
+  const extrasFrac = basisShare * (extrasPct / 100);
+  const finalWaterFrac = percentBasis === "dough" ? basisShare * (hydration / 100) : hydration / 100 - prefWaterFrac - levainWaterFrac;
+  const totalWaterFrac = finalWaterFrac + prefWaterFrac + levainWaterFrac;
+  const totalPct = 100 + 100 * (totalWaterFrac + saltFrac + sugarFrac + fatFrac + extrasFrac) + prefermentExtrasPct + dose.pct;
   const pieces = Math.max(1, Math.round(inputs.ballCount || 1));
   const scaleMode = inputs.scaleMode ?? "pieces";
   let totalFlour;
@@ -2445,16 +2533,17 @@ function calculateRecipe(inputs) {
     targetDoughWeight = Math.max(1, (inputs.ballWeight || 1) * pieces);
     totalFlour = targetDoughWeight / (totalPct / 100);
   }
-  const totalWater = totalFlour * (hydration / 100);
-  const prefermentFlour = preferment ? totalFlour * (preferment.flour_pct / 100) : 0;
-  const prefermentWater = preferment ? prefermentFlour * (preferment.hydration_pct / 100) : 0;
+  const totalWater = totalFlour * totalWaterFrac;
+  const basisFlour = totalFlour * basisShare;
+  const prefermentFlour = totalFlour * prefFlourFrac;
+  const prefermentWater = totalFlour * prefWaterFrac;
   const prefermentSalt = preferment?.salt_pct ? prefermentFlour * (preferment.salt_pct / 100) : 0;
   const prefermentYeast = preferment?.yeast_fresh_pct ? prefermentFlour * (preferment.yeast_fresh_pct / 100) * (yeastForm === "fresh" ? 1 : yeastForm === "instant" ? 0.33 : 0.4) : 0;
-  const levainFlour = totalFlour * (inoculationPct / 100);
-  const levainWater = levainFlour * (starterHydration / 100);
+  const levainFlour = totalFlour * levainFlourFrac;
+  const levainWater = totalFlour * levainWaterFrac;
   const levainTotal = levainFlour + levainWater;
   const finalFlour = totalFlour - prefermentFlour - levainFlour;
-  const finalWater = totalWater - prefermentWater - levainWater;
+  const finalWater = totalFlour * finalWaterFrac;
   if (finalFlour < 0) {
     notes.push({ code: "note.flour_overdrawn", severity: "warn" });
   }
@@ -2466,7 +2555,7 @@ function calculateRecipe(inputs) {
     });
   }
   const sections = [];
-  const pct = (grams) => totalFlour > 0 ? round(grams / totalFlour * 100, 2) : 0;
+  const pct = (grams) => basisFlour > 0 ? round(grams / basisFlour * 100, 2) : 0;
   if (usesLevain && levainTotal > 0) {
     const levainIngredients = [
       {
@@ -2564,10 +2653,11 @@ function calculateRecipe(inputs) {
     });
   }
   trueWater += prefermentWater + levainWater;
+  const saltGrams = totalFlour * saltFrac - prefermentSalt;
   finalIngredients.push({
     key: "ing.salt",
-    grams: round(totalFlour * (salt / 100) - prefermentSalt, 1),
-    percentage: pct(totalFlour * (salt / 100) - prefermentSalt),
+    grams: round(saltGrams, 1),
+    percentage: pct(saltGrams),
     type: "salt"
   });
   if (usesLevain && levainTotal > 0) {
@@ -2597,7 +2687,7 @@ function calculateRecipe(inputs) {
     });
   }
   if (sugar > 0) {
-    const grams = totalFlour * (sugar / 100);
+    const grams = totalFlour * sugarFrac;
     finalIngredients.push({
       key: style.defaultParams.sugarKey ?? "ing.sugar",
       grams: round(grams, 1),
@@ -2606,7 +2696,7 @@ function calculateRecipe(inputs) {
     });
   }
   if (fat > 0) {
-    const grams = totalFlour * (fat / 100);
+    const grams = totalFlour * fatFrac;
     finalIngredients.push({
       key: style.defaultParams.fatKey ?? "ing.oil",
       grams: round(grams, 1),
@@ -2615,7 +2705,7 @@ function calculateRecipe(inputs) {
     });
   }
   for (const extra of extras) {
-    const grams = totalFlour * (extra.pct / 100);
+    const grams = totalFlour * basisShare * (extra.pct / 100);
     trueWater += grams * (extra.waterFraction ?? 0);
     finalIngredients.push({
       key: extra.key,
@@ -2691,6 +2781,8 @@ function calculateRecipe(inputs) {
       roomTemp,
       coldTemp,
       totalFlour,
+      basisFlour,
+      percentBasis,
       levainTotal,
       levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
       levainPeakHours,
@@ -2760,7 +2852,9 @@ function calculateRecipe(inputs) {
       sugar,
       oil: fat,
       starterHydration,
-      prefermentFlourPct: preferment?.flour_pct ?? 0
+      prefermentFlourPct: preferment?.flour_pct ?? 0,
+      percentBasis,
+      basisFlour: round(basisFlour, 1)
     },
     timeline: steps,
     notes,
@@ -2872,7 +2966,11 @@ function buildNotes(c) {
   if (c.preferment) {
     notes.push({ code: "note.preferment", severity: "info" });
   }
-  notes.push({ code: "note.percent_basis", severity: "info", values: { flour: round(c.totalFlour, 0) } });
+  notes.push({
+    code: c.percentBasis === "dough" ? "note.percent_basis_dough" : "note.percent_basis_total",
+    severity: "info",
+    values: { flour: round(c.basisFlour, 0), total: round(c.totalFlour, 0) }
+  });
   return notes;
 }
 

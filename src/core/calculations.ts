@@ -88,6 +88,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
 
   const usePreferment = (inputs.usePreferment ?? true) && Boolean(style.preferment);
   const preferment = usePreferment ? style.preferment : undefined;
+  const percentBasis = inputs.percentBasis ?? 'total';
 
   if (requestedCold > totalTime) {
     notes.push({ code: 'note.cold_clamped', severity: 'warn', values: { hours: round(coldHours, 1) } });
@@ -151,10 +152,43 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       )
     : 0;
 
-  // The levain adds flour and water that are subtracted again from the main
-  // dough, so it is weight-neutral. Yeast and extras genuinely add weight.
+  // Fractions of the TOTAL flour that go into the preferment and the levain.
+  // Everything below is expressed against total flour so the solve stays linear.
+  const prefFlourFrac = preferment ? preferment.flour_pct / 100 : 0;
+  const prefWaterFrac = prefFlourFrac * ((preferment?.hydration_pct ?? 0) / 100);
+  const levainFlourFrac = inoculationPct / 100;
+  const levainWaterFrac = levainFlourFrac * (starterHydration / 100);
+
+  // On a dough basis the percentages are measured against only the flour added
+  // directly to the final mix, so they buy proportionally less of everything.
+  // The floor keeps a 100%-preferment style (where no fresh flour is added)
+  // from collapsing the denominator to zero.
+  const basisShare =
+    percentBasis === 'dough'
+      ? Math.max(0.05, 1 - prefFlourFrac - levainFlourFrac)
+      : 1;
+
+  const saltFrac = basisShare * (salt / 100);
+  const sugarFrac = basisShare * (sugar / 100);
+  const fatFrac = basisShare * (fat / 100);
+  const extrasFrac = basisShare * (extrasPct / 100);
+
+  // Water added to the final dough. On a total basis the stated hydration
+  // covers every drop including the preferment's and the starter's, so those
+  // come off; on a dough basis it covers only what goes into the final mix.
+  const finalWaterFrac =
+    percentBasis === 'dough'
+      ? basisShare * (hydration / 100)
+      : hydration / 100 - prefWaterFrac - levainWaterFrac;
+  const totalWaterFrac = finalWaterFrac + prefWaterFrac + levainWaterFrac;
+
+  // The levain and preferment add flour and water that are subtracted again
+  // from the main dough, so they are weight-neutral. Yeast and extras add weight.
   const totalPct =
-    100 + hydration + salt + sugar + fat + extrasPct + prefermentExtrasPct + dose.pct;
+    100 +
+    100 * (totalWaterFrac + saltFrac + sugarFrac + fatFrac + extrasFrac) +
+    prefermentExtrasPct +
+    dose.pct;
 
   const pieces = Math.max(1, Math.round(inputs.ballCount || 1));
   const scaleMode = inputs.scaleMode ?? 'pieces';
@@ -173,12 +207,11 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   }
 
   // ── 4. Split the flour and water between preferment, levain and final dough ──
-  const totalWater = totalFlour * (hydration / 100);
+  const totalWater = totalFlour * totalWaterFrac;
+  const basisFlour = totalFlour * basisShare;
 
-  const prefermentFlour = preferment ? totalFlour * (preferment.flour_pct / 100) : 0;
-  const prefermentWater = preferment
-    ? prefermentFlour * (preferment.hydration_pct / 100)
-    : 0;
+  const prefermentFlour = totalFlour * prefFlourFrac;
+  const prefermentWater = totalFlour * prefWaterFrac;
   const prefermentSalt = preferment?.salt_pct
     ? prefermentFlour * (preferment.salt_pct / 100)
     : 0;
@@ -188,12 +221,12 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       (yeastForm === 'fresh' ? 1 : yeastForm === 'instant' ? 0.33 : 0.4)
     : 0;
 
-  const levainFlour = totalFlour * (inoculationPct / 100);
-  const levainWater = levainFlour * (starterHydration / 100);
+  const levainFlour = totalFlour * levainFlourFrac;
+  const levainWater = totalFlour * levainWaterFrac;
   const levainTotal = levainFlour + levainWater;
 
   const finalFlour = totalFlour - prefermentFlour - levainFlour;
-  const finalWater = totalWater - prefermentWater - levainWater;
+  const finalWater = totalFlour * finalWaterFrac;
 
   if (finalFlour < 0) {
     notes.push({ code: 'note.flour_overdrawn', severity: 'warn' });
@@ -208,7 +241,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
 
   // ── 5. Build the ingredient sections ──
   const sections: RecipeSection[] = [];
-  const pct = (grams: number) => (totalFlour > 0 ? round((grams / totalFlour) * 100, 2) : 0);
+  const pct = (grams: number) => (basisFlour > 0 ? round((grams / basisFlour) * 100, 2) : 0);
 
   if (usesLevain && levainTotal > 0) {
     const levainIngredients: Ingredient[] = [
@@ -316,10 +349,11 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   }
   trueWater += prefermentWater + levainWater;
 
+  const saltGrams = totalFlour * saltFrac - prefermentSalt;
   finalIngredients.push({
     key: 'ing.salt',
-    grams: round(totalFlour * (salt / 100) - prefermentSalt, 1),
-    percentage: pct(totalFlour * (salt / 100) - prefermentSalt),
+    grams: round(saltGrams, 1),
+    percentage: pct(saltGrams),
     type: 'salt',
   });
 
@@ -357,7 +391,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   }
 
   if (sugar > 0) {
-    const grams = totalFlour * (sugar / 100);
+    const grams = totalFlour * sugarFrac;
     finalIngredients.push({
       key: style.defaultParams.sugarKey ?? 'ing.sugar',
       grams: round(grams, 1),
@@ -367,7 +401,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   }
 
   if (fat > 0) {
-    const grams = totalFlour * (fat / 100);
+    const grams = totalFlour * fatFrac;
     finalIngredients.push({
       key: style.defaultParams.fatKey ?? 'ing.oil',
       grams: round(grams, 1),
@@ -377,7 +411,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   }
 
   for (const extra of extras) {
-    const grams = totalFlour * (extra.pct / 100);
+    const grams = totalFlour * basisShare * (extra.pct / 100);
     trueWater += grams * (extra.waterFraction ?? 0);
     finalIngredients.push({
       key: extra.key,
@@ -469,6 +503,8 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       roomTemp,
       coldTemp,
       totalFlour,
+      basisFlour,
+      percentBasis,
       levainTotal,
       levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
       levainPeakHours,
@@ -541,6 +577,8 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       oil: fat,
       starterHydration,
       prefermentFlourPct: preferment?.flour_pct ?? 0,
+      percentBasis,
+      basisFlour: round(basisFlour, 1),
     },
     timeline: steps,
     notes,
@@ -589,6 +627,8 @@ interface NoteContext {
   roomTemp: number;
   coldTemp: number;
   totalFlour: number;
+  basisFlour: number;
+  percentBasis: 'total' | 'dough';
   levainTotal: number;
   levainOnFlourPct: number;
   levainPeakHours: number;
@@ -691,7 +731,11 @@ function buildNotes(c: NoteContext): Note[] {
     notes.push({ code: 'note.preferment', severity: 'info' });
   }
 
-  notes.push({ code: 'note.percent_basis', severity: 'info', values: { flour: round(c.totalFlour, 0) } });
+  notes.push({
+    code: c.percentBasis === 'dough' ? 'note.percent_basis_dough' : 'note.percent_basis_total',
+    severity: 'info',
+    values: { flour: round(c.basisFlour, 0), total: round(c.totalFlour, 0) },
+  });
 
   return notes;
 }

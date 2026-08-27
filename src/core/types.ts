@@ -8,6 +8,17 @@ import type { MixingMethod, YeastForm } from './constants';
 export type LeavenType = 'commercial' | 'sourdough' | 'hybrid';
 export type ScaleMode = 'pieces' | 'flour' | 'dough';
 
+/**
+ * Which flour weight the baker's percentages are measured against.
+ *
+ * Both conventions are in active use and published recipes rarely say which
+ * they mean. Full Proof Baking quotes salt against the total including the
+ * starter's flour; Russell Peace Baker quotes it against "flour added directly
+ * to the dough, not including starter flour". The same loaf reads as 1.8% or
+ * 2.0% salt depending on the choice, so the app names it rather than guessing.
+ */
+export type PercentBasis = 'total' | 'dough';
+
 export interface CalculationInputs {
   style: BreadStyle;
   /** How the batch is sized: by pieces, by a flour weight you have, or by a total dough weight. */
@@ -33,7 +44,10 @@ export interface CalculationInputs {
   /** Flour temperature for the DDT calculation; defaults to room temperature. */
   flourTemp?: number;
 
-  /** Baker's-% overrides of the style defaults. */
+  /** Which flour weight the percentages below are measured against. Default 'total'. */
+  percentBasis?: PercentBasis;
+
+  /** Baker's-% overrides of the style defaults, in `percentBasis` terms. */
   hydration?: number;
   salt?: number;
   sugar?: number;
@@ -178,6 +192,9 @@ export interface CalculationResults {
     oil: number;
     starterHydration: number;
     prefermentFlourPct: number;
+    percentBasis: PercentBasis;
+    /** The flour weight the displayed percentages divide by. */
+    basisFlour: number;
   };
   timeline: TimelineStep[];
   notes: Note[];

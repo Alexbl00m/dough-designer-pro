@@ -136,6 +136,7 @@ export function RecipeResults({
             key={section.id}
             section={section}
             subdued={section.id !== 'final'}
+            percentBasis={results.params.percentBasis}
           />
         ))}
       </section>

@@ -120,9 +120,12 @@ export function buildSchedule(input: ScheduleInput): {
   // "bulk" alongside a full-length "bulk in the fridge" would double-count a
   // ferment that is entirely cold.
   if (bulkWarmMin > 0) {
+    const [riseMin, riseMax] = style.bulkRisePct ?? [50, 60];
     push(bulkStart, bulkWarmMin, 'bulk', 'process.bulk', {
       hours: round1(bulkWarmMin / 60),
       temp: input.roomTempC,
+      riseMin,
+      riseMax,
     }, input.roomTempC);
   }
 

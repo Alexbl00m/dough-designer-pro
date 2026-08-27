@@ -17,7 +17,7 @@ import type { BreadStyle } from '@/data/styles';
 import type { RecipeParams } from '@/lib/recipe/state';
 import { FRICTION_FACTOR_C } from '@/core/constants';
 import type { MixingMethod, YeastForm } from '@/core/constants';
-import type { LeavenType, ScaleMode } from '@/core/types';
+import type { LeavenType, PercentBasis, ScaleMode } from '@/core/types';
 import { useI18n } from '@/i18n';
 import { formatNumber, toDateTimeLocal } from '@/lib/format';
 
@@ -351,6 +351,17 @@ export function CalculatorInputs({
           </AccordionTrigger>
           <AccordionContent className="pb-5">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <SelectField<PercentBasis>
+                id="percentBasis"
+                label={t('field.percentBasis')}
+                value={params.percentBasis}
+                onChange={(value) => onChange('percentBasis', value)}
+                help={t('field.percentBasis.help')}
+                options={[
+                  { value: 'total', label: t('field.percentBasis.total') },
+                  { value: 'dough', label: t('field.percentBasis.dough') },
+                ]}
+              />
               <SliderField
                 id="coldTemp"
                 label={t('field.coldTemp')}

@@ -82,6 +82,11 @@ export const sv: Record<string, string> = {
   'field.ballCount': 'Antal {unit}',
   'field.targetFlour': 'Mjöl totalt',
   'field.targetDough': 'Degvikt totalt',
+  'field.percentBasis': 'Procentbas',
+  'field.percentBasis.total': 'Totalt mjöl',
+  'field.percentBasis.dough': 'Degens mjöl',
+  'field.percentBasis.help':
+    'Vilket mjöl procenten räknas på. “Totalt mjöl” räknar in surdegens och förjäsningens mjöl; “degens mjöl” bara det du väger upp separat. Recept använder båda och skriver sällan vilket – byt hit om siffrorna inte stämmer med receptet du läser.',
   'field.hydration': 'Hydrering',
   'field.hydration.help': 'Vatten i procent av mjölvikten.',
   'field.salt': 'Salt',
@@ -157,6 +162,8 @@ export const sv: Record<string, string> = {
   'recipe.why': 'Varför',
   'recipe.grams': 'Gram',
   'recipe.percent': "Baker's %",
+  'recipe.percentTotal': "Baker's % (totalt mjöl)",
+  'recipe.percentDough': "Baker's % (degens mjöl)",
   'recipe.ingredient': 'Ingrediens',
   'recipe.totalDough': 'Total degvikt',
   'recipe.targetDough': 'Målvikt',
@@ -242,7 +249,7 @@ export const sv: Record<string, string> = {
   'process.mix.body': 'Arbeta degen {minutes} min tills den är sammanhållen och slät.',
   'process.bulk': 'Bulkjäsning',
   'process.bulk.body':
-    '{hours} h vid {temp} °C. Sikta på 50–60% volymökning under bulken – degen ska vara spänstig och hålla formen, inte klibbig.',
+    '{hours} h vid {temp} °C. Sikta på {riseMin}–{riseMax}% volymökning – degen ska vara spänstig och hålla formen, inte klibbig.',
   'process.fold': 'Vikning {index} av {count}',
   'process.fold.body': '{technique}',
   'process.fold.slapfold': 'Slap & fold på bänken tills degen spänner upp',
@@ -421,7 +428,10 @@ export const sv: Record<string, string> = {
   'note.high_salt': '{pct}% salt bromsar jästen märkbart. Jästmängden är uppjusterad för att kompensera.',
   'note.rich_dough': '{pct}% fett. Tillsätt fettet först när glutenet är utvecklat, annars får degen aldrig fäste.',
   'note.preferment': 'Förjäsningens mjöl och vatten är avräknade från huvuddegen, så totalerna stämmer.',
-  'note.percent_basis': 'Alla procent räknas på totalt mjöl ({flour} g), inklusive mjölet i förjäsning och surdeg.',
+  'note.percent_basis_total':
+    'Procenten räknas på det totala mjölet ({total} g), inklusive mjölet i förjäsning och surdeg.',
+  'note.percent_basis_dough':
+    'Procenten räknas på mjölet som går direkt i degen ({flour} g), inte på det totala ({total} g). Många recept skriver så – men inte alla, så jämför alltid basen innan du jämför siffror.',
   'note.flour_overdrawn': 'Förjäsning och surdeg drar mer mjöl än receptet innehåller. Minska förjäsningen eller inokuleringen.',
   'note.water_overdrawn': 'Förjäsning och surdeg innehåller mer vatten än {hydration}% hydrering tillåter. Höj hydreringen eller sänk surdegens hydrering.',
   'note.from_section': 'från egen sektion',

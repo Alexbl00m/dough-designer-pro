@@ -153,6 +153,13 @@ export interface BreadStyle {
   extras?: StyleExtra[];
   /** Minimum flour strength this style really wants, in % protein. */
   minProteinPct?: number;
+  /**
+   * Volume increase to look for at the end of bulk, as [min, max] percent.
+   * Sources disagree because they push bulk to different points — Full Proof
+   * Baking aims for 50–60%, Russell Peace Baker for 30–50% — so it is a
+   * property of the style, not a constant.
+   */
+  bulkRisePct?: [number, number];
   /** Number of i18n'd characteristic bullets in `style.<id>.char.<n>`. */
   characteristicCount: number;
 }
@@ -677,6 +684,53 @@ export const BREAD_STYLES: BreadStyle[] = [
   },
 
   // ─────────────────────────── BREAD ───────────────────────────
+  {
+    id: 'strong_white_sourdough',
+    name: 'Strong White Sourdough',
+    category: 'bread',
+    regionKey: 'region.uk',
+    defaultParams: { hydration_pct: 70.5, salt_pct: 1.8, sugar_pct: 0, oil_pct: 0 },
+    fermentation: {
+      bulk_ratio: 0.7,
+      proof_ratio: 0.3,
+      base_yeast_fresh_pct: 0,
+      yeast_ref_hours: 5,
+      yeast_ref_temp_c: 23,
+      // 80 g of 100%-hydration starter on 400 g of dough flour is 40 g of
+      // starter flour in 440 g total — 9.1% in the engine's convention — over a
+      // bulk at 26–28 °C plus a same-day proof.
+      base_inoculation_pct: 9,
+      levain_ref_hours: 7,
+      levain_ref_temp_c: 27,
+    },
+    process: {
+      autolyseMin: 45,
+      mixMin: 3,
+      benchRestMin: 30,
+      folds: { count: 4, intervalMin: 40, techniqueKey: 'process.fold.coil' },
+      preshapeRestMin: 20,
+      shapeKey: 'process.shape.boule',
+      bakeKey: 'process.bake.dutchoven',
+      bakeTempC: 240,
+      bakeDropTempC: 220,
+      bakeMinutes: 43,
+      steamMinutes: 20,
+      coldPhase: 'proof',
+    },
+    defaults: {
+      ballWeight: 758,
+      ballCount: 1,
+      totalTime: 7,
+      coldHours: 0,
+      roomTemp: 27,
+      doughTemp: 28,
+      leavenType: 'sourdough',
+    },
+    flourBlend: [{ key: 'flour.bread_high', percentage: 100, protein_pct: 12.7 }],
+    minProteinPct: 12,
+    bulkRisePct: [30, 50],
+    characteristicCount: 4,
+  },
   {
     id: 'country_sourdough',
     name: 'Pain de Campagne',

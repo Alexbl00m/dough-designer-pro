@@ -84,6 +84,15 @@ export const stylesSv: Record<string, string> = {
   'style.ciabatta.char.2': 'Delas, formas inte om',
   'style.ciabatta.char.3': 'Stora oregelbundna hål',
 
+  'region.uk': 'Storbritannien',
+
+  'style.strong_white_sourdough.desc':
+    'Rakt vitt surdegsbröd på starkt vetemjöl – den mest grundläggande limpan att lära sig. Progressiv hydrering: börja på 67,5% och arbeta in mer vatten tills degen känns rätt.',
+  'style.strong_white_sourdough.char.0': 'Bara mjöl, vatten, surdeg och salt',
+  'style.strong_white_sourdough.char.1': 'Progressiv hydrering (bassinage)',
+  'style.strong_white_sourdough.char.2': 'Varm deg, 26–28 °C',
+  'style.strong_white_sourdough.char.3': 'Samma dag eller kall jäsning över natten',
+
   'style.country_sourdough.desc':
     'Franskt lantbröd på surdeg med en gnutta fullkorn och råg. Bulk i rumstemperatur, slutjäsning i kyl.',
   'style.country_sourdough.char.0': 'Surdeg, ingen jäst',

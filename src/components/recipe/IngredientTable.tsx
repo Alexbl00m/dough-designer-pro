@@ -26,9 +26,11 @@ interface IngredientTableProps {
   section: RecipeSection;
   /** Preferments and levains get a lighter treatment than the final dough. */
   subdued?: boolean;
+  /** Named in the column header, because the two bases give different numbers. */
+  percentBasis: 'total' | 'dough';
 }
 
-export function IngredientTable({ section, subdued }: IngredientTableProps) {
+export function IngredientTable({ section, subdued, percentBasis }: IngredientTableProps) {
   const { t, lang } = useI18n();
 
   return (
@@ -59,7 +61,9 @@ export function IngredientTable({ section, subdued }: IngredientTableProps) {
           <tr>
             <th scope="col">{t('recipe.ingredient')}</th>
             <th scope="col">{t('recipe.grams')}</th>
-            <th scope="col">{t('recipe.percent')}</th>
+            <th scope="col">
+              {t(percentBasis === 'dough' ? 'recipe.percentDough' : 'recipe.percentTotal')}
+            </th>
           </tr>
         </thead>
         <tbody>

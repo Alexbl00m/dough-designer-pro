@@ -11,7 +11,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { getStyleById } from '@/data/styles';
+import { BREAD_STYLES, getStyleById } from '@/data/styles';
 import { calculateRecipe } from '@/core/calculations';
 import { computeRoomEquivHours, starterPeakHours } from '@/core/fermentation';
 import { Q10, rateRatio } from '@/core/constants';
@@ -214,5 +214,185 @@ describe('the levain section header matches the schedule', () => {
     expect(section.meta!.hours).toBe(step.values!.hours);
     // 19 °C is well below the style's 23 °C reference, so the build must be longer.
     expect(section.meta!.hours).toBeGreaterThan(style.fermentation.levain_ref_hours!);
+  });
+});
+
+describe('Russell Peace Baker — "The Mighty White"', () => {
+  // 400 g flour, 270 g water to start, 80 g starter at 100%, 8 g salt.
+  // The recipe states its basis: "Baker's percentages are based on flour added
+  // directly to the dough (400 g), not including starter flour."
+  const DOUGH_FLOUR = 400;
+  const TOTAL_FLOUR = DOUGH_FLOUR + 80 / 2;
+
+  const build = (percentBasis: 'total' | 'dough') => {
+    const style = getStyleById('strong_white_sourdough')!;
+    return calculateRecipe({
+      style,
+      scaleMode: 'flour',
+      targetFlour: percentBasis === 'dough' ? TOTAL_FLOUR : TOTAL_FLOUR,
+      ballWeight: 0,
+      ballCount: 1,
+      percentBasis,
+      hydration: percentBasis === 'dough' ? 67.5 : 70.5,
+      salt: percentBasis === 'dough' ? 2 : 1.8,
+      totalTime: 7,
+      coldHours: 0,
+      roomTemp: 27,
+      leavenType: 'sourdough',
+      yeastForm: 'instant',
+      mixing: 'hand',
+      desiredDoughTemp: 28,
+      startTime: START,
+    });
+  };
+
+  it('reads 2% salt and 67.5% hydration on the dough basis, as written', () => {
+    const r = build('dough');
+    expect(r.params.percentBasis).toBe('dough');
+
+    const salt = r.ingredients.find((i) => i.type === 'salt')!;
+    expect(salt.percentage).toBeCloseTo(2, 1);
+    expect(salt.grams).toBeCloseTo(8, 0);
+
+    // 67.5% of 400 g of dough flour is the 270 g they start the autolyse with.
+    const doughWater = r.sections
+      .find((s) => s.id === 'final')!
+      .ingredients.filter((i) => i.type === 'water')
+      .reduce((sum, i) => sum + i.grams, 0);
+    expect(doughWater).toBeCloseTo(270, -1);
+  });
+
+  it('reads the same loaf as 1.8% salt on the total basis', () => {
+    const r = build('total');
+    const salt = r.ingredients.find((i) => i.type === 'salt')!;
+    expect(salt.percentage).toBeCloseTo(1.8, 1);
+    expect(salt.grams).toBeCloseTo(8, 0);
+  });
+
+  it('weighs out the same grams either way — only the denominator moves', () => {
+    const dough = build('dough');
+    const total = build('total');
+
+    const grams = (r: typeof dough, type: string) =>
+      r.ingredients.filter((i) => i.type === type).reduce((sum, i) => sum + i.grams, 0);
+
+    // The two builds are given hand-converted equivalents (2% of dough flour vs
+    // 1.8% of total), so they agree to the precision of that conversion rather
+    // than exactly. What matters is that the same loaf comes out of both.
+    const within = (a: number, b: number, pct: number) =>
+      Math.abs(a - b) / Math.max(a, b) < pct / 100;
+
+    expect(within(grams(dough, 'salt'), grams(total, 'salt'), 1.5)).toBe(true);
+    expect(within(grams(dough, 'water'), grams(total, 'water'), 1.5)).toBe(true);
+    expect(dough.totals.flour).toBeCloseTo(total.totals.flour, 0);
+  });
+
+  it('quotes the starter at the 20% the recipe states', () => {
+    const r = build('dough');
+    expect(r.fermentation.levainOnFlourPct).toBeGreaterThan(17);
+    expect(r.fermentation.levainOnFlourPct).toBeLessThan(23);
+  });
+
+  it('reports which basis it used, so the two can never be confused', () => {
+    expect(build('dough').notes.some((n) => n.code === 'note.percent_basis_dough')).toBe(true);
+    expect(build('total').notes.some((n) => n.code === 'note.percent_basis_total')).toBe(true);
+  });
+
+  it('asks for 38 °C water to hit their 28 °C dough in a 22 °C kitchen', () => {
+    const style = getStyleById('strong_white_sourdough')!;
+    const r = calculateRecipe({
+      style,
+      ballWeight: 758,
+      ballCount: 1,
+      totalTime: 7,
+      roomTemp: 22,
+      flourTemp: 22,
+      coldHours: 0,
+      leavenType: 'sourdough',
+      yeastForm: 'instant',
+      mixing: 'hand',
+      desiredDoughTemp: 28,
+      startTime: START,
+    });
+    expect(r.water.tempC).toBeCloseTo(38, 0);
+  });
+
+  it("uses the style's own bulk-rise target rather than a global constant", () => {
+    const style = getStyleById('strong_white_sourdough')!;
+    expect(style.bulkRisePct).toEqual([30, 50]);
+
+    const r = build('dough');
+    const bulk = r.timeline.find((s) => s.key === 'process.bulk')!;
+    expect(bulk.values!.riseMin).toBe(30);
+    expect(bulk.values!.riseMax).toBe(50);
+  });
+});
+
+describe('percentage basis, in general', () => {
+  it('leaves a straight dough untouched — there is no starter flour to exclude', () => {
+    const style = getStyleById('focaccia')!;
+    const common = {
+      style,
+      ballWeight: style.defaults.ballWeight,
+      ballCount: style.defaults.ballCount,
+      totalTime: style.defaults.totalTime,
+      roomTemp: style.defaults.roomTemp,
+      coldHours: 0,
+      leavenType: 'commercial' as const,
+      yeastForm: 'instant' as const,
+      mixing: 'hand' as const,
+      desiredDoughTemp: style.defaults.doughTemp,
+      startTime: START,
+    };
+    const total = calculateRecipe({ ...common, percentBasis: 'total' });
+    const dough = calculateRecipe({ ...common, percentBasis: 'dough' });
+    expect(dough.totals.flour).toBeCloseTo(total.totals.flour, 1);
+    expect(dough.params.basisFlour).toBeCloseTo(total.params.basisFlour, 1);
+  });
+
+  it('still lands on the requested dough weight on either basis', () => {
+    for (const style of BREAD_STYLES) {
+      for (const percentBasis of ['total', 'dough'] as const) {
+        const r = calculateRecipe({
+          style,
+          percentBasis,
+          ballWeight: style.defaults.ballWeight,
+          ballCount: style.defaults.ballCount,
+          totalTime: style.defaults.totalTime,
+          roomTemp: style.defaults.roomTemp,
+          coldHours: style.defaults.coldHours,
+          leavenType: style.defaults.leavenType,
+          yeastForm: 'instant',
+          mixing: 'hand',
+          desiredDoughTemp: style.defaults.doughTemp,
+          startTime: START,
+        });
+        const target = style.defaults.ballWeight * style.defaults.ballCount;
+        expect(r.totals.doughWeight, `${style.id}/${percentBasis}`).toBeGreaterThan(target * 0.99);
+        expect(r.totals.doughWeight, `${style.id}/${percentBasis}`).toBeLessThan(target * 1.01);
+      }
+    }
+  });
+
+  it('never produces a negative weight on the dough basis, even at 100% preferment', () => {
+    const style = getStyleById('pizza_biga')!;
+    const r = calculateRecipe({
+      style,
+      percentBasis: 'dough',
+      ballWeight: style.defaults.ballWeight,
+      ballCount: style.defaults.ballCount,
+      totalTime: style.defaults.totalTime,
+      roomTemp: style.defaults.roomTemp,
+      coldHours: 0,
+      leavenType: 'commercial',
+      yeastForm: 'instant',
+      mixing: 'hand',
+      desiredDoughTemp: style.defaults.doughTemp,
+      startTime: START,
+    });
+    for (const ing of r.ingredients) {
+      expect(ing.grams, ing.key).toBeGreaterThanOrEqual(0);
+      expect(Number.isFinite(ing.percentage), ing.key).toBe(true);
+    }
   });
 });

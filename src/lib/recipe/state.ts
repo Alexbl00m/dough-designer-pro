@@ -8,7 +8,7 @@
 
 import { BREAD_STYLES, getStyleById } from '@/data/styles';
 import type { BreadStyle } from '@/data/styles';
-import type { LeavenType, ScaleMode } from '@/core/types';
+import type { LeavenType, PercentBasis, ScaleMode } from '@/core/types';
 import type { MixingMethod, YeastForm } from '@/core/constants';
 
 export interface RecipeParams {
@@ -34,6 +34,7 @@ export interface RecipeParams {
   mixing: MixingMethod;
   starterHydration: number;
   usePreferment: boolean;
+  percentBasis: PercentBasis;
 }
 
 /** Fresh parameters for a style: its own defaults, never the previous style's. */
@@ -63,6 +64,7 @@ export function paramsForStyle(style: BreadStyle): RecipeParams {
     mixing: 'hand',
     starterHydration: 100,
     usePreferment: true,
+    percentBasis: 'total',
   };
 }
 
@@ -89,6 +91,7 @@ const KEYS: Record<keyof RecipeParams, string> = {
   mixing: 'm',
   starterHydration: 'sh',
   usePreferment: 'pf',
+  percentBasis: 'pb',
 };
 
 export function paramsToQuery(params: RecipeParams): string {
@@ -131,6 +134,7 @@ const ENUMS: Partial<Record<keyof RecipeParams, readonly string[]>> = {
   leavenType: ['commercial', 'sourdough', 'hybrid'],
   yeastForm: ['fresh', 'active_dry', 'instant'],
   mixing: ['hand', 'dlx', 'planetary', 'spiral'],
+  percentBasis: ['total', 'dough'],
 };
 
 /**

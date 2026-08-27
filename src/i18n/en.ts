@@ -82,6 +82,11 @@ export const en: Record<string, string> = {
   'field.ballCount': 'Number of {unit}',
   'field.targetFlour': 'Total flour',
   'field.targetDough': 'Total dough',
+  'field.percentBasis': 'Percentage basis',
+  'field.percentBasis.total': 'Total flour',
+  'field.percentBasis.dough': 'Dough flour',
+  'field.percentBasis.help':
+    'Which flour the percentages divide by. “Total flour” counts the flour inside the starter and preferment; “dough flour” counts only what you weigh out separately. Recipes use both and rarely say which — switch here if the numbers do not match the recipe you are reading.',
   'field.hydration': 'Hydration',
   'field.hydration.help': 'Water as a percentage of flour weight.',
   'field.salt': 'Salt',
@@ -157,6 +162,8 @@ export const en: Record<string, string> = {
   'recipe.why': 'Why',
   'recipe.grams': 'Grams',
   'recipe.percent': "Baker's %",
+  'recipe.percentTotal': "Baker's % (total flour)",
+  'recipe.percentDough': "Baker's % (dough flour)",
   'recipe.ingredient': 'Ingredient',
   'recipe.totalDough': 'Total dough',
   'recipe.targetDough': 'Target',
@@ -242,7 +249,7 @@ export const en: Record<string, string> = {
   'process.mix.body': 'Work the dough for {minutes} min until it comes together and looks smooth.',
   'process.bulk': 'Bulk fermentation',
   'process.bulk.body':
-    '{hours} h at {temp} °C. Aim for 50–60% growth through the bulk — the dough should be supple and hold its shape, not sticky.',
+    '{hours} h at {temp} °C. Aim for {riseMin}–{riseMax}% growth — the dough should be supple and hold its shape, not sticky.',
   'process.fold': 'Fold {index} of {count}',
   'process.fold.body': '{technique}',
   'process.fold.slapfold': 'Slap and fold on the bench until the dough tightens',
@@ -421,7 +428,10 @@ export const en: Record<string, string> = {
   'note.high_salt': '{pct}% salt slows the yeast noticeably. The dose has been raised to compensate.',
   'note.rich_dough': '{pct}% fat. Add it once the gluten is developed, otherwise the dough never takes hold.',
   'note.preferment': 'The preferment\'s flour and water are subtracted from the final dough, so the totals still add up.',
-  'note.percent_basis': 'All percentages are on total flour ({flour} g), including flour in the preferment and starter.',
+  'note.percent_basis_total':
+    'Percentages are on total flour ({total} g), including the flour in the preferment and starter.',
+  'note.percent_basis_dough':
+    'Percentages are on the flour added directly to the dough ({flour} g), not the total ({total} g). Plenty of recipes are written this way — but not all, so check the basis before comparing numbers.',
   'note.flour_overdrawn': 'The preferment and starter draw more flour than the recipe contains. Reduce one of them.',
   'note.water_overdrawn': 'The preferment and starter hold more water than {hydration}% hydration allows. Raise hydration or use a stiffer starter.',
   'note.from_section': 'from its own section',
