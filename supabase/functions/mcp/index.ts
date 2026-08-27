@@ -21,14 +21,9 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 62, salt_pct: 2.8, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.75,
-      proof_ratio: 0.25,
-      base_yeast_fresh_pct: 0.025,
-      yeast_ref_hours: 24,
-      yeast_ref_temp_c: 21,
-      base_inoculation_pct: 7,
-      levain_ref_hours: 10,
-      levain_ref_temp_c: 22
+      proof_ratio: 0.25
     },
+    defaultLevainPct: 15.1,
     process: {
       mixMin: 20,
       benchRestMin: 20,
@@ -63,14 +58,9 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 63, salt_pct: 2.2, sugar_pct: 1.5, oil_pct: 2, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.25,
-      proof_ratio: 0.75,
-      base_yeast_fresh_pct: 0.35,
-      yeast_ref_hours: 24,
-      yeast_ref_temp_c: 21,
-      base_inoculation_pct: 8,
-      levain_ref_hours: 10,
-      levain_ref_temp_c: 22
+      proof_ratio: 0.75
     },
+    defaultLevainPct: 17.4,
     process: {
       mixMin: 10,
       benchRestMin: 20,
@@ -101,10 +91,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 72, salt_pct: 2.2, sugar_pct: 1, oil_pct: 4, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.6,
-      proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.25,
-      yeast_ref_hours: 24,
-      yeast_ref_temp_c: 21
+      proof_ratio: 0.4
     },
     process: {
       mixMin: 8,
@@ -137,10 +124,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 80, salt_pct: 2.4, sugar_pct: 0, oil_pct: 3, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.7,
-      proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0.08,
-      yeast_ref_hours: 24,
-      yeast_ref_temp_c: 20
+      proof_ratio: 0.3
     },
     process: {
       autolyseMin: 30,
@@ -174,10 +158,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 52, salt_pct: 1.8, sugar_pct: 2, oil_pct: 18, fatKey: "ing.butter" },
     fermentation: {
       bulk_ratio: 0.65,
-      proof_ratio: 0.35,
-      base_yeast_fresh_pct: 0.3,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 22
+      proof_ratio: 0.35
     },
     process: {
       mixMin: 6,
@@ -210,14 +191,9 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 75, salt_pct: 2.4, sugar_pct: 1, oil_pct: 6, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.6,
-      proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.15,
-      yeast_ref_hours: 6,
-      yeast_ref_temp_c: 22,
-      base_inoculation_pct: 10,
-      levain_ref_hours: 7,
-      levain_ref_temp_c: 23
+      proof_ratio: 0.4
     },
+    defaultLevainPct: 22.2,
     process: {
       mixMin: 10,
       benchRestMin: 30,
@@ -252,10 +228,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 65, salt_pct: 2.4, sugar_pct: 0.6, oil_pct: 0, sugarKey: "ing.honey" },
     fermentation: {
       bulk_ratio: 0.35,
-      proof_ratio: 0.65,
-      base_yeast_fresh_pct: 0.1,
-      yeast_ref_hours: 6,
-      yeast_ref_temp_c: 22
+      proof_ratio: 0.65
     },
     preferment: {
       type: "poolish",
@@ -297,10 +270,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 70, salt_pct: 2.8, sugar_pct: 1, oil_pct: 0, sugarKey: "ing.malt" },
     fermentation: {
       bulk_ratio: 0.25,
-      proof_ratio: 0.75,
-      base_yeast_fresh_pct: 0.05,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 20
+      proof_ratio: 0.75
     },
     preferment: {
       type: "biga",
@@ -343,10 +313,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 74, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.6,
-      proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.08,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23
+      proof_ratio: 0.4
     },
     preferment: {
       type: "poolish",
@@ -393,10 +360,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 72, salt_pct: 2.2, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.65,
-      proof_ratio: 0.35,
-      base_yeast_fresh_pct: 0.06,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 22
+      proof_ratio: 0.35
     },
     preferment: {
       type: "biga",
@@ -442,10 +406,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 72, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.6,
-      proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.1,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23
+      proof_ratio: 0.4
     },
     preferment: {
       type: "poolish",
@@ -489,10 +450,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 82, salt_pct: 2.2, sugar_pct: 0, oil_pct: 1, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.7,
-      proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0.08,
-      yeast_ref_hours: 4,
-      yeast_ref_temp_c: 22
+      proof_ratio: 0.3
     },
     preferment: {
       type: "biga",
@@ -535,17 +493,14 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 70.5, salt_pct: 1.8, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.7,
-      proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
+      proof_ratio: 0.3
       // 80 g of 100%-hydration starter on 400 g of dough flour is 40 g of
       // starter flour in 440 g total — 9.1% in the engine's convention — over a
-      // bulk at 26–28 °C plus a same-day proof.
-      base_inoculation_pct: 9,
-      levain_ref_hours: 7,
-      levain_ref_temp_c: 27
     },
+    defaultLevainPct: 19.8,
+    // Solved so the engine reproduces The Mighty White's 80 g starter on 400 g
+    // of dough flour over its same-day schedule at 27 °C.
+    fermentFactor: 1.37,
     process: {
       autolyseMin: 45,
       mixMin: 3,
@@ -582,14 +537,12 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 76, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.55,
-      proof_ratio: 0.45,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 9,
-      levain_ref_hours: 9,
-      levain_ref_temp_c: 23
+      proof_ratio: 0.45
     },
+    defaultLevainPct: 19.8,
+    // Solved so the engine reproduces Full Proof Baking's 20% levain over their
+    // published 6 h bulk at 23.3 °C plus a 14 h retard at 3.3 °C.
+    fermentFactor: 1.53,
     process: {
       autolyseMin: 45,
       mixMin: 10,
@@ -628,14 +581,9 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 80, salt_pct: 2.2, sugar_pct: 0.5, oil_pct: 8, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.55,
-      proof_ratio: 0.45,
-      base_yeast_fresh_pct: 0.15,
-      yeast_ref_hours: 6,
-      yeast_ref_temp_c: 22,
-      base_inoculation_pct: 10,
-      levain_ref_hours: 7,
-      levain_ref_temp_c: 23
+      proof_ratio: 0.45
     },
+    defaultLevainPct: 22.2,
     process: {
       mixMin: 8,
       benchRestMin: 30,
@@ -666,10 +614,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 66, salt_pct: 1.8, sugar_pct: 3, oil_pct: 5, fatKey: "ing.butter" },
     fermentation: {
       bulk_ratio: 0.45,
-      proof_ratio: 0.55,
-      base_yeast_fresh_pct: 0.25,
-      yeast_ref_hours: 3,
-      yeast_ref_temp_c: 24
+      proof_ratio: 0.55
     },
     process: {
       mixMin: 12,
@@ -703,10 +648,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 62, salt_pct: 2, sugar_pct: 1, oil_pct: 3, fatKey: "ing.oliveoil" },
     fermentation: {
       bulk_ratio: 0.7,
-      proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0.5,
-      yeast_ref_hours: 3,
-      yeast_ref_temp_c: 24
+      proof_ratio: 0.3
     },
     process: {
       mixMin: 8,
@@ -736,14 +678,9 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 78, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.6,
-      proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 14,
-      levain_ref_hours: 8,
-      levain_ref_temp_c: 24
+      proof_ratio: 0.4
     },
+    defaultLevainPct: 32.6,
     process: {
       mixMin: 8,
       benchRestMin: 40,
@@ -779,14 +716,9 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 82, salt_pct: 2, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.55,
-      proof_ratio: 0.45,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 10,
-      levain_ref_hours: 9,
-      levain_ref_temp_c: 23
+      proof_ratio: 0.45
     },
+    defaultLevainPct: 22.2,
     process: {
       autolyseMin: 45,
       mixMin: 10,
@@ -826,14 +758,9 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 68, salt_pct: 2.2, sugar_pct: 0, oil_pct: 0 },
     fermentation: {
       bulk_ratio: 0.65,
-      proof_ratio: 0.35,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 4,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 20,
-      levain_ref_hours: 5,
-      levain_ref_temp_c: 23
+      proof_ratio: 0.35
     },
+    defaultLevainPct: 50,
     process: {
       mixMin: 8,
       benchRestMin: 30,
@@ -866,14 +793,9 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 58, salt_pct: 2, sugar_pct: 0, oil_pct: 18, fatKey: "ing.melted_butter" },
     fermentation: {
       bulk_ratio: 0.8,
-      proof_ratio: 0.2,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 3,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 8,
-      levain_ref_hours: 3,
-      levain_ref_temp_c: 23
+      proof_ratio: 0.2
     },
+    defaultLevainPct: 17.4,
     process: {
       mixMin: 8,
       shapeKey: "process.shape.tortilla",
@@ -903,10 +825,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 68, salt_pct: 1.6, sugar_pct: 10, oil_pct: 8, fatKey: "ing.butter" },
     fermentation: {
       bulk_ratio: 0.55,
-      proof_ratio: 0.45,
-      base_yeast_fresh_pct: 2.8,
-      yeast_ref_hours: 2.5,
-      yeast_ref_temp_c: 26
+      proof_ratio: 0.45
     },
     process: {
       mixMin: 15,
@@ -941,10 +860,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 69, salt_pct: 2.1, sugar_pct: 2.6, oil_pct: 14, fatKey: "ing.butter", sugarKey: "ing.honey" },
     fermentation: {
       bulk_ratio: 0.45,
-      proof_ratio: 0.55,
-      base_yeast_fresh_pct: 2,
-      yeast_ref_hours: 3,
-      yeast_ref_temp_c: 24
+      proof_ratio: 0.55
     },
     process: {
       mixMin: 15,
@@ -979,10 +895,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 52, salt_pct: 1.8, sugar_pct: 12, oil_pct: 45, fatKey: "ing.butter" },
     fermentation: {
       bulk_ratio: 0.55,
-      proof_ratio: 0.45,
-      base_yeast_fresh_pct: 1.2,
-      yeast_ref_hours: 4,
-      yeast_ref_temp_c: 22
+      proof_ratio: 0.45
     },
     process: {
       mixMin: 25,
@@ -1017,10 +930,7 @@ var BREAD_STYLES = [
     defaultParams: { hydration_pct: 55, salt_pct: 1.6, sugar_pct: 9, oil_pct: 9, fatKey: "ing.oil" },
     fermentation: {
       bulk_ratio: 0.55,
-      proof_ratio: 0.45,
-      base_yeast_fresh_pct: 0.8,
-      yeast_ref_hours: 4,
-      yeast_ref_temp_c: 24
+      proof_ratio: 0.45
     },
     process: {
       mixMin: 12,
@@ -1125,6 +1035,22 @@ var sv = {
   "field.percentBasis.total": "Totalt mj\xF6l",
   "field.percentBasis.dough": "Degens mj\xF6l",
   "field.percentBasis.help": "Vilket mj\xF6l procenten r\xE4knas p\xE5. \u201CTotalt mj\xF6l\u201D r\xE4knar in surdegens och f\xF6rj\xE4sningens mj\xF6l; \u201Cdegens mj\xF6l\u201D bara det du v\xE4ger upp separat. Recept anv\xE4nder b\xE5da och skriver s\xE4llan vilket \u2013 byt hit om siffrorna inte st\xE4mmer med receptet du l\xE4ser.",
+  "clock.title": "J\xE4sningsklockan",
+  "clock.doubling": "F\xF6rdubbling {hours} h",
+  "clock.lead": "Vid {temp} \xB0C f\xF6rdubblas j\xE4stpopulationen var {hours} h. Det \xE4r sj\xE4lva nyckeln: varje f\xF6rdubbling av j\xE4smedlet kortar bulken med exakt s\xE5 mycket \u2013 oavsett hur mycket du redan har i. D\xE4rf\xF6r g\xF6r 50\xD7 mer surdeg degen ungef\xE4r 3,7\xD7 snabbare, inte 50\xD7.",
+  "clock.dose": "{pct}% levain",
+  "clock.bulk": "{hours} h bulk",
+  "clock.slower": "Salt, socker, vatten och fett i det h\xE4r receptet drar ut klockan med {pct}%.",
+  "clock.faster": "Salt, socker, vatten och fett i det h\xE4r receptet kortar klockan med {pct}%.",
+  "clock.yeastEquivalent": "{yeast}% {form} ({grams} g) motsvarar {starter}% mogen surdeg i j\xE4skraft. J\xE4st och surdeg g\xE5r p\xE5 samma klocka \u2013 byter du j\xE4smedel \xE4ndras inte schemat.",
+  "clock.source": "Kurvan \xE4r interpolerad ur en m\xE4tt tabell \xF6ver bulktider vid \xE5tta temperaturer och \xE5tta surdegsm\xE4ngder. Temperaturberoendet \xE4r inte ett enda Q10: brant i kylan, omkring 3 vid rumstemperatur, och planar ut n\xE4ra j\xE4stens optimum runt 29 \xB0C.",
+  "field.driver": "Vad styr du?",
+  "field.driver.time": "Jag v\xE4ljer tiden",
+  "field.driver.dose": "Jag v\xE4ljer m\xE4ngden",
+  "field.driver.help": "Tv\xE5 s\xE4tt att h\xE5lla i samma ekvation. V\xE4ljer du tiden r\xE4knas m\xE4ngden j\xE4smedel ut; v\xE4ljer du m\xE4ngden r\xE4knas tiden ut. De kan aldrig s\xE4ga emot varandra.",
+  "field.leavenPct": "M\xE4ngd j\xE4smedel",
+  "field.leavenPct.help": "Mogen levain i procent av degens mj\xF6l \u2013 siffran recept menar med \u201Cinokulering\u201D. J\xE4st r\xE4knas om till samma skala.",
+  "field.computedTime": "Ber\xE4knad j\xE4sningstid",
   "field.hydration": "Hydrering",
   "field.hydration.help": "Vatten i procent av mj\xF6lvikten.",
   "field.salt": "Salt",
@@ -1233,7 +1159,7 @@ var sv = {
   "sd.ratio": "{onFlour}% levain p\xE5 mj\xF6let",
   "sd.body": "{grams} g mogen levain vid {hydration}% hydrering. Det \xE4r {onFlour}% r\xE4knat p\xE5 degens mj\xF6l \u2013 siffran de flesta recept menar med \u201Cinokulering\u201D \u2013 eller {inoculation}% av det totala mj\xF6let om man r\xE4knar surdegens mj\xF6l f\xF6r sig.",
   "sd.peak": "Levainen beh\xF6ver ungef\xE4r {hours} h f\xF6r att n\xE5 toppen vid {temp} \xB0C.",
-  "sd.base": "Basen f\xF6r den h\xE4r stilen \xE4r {base}% vid {temp} \xB0C och {hours} h. M\xE4ngden skalas med Q10: dubbelt s\xE5 l\xE5ng tid \u2248 halva m\xE4ngden, +10 \xB0C \u2248 {q10}\xD7 snabbare j\xE4sning.",
+  "sd.base": "M\xE4ngden f\xF6ljer j\xE4sningsklockan: vid {temp} \xB0C f\xF6rdubblas populationen var {hours} h, s\xE5 varje halvering av surdegen f\xF6rl\xE4nger bulken med just den tiden.",
   "sd.now": "Just nu: {total} h vid {temp} \xB0C{cold}.",
   "sd.nowCold": " ({cold} h i kyl \u2192 {equiv} h rumsekvivalent)",
   "sd.checklist": "\xC4r surdegen mogen?",
@@ -1245,7 +1171,7 @@ var sv = {
   "sd.check.5": "N\xE4tverk av bubblor syns l\xE4ngs burkens sidor",
   "sd.checkFoot": "Tr\xF6g eller nymatad surdeg j\xE4ser l\xE5ngsammare \xE4n ber\xE4kningen antar \u2013 v\xE4nta hellre en timme extra.",
   "sd.sensitivity": "K\xE4nslighet: tid och temperatur",
-  "sd.sensitivityLead": "Levain i % av degens mj\xF6l, med surdegens mj\xF6l som andel av totalen inom parentes. Ditt l\xE4ge \xE4r markerat.",
+  "sd.sensitivityLead": "Levain i % av degens mj\xF6l f\xF6r att tr\xE4ffa varje tid och temperatur. Ditt l\xE4ge \xE4r markerat.",
   "sd.sensitivityFoot": "Tabellen g\xE4ller j\xE4sning i rumstemperatur hela tiden. Kyltid r\xE4knas om till rumsekvivalent tid innan m\xE4ngden best\xE4ms.",
   "sd.time": "Tid",
   // ── Yeast explainer ──
@@ -1424,6 +1350,8 @@ var sv = {
   "note.cold_retard": "Kylj\xE4sning: {cold} av {total} h ligger vid {coldTemp} \xB0C ({phase}). Det motsvarar {equiv} h i rumstemperatur, och j\xE4sten \xE4r doserad f\xF6r den siffran.",
   "note.yeast_clamped": "J\xE4stm\xE4ngden n\xE5dde modellens gr\xE4ns och stannar p\xE5 {pct}% ({grams} g). Justera tid eller temperatur ist\xE4llet.",
   "note.tiny_yeast": "Bara {grams} g j\xE4st. V\xE4g p\xE5 en 0,01-v\xE5g, eller l\xF6s upp en st\xF6rre m\xE4ngd i vatten och anv\xE4nd en del av l\xF6sningen.",
+  "note.time_too_long": "{hours} h vid {temp} \xB0C kr\xE4ver mindre j\xE4smedel \xE4n du kan v\xE4ga. S\xE4nk temperaturen, l\xE4gg en del av tiden i kyl, eller korta j\xE4sningen.",
+  "note.very_fast": "Mycket j\xE4smedel ({pct}% levainekvivalent). Degen g\xE5r fort \u2013 g\xE5 efter hur den ser ut och k\xE4nns, inte efter klockan.",
   "note.levain_ratio": "Surdegsratio: {onFlour}% mogen levain p\xE5 mj\xF6let i degen \u2013 den siffran de flesta recept menar med \u201Cinokulering\u201D. Det \xE4r {grams} g levain vid {hydration}% hydrering, vilket motsvarar {inoculation}% av det totala mj\xF6let r\xE4knat som surdegens mj\xF6l.",
   "note.levain_ripe": "Anv\xE4nd levainen p\xE5 toppen \u2013 ungef\xE4r {hours} h vid {temp} \xB0C efter en vanlig matning. En h\xF6g utsp\xE4dning som 1:5:5 tar l\xE4ngre tid, och en tr\xF6g surdeg j\xE4ser l\xE5ngsammare \xE4n ber\xE4kningen antar.",
   "note.levain_high": "H\xF6g inokulering ({pct}%). Degen j\xE4ser fort och blir syrligare \u2013 h\xE5ll koll fr\xE5n halva tiden.",
@@ -1540,6 +1468,22 @@ var en = {
   "field.percentBasis.total": "Total flour",
   "field.percentBasis.dough": "Dough flour",
   "field.percentBasis.help": "Which flour the percentages divide by. \u201CTotal flour\u201D counts the flour inside the starter and preferment; \u201Cdough flour\u201D counts only what you weigh out separately. Recipes use both and rarely say which \u2014 switch here if the numbers do not match the recipe you are reading.",
+  "clock.title": "The fermentation clock",
+  "clock.doubling": "Doubling {hours} h",
+  "clock.lead": "At {temp} \xB0C the population doubles every {hours} h. That is the whole trick: every doubling of the leavening shortens bulk by exactly that much, however much you already have in. It is why 50\xD7 the starter makes the dough about 3.7\xD7 faster, not 50\xD7.",
+  "clock.dose": "{pct}% levain",
+  "clock.bulk": "{hours} h bulk",
+  "clock.slower": "This recipe's salt, sugar, water and fat stretch the clock by {pct}%.",
+  "clock.faster": "This recipe's salt, sugar, water and fat compress the clock by {pct}%.",
+  "clock.yeastEquivalent": "{yeast}% {form} ({grams} g) is worth {starter}% ripe starter in leavening power. Yeast and sourdough ride the same clock, so switching leavening does not change the schedule.",
+  "clock.source": "The curve is interpolated from a measured table of bulk times across eight temperatures and eight starter doses. The temperature dependence is not a single Q10: steep in the cold, around 3 at room temperature, flattening near the yeast optimum around 29 \xB0C.",
+  "field.driver": "What are you holding?",
+  "field.driver.time": "I choose the time",
+  "field.driver.dose": "I choose the amount",
+  "field.driver.help": "Two ways to hold the same equation. Choose the time and the leavening follows; choose the leavening and the time follows. They can never contradict each other.",
+  "field.leavenPct": "Leavening amount",
+  "field.leavenPct.help": 'Ripe levain as a percentage of the dough flour \u2014 the figure recipes mean by "inoculation". Yeast is converted to the same scale.',
+  "field.computedTime": "Calculated fermentation time",
   "field.hydration": "Hydration",
   "field.hydration.help": "Water as a percentage of flour weight.",
   "field.salt": "Salt",
@@ -1648,7 +1592,7 @@ var en = {
   "sd.ratio": "{onFlour}% levain on flour",
   "sd.body": "{grams} g of ripe levain at {hydration}% hydration. That is {onFlour}% against the dough flour \u2014 the figure most recipes mean by \u201Cinoculation\u201D \u2014 or {inoculation}% of the total flour if you count the starter's flour separately.",
   "sd.peak": "The levain needs roughly {hours} h to peak at {temp} \xB0C.",
-  "sd.base": "The reference for this style is {base}% at {temp} \xB0C over {hours} h. The dose scales with Q10: twice the time \u2248 half the starter, +10 \xB0C \u2248 {q10}\xD7 faster fermentation.",
+  "sd.base": "The amount follows the fermentation clock: at {temp} \xB0C the population doubles every {hours} h, so every halving of the starter adds exactly that much to the bulk.",
   "sd.now": "Right now: {total} h at {temp} \xB0C{cold}.",
   "sd.nowCold": " ({cold} h cold \u2192 {equiv} h room-equivalent)",
   "sd.checklist": "Is the starter ripe?",
@@ -1660,7 +1604,7 @@ var en = {
   "sd.check.5": "A web of bubbles is visible down the sides of the jar",
   "sd.checkFoot": "A sluggish or freshly fed starter ferments slower than the model assumes \u2014 give it the extra hour.",
   "sd.sensitivity": "Sensitivity: time and temperature",
-  "sd.sensitivityLead": "Levain as % of the dough flour, with starter flour as a share of the total in brackets. Your setting is highlighted.",
+  "sd.sensitivityLead": "Levain as % of dough flour needed to hit each time and temperature. Your setting is highlighted.",
   "sd.sensitivityFoot": "The table assumes room temperature throughout. Cold hours convert to room-equivalent time before the dose is set.",
   "sd.time": "Time",
   // ── Yeast explainer ──
@@ -1839,6 +1783,8 @@ var en = {
   "note.cold_retard": "Cold retard: {cold} of {total} h sit at {coldTemp} \xB0C ({phase}). That is worth about {equiv} h at room temperature, and the dose is set for that figure.",
   "note.yeast_clamped": "The dose hit the model's limit and stops at {pct}% ({grams} g). Adjust time or temperature instead.",
   "note.tiny_yeast": "Only {grams} g of yeast. Use a 0.01 g scale, or dissolve a larger amount in water and use part of the solution.",
+  "note.time_too_long": "{hours} h at {temp} \xB0C needs less leavening than you can weigh. Drop the temperature, move part of the time into the fridge, or shorten the ferment.",
+  "note.very_fast": "A lot of leavening ({pct}% levain-equivalent). This dough moves fast \u2014 go by how it looks and feels, not by the clock.",
   "note.levain_ratio": "Starter ratio: {onFlour}% ripe levain on the dough flour \u2014 the figure most recipes mean by \u201Cinoculation\u201D. That is {grams} g of levain at {hydration}% hydration, which is {inoculation}% of the total flour counted as starter flour.",
   "note.levain_ripe": "Use the levain at its peak \u2014 roughly {hours} h at {temp} \xB0C after a normal feed. A high-dilution feed like 1:5:5 takes longer, and a sluggish starter ferments slower than the model assumes.",
   "note.levain_high": "High inoculation ({pct}%). The dough moves fast and turns tangier \u2014 start checking at the halfway mark.",
@@ -2189,7 +2135,7 @@ var WATER_TEMP_MAX_C = 55;
 var YEAST_DANGER_TEMP_C = 50;
 var YEAST_PCT_MIN = 5e-3;
 var YEAST_PCT_MAX = 4;
-var INOCULATION_MIN = 3;
+var INOCULATION_MIN = 0.1;
 var INOCULATION_MAX = 50;
 var INOCULATION_HIGH = 20;
 var CORRECTION_CLAMP = {
@@ -2212,6 +2158,88 @@ var round = (value, decimals = 0) => {
 var clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 var rateRatio = (temp, reference = REFERENCE_TEMP_C, q10 = Q10) => q10 ** ((temp - reference) / 10);
 
+// src/data/fermentationTable.ts
+var FULL_FERMENT_PCT = 97.7;
+var FERMENTATION_CURVE = [
+  { tempC: 10, doublingHours: 12.031, proofHours: 19.12 },
+  { tempC: 12.8, doublingHours: 7.514, proofHours: 11.94 },
+  { tempC: 15.6, doublingHours: 4.785, proofHours: 7.61 },
+  { tempC: 18.3, doublingHours: 3.138, proofHours: 4.99 },
+  { tempC: 21.1, doublingHours: 2.153, proofHours: 3.42 },
+  { tempC: 23.9, doublingHours: 1.579, proofHours: 2.51 },
+  { tempC: 26.7, doublingHours: 1.277, proofHours: 2.03 },
+  { tempC: 29.4, doublingHours: 1.198, proofHours: 1.9 }
+];
+var TABLE_SALT_PCT = 2;
+var TABLE_HYDRATION_PCT = 75;
+var FRESH_YEAST_TO_STARTER = 30;
+var VERY_FAST_LEAVEN_PCT = 60;
+
+// src/core/growth.ts
+var LEAVEN_PCT_MIN = 0.2;
+var LEAVEN_PCT_MAX = 60;
+function interpolate2(tempC, pick) {
+  const curve = FERMENTATION_CURVE;
+  const t = clamp(tempC, -2, 45);
+  let lo = 0;
+  if (t <= curve[0].tempC) lo = 0;
+  else if (t >= curve[curve.length - 1].tempC) lo = curve.length - 2;
+  else {
+    lo = curve.findIndex((a2, i) => i < curve.length - 1 && t >= a2.tempC && t < curve[i + 1].tempC);
+    if (lo < 0) lo = curve.length - 2;
+  }
+  const a = curve[lo];
+  const b = curve[lo + 1];
+  const span = b.tempC - a.tempC;
+  const f = span === 0 ? 0 : (t - a.tempC) / span;
+  const value = Math.exp(Math.log(pick(a)) + f * (Math.log(pick(b)) - Math.log(pick(a))));
+  return Math.max(0.2, value);
+}
+var doublingHoursAt = (tempC) => interpolate2(tempC, (a) => a.doublingHours);
+var proofHoursAt = (tempC) => interpolate2(tempC, (a) => a.proofHours);
+function timeCorrection(params) {
+  const salt = clamp(
+    1 + CORRECTION_SLOPE.saltPerPctOver2 * (params.saltPct - TABLE_SALT_PCT),
+    ...CORRECTION_CLAMP.salt
+  );
+  const sugarRaw = params.sugarPct <= 8 ? 1 + CORRECTION_SLOPE.sugarPerPctUnder8 * params.sugarPct : 1 + CORRECTION_SLOPE.sugarPerPctUnder8 * 8 + CORRECTION_SLOPE.sugarPerPctOver8 * (params.sugarPct - 8);
+  const sugar = clamp(sugarRaw, ...CORRECTION_CLAMP.sugar);
+  const hydration = clamp(
+    1 + CORRECTION_SLOPE.hydrationPerPctOver62 * (params.hydrationPct - TABLE_HYDRATION_PCT),
+    ...CORRECTION_CLAMP.hydration
+  );
+  const fat = clamp(
+    1 + CORRECTION_SLOPE.fatPerPctOver5 * Math.max(0, params.fatPct - 5),
+    ...CORRECTION_CLAMP.fat
+  );
+  return salt * sugar * hydration * fat;
+}
+var correctionFor = (p) => timeCorrection({
+  saltPct: p.saltPct ?? TABLE_SALT_PCT,
+  sugarPct: p.sugarPct ?? 0,
+  hydrationPct: p.hydrationPct ?? TABLE_HYDRATION_PCT,
+  fatPct: p.fatPct ?? 0
+});
+function bulkHoursFor(leavenPct, p) {
+  const k = doublingHoursAt(p.tempC);
+  const dose = clamp(leavenPct, LEAVEN_PCT_MIN, FULL_FERMENT_PCT - 0.5);
+  const hours = k * Math.log2(FULL_FERMENT_PCT / dose) * correctionFor(p);
+  return round(Math.max(0.4 * k, hours), 2);
+}
+function leavenPctFor(bulkHours, p) {
+  const hours = Math.max(0.1, bulkHours) / correctionFor(p);
+  const dose = FULL_FERMENT_PCT / 2 ** (hours / doublingHoursAt(p.tempC));
+  return round(clamp(dose, LEAVEN_PCT_MIN, LEAVEN_PCT_MAX), 2);
+}
+function totalHoursFor(leavenPct, p) {
+  return round(bulkHoursFor(leavenPct, p) + proofHoursAt(p.tempC) * correctionFor(p), 2);
+}
+function leavenPctForTotal(totalHours, p) {
+  const proof = proofHoursAt(p.tempC) * correctionFor(p);
+  return leavenPctFor(Math.max(0.1, totalHours - proof), p);
+}
+var starterToFreshYeastPct = (starterPct) => starterPct / FRESH_YEAST_TO_STARTER;
+
 // src/core/fermentation.ts
 function computeRoomEquivHours({
   totalHours,
@@ -2229,55 +2257,54 @@ function computeRoomEquivHours({
   return Math.max(0.25, equiv);
 }
 function computeYeastDose(input) {
-  const identity = {
-    time: 1,
-    temperature: 1,
-    salt: 1,
-    sugar: 1,
-    hydration: 1,
-    fat: 1,
-    form: 1,
-    preferment: 1
-  };
-  if (input.leavenType === "sourdough" || input.baseFreshPct <= 0) {
-    return { pct: 0, freshPct: 0, clamped: false, corrections: identity };
+  if (input.leavenType === "sourdough") {
+    return { pct: 0, freshPct: 0, starterEquivalentPct: 0, clamped: false };
   }
-  const time = input.refHours / Math.max(0.25, input.effectiveHours);
-  const temperature = 1 / rateRatio(input.roomTemp, input.refTempC);
-  const salt = clamp(
-    1 + CORRECTION_SLOPE.saltPerPctOver2 * (input.saltPct - 2),
-    ...CORRECTION_CLAMP.salt
-  );
-  const sugarRaw = input.sugarPct <= 8 ? 1 + CORRECTION_SLOPE.sugarPerPctUnder8 * input.sugarPct : 1 + CORRECTION_SLOPE.sugarPerPctUnder8 * 8 + CORRECTION_SLOPE.sugarPerPctOver8 * (input.sugarPct - 8);
-  const sugar = clamp(sugarRaw, ...CORRECTION_CLAMP.sugar);
-  const hydration = clamp(
-    1 + CORRECTION_SLOPE.hydrationPerPctOver62 * (input.hydrationPct - 62),
-    ...CORRECTION_CLAMP.hydration
-  );
-  const fat = clamp(
-    1 + CORRECTION_SLOPE.fatPerPctOver5 * Math.max(0, input.fatPct - 5),
-    ...CORRECTION_CLAMP.fat
-  );
-  const preferment = 1 - 0.6 * clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
-  const hybrid = input.leavenType === "hybrid" ? 0.5 : 1;
-  const freshRaw = input.baseFreshPct * time * temperature * salt * sugar * hydration * fat * preferment * hybrid;
-  const form = YEAST_CONVERSION[input.yeastForm];
-  const dosed = freshRaw * form;
+  const clock = {
+    tempC: input.roomTemp,
+    saltPct: input.saltPct,
+    sugarPct: input.sugarPct,
+    hydrationPct: input.hydrationPct,
+    fatPct: input.fatPct
+  };
+  const hours = input.effectiveHours / (input.fermentFactor ?? 1);
+  let starterEquivalent = leavenPctForTotal(hours, clock);
+  const prefermentShare = clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
+  starterEquivalent *= 1 - 0.6 * prefermentShare;
+  if (input.leavenType === "hybrid") starterEquivalent *= 0.5;
+  const freshRaw = starterToFreshYeastPct(starterEquivalent);
+  const dosed = freshRaw * YEAST_CONVERSION[input.yeastForm];
   const pct = clamp(dosed, YEAST_PCT_MIN, YEAST_PCT_MAX);
   return {
     pct: round(pct, 4),
     freshPct: round(freshRaw, 4),
-    clamped: Math.abs(pct - dosed) > 1e-9,
-    corrections: { time, temperature, salt, sugar, hydration, fat, form, preferment }
+    starterEquivalentPct: round(starterEquivalent, 2),
+    clamped: Math.abs(pct - dosed) > 1e-9
   };
 }
 function computeInoculationPct(input) {
-  if (input.leavenType === "commercial" || input.basePct <= 0) return 0;
-  const time = input.refHours / Math.max(0.25, input.effectiveHours);
-  const temperature = 1 / rateRatio(input.roomTemp, input.refTempC);
-  const hybrid = input.leavenType === "hybrid" ? 0.5 : 1;
-  const scaled = input.basePct * time * temperature * hybrid;
-  return round(clamp(scaled, INOCULATION_MIN, INOCULATION_MAX), 1);
+  if (input.leavenType === "commercial") return 0;
+  const hours = input.effectiveHours / (input.fermentFactor ?? 1);
+  let onFlour = leavenPctForTotal(hours, {
+    tempC: input.roomTemp,
+    saltPct: input.saltPct,
+    sugarPct: input.sugarPct,
+    hydrationPct: input.hydrationPct,
+    fatPct: input.fatPct
+  });
+  if (input.leavenType === "hybrid") onFlour *= 0.5;
+  return round(
+    clamp(
+      inoculationFromLevainOnFlour(onFlour, input.starterHydrationPct ?? 100),
+      INOCULATION_MIN,
+      INOCULATION_MAX
+    ),
+    3
+  );
+}
+function inoculationFromLevainOnFlour(onFlourPct, starterHydrationPct = 100) {
+  const ratio = onFlourPct / 100 / (1 + starterHydrationPct / 100);
+  return ratio / (1 + ratio) * 100;
 }
 function computeWaterTemp(params) {
   const hasPreferment = typeof params.prefermentTempC === "number";
@@ -2451,8 +2478,6 @@ function calculateRecipe(inputs) {
   const roomTemp = clamp(inputs.roomTemp, 4, 40);
   const coldTemp = clamp(inputs.coldTemp ?? DEFAULT_COLD_TEMP_C, -2, 18);
   const totalTime = Math.max(0.5, inputs.totalTime);
-  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
-  const coldHours = Math.min(requestedCold, totalTime);
   const coldPhase = inputs.coldPhase ?? style.process.coldPhase;
   const desiredDoughTemp = clamp(inputs.desiredDoughTemp, 15, 35);
   const flourTemp = inputs.flourTemp ?? roomTemp;
@@ -2462,19 +2487,44 @@ function calculateRecipe(inputs) {
   const usePreferment = (inputs.usePreferment ?? true) && Boolean(style.preferment);
   const preferment = usePreferment ? style.preferment : void 0;
   const percentBasis = inputs.percentBasis ?? "total";
-  if (requestedCold > totalTime) {
-    notes.push({ code: "note.cold_clamped", severity: "warn", values: { hours: round(coldHours, 1) } });
+  const driver = inputs.driver ?? "time";
+  const clock = {
+    tempC: roomTemp,
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat
+  };
+  const fermentFactor = style.fermentFactor ?? 1;
+  const usesLevain = leavenType === "sourdough" || leavenType === "hybrid";
+  let requestedTotal;
+  let leavenOnFlour;
+  if (driver === "dose") {
+    leavenOnFlour = Math.max(0.2, inputs.leavenPct ?? style.defaultLevainPct ?? 20);
+    requestedTotal = round(totalHoursFor(leavenOnFlour, clock) * fermentFactor, 2);
+  } else {
+    requestedTotal = totalTime;
+    leavenOnFlour = leavenPctForTotal(totalTime / fermentFactor, clock);
+  }
+  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
+  const coldHours = Math.min(requestedCold, requestedTotal);
+  if (requestedCold > requestedTotal) {
+    notes.push({
+      code: "note.cold_clamped",
+      severity: "warn",
+      values: { hours: round(coldHours, 1) }
+    });
   }
   const roomEquivHours = computeRoomEquivHours({
-    totalHours: totalTime,
+    totalHours: requestedTotal,
     coldHours,
     roomTemp,
     coldTemp
   });
+  if (driver === "time") {
+    leavenOnFlour = leavenPctForTotal(roomEquivHours / fermentFactor, clock);
+  }
   const dose = computeYeastDose({
-    baseFreshPct: style.fermentation.base_yeast_fresh_pct,
-    refHours: style.fermentation.yeast_ref_hours,
-    refTempC: style.fermentation.yeast_ref_temp_c,
     effectiveHours: roomEquivHours,
     roomTemp,
     saltPct: salt,
@@ -2483,24 +2533,27 @@ function calculateRecipe(inputs) {
     fatPct: fat,
     yeastForm,
     leavenType,
-    prefermentFlourPct: preferment?.flour_pct
+    prefermentFlourPct: preferment?.flour_pct,
+    fermentFactor
   });
-  const usesLevain = leavenType === "sourdough" || leavenType === "hybrid";
-  const baseInoculation = style.fermentation.base_inoculation_pct ?? 20;
-  const levainRefHours = style.fermentation.levain_ref_hours ?? 6;
-  const levainRefTemp = style.fermentation.levain_ref_temp_c ?? 24;
   const inoculationPct = usesLevain ? computeInoculationPct({
-    basePct: baseInoculation,
-    refHours: levainRefHours,
-    refTempC: levainRefTemp,
     effectiveHours: roomEquivHours,
     roomTemp,
-    leavenType
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+    leavenType,
+    starterHydrationPct: starterHydration,
+    fermentFactor
   }) : 0;
   const levainPeakHours = starterPeakHours(roomTemp);
-  if (usesLevain && style.fermentation.base_inoculation_pct === void 0) {
-    notes.push({ code: "note.levain_generic", severity: "info", values: { style: style.name } });
-  }
+  const correction = timeCorrection({
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat
+  });
   const extras = style.extras ?? [];
   const extrasPct = extras.reduce((sum, e) => sum + e.pct, 0);
   const prefermentExtrasPct = preferment ? (preferment.extras ?? []).reduce(
@@ -2736,8 +2789,16 @@ function calculateRecipe(inputs) {
   const clampedWater = Math.abs(rawTempC - waterTempC) > 0.05;
   const iceGrams = computeIceSplit(finalWater, waterTempC);
   const ratioSum = style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
-  const bulkHours = totalTime * (style.fermentation.bulk_ratio / ratioSum);
-  const proofHours = totalTime * (style.fermentation.proof_ratio / ratioSum);
+  let bulkHours = requestedTotal * (style.fermentation.bulk_ratio / ratioSum);
+  let proofHours = requestedTotal * (style.fermentation.proof_ratio / ratioSum);
+  const coldInProof = coldPhase === "proof" ? Math.min(coldHours, proofHours) : 0;
+  const warmProof = proofHours - coldInProof;
+  const maxWarmProof = proofHoursAt(roomTemp) * correction;
+  if (warmProof > maxWarmProof) {
+    const surplus = warmProof - maxWarmProof;
+    proofHours -= surplus;
+    bulkHours += surplus;
+  }
   const startTime = inputs.startTime ?? /* @__PURE__ */ new Date();
   const { steps, readyAt } = buildSchedule({
     style,
@@ -2777,9 +2838,11 @@ function calculateRecipe(inputs) {
       coldHours,
       coldPhase,
       roomEquivHours,
-      totalTime,
+      totalTime: requestedTotal,
       roomTemp,
       coldTemp,
+      driver,
+      starterEquivalentPct: usesLevain ? leavenOnFlour : dose.starterEquivalentPct,
       totalFlour,
       basisFlour,
       percentBasis,
@@ -2819,7 +2882,7 @@ function calculateRecipe(inputs) {
       coldHours: round(coldHours, 2),
       coldPhase,
       roomEquivHours: round(roomEquivHours, 2),
-      totalHours: round(totalTime, 2),
+      totalHours: round(requestedTotal, 2),
       yeastPct: dose.pct,
       yeastForm,
       inoculationPct,
@@ -2828,23 +2891,15 @@ function calculateRecipe(inputs) {
       // total including the levain's own flour. Report both so a baker can
       // compare this recipe with any other they read.
       levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
-      baseInoculationPct: baseInoculation,
-      levainRefHours,
-      levainRefTempC: levainRefTemp,
       levainPeakHours,
       levainSeedShare: LEVAIN_SEED_SHARE,
+      driver,
+      doublingHours: round(doublingHoursAt(roomTemp), 2),
+      timeCorrection: round(correction, 3),
+      starterEquivalentPct: usesLevain ? round(leavenOnFlour, 2) : dose.starterEquivalentPct,
       leavenType,
       roomTempC: roomTemp,
-      coldTempC: coldTemp,
-      corrections: {
-        time: round(dose.corrections.time, 3),
-        temperature: round(dose.corrections.temperature, 3),
-        salt: round(dose.corrections.salt, 3),
-        sugar: round(dose.corrections.sugar, 3),
-        hydration: round(dose.corrections.hydration, 3),
-        fat: round(dose.corrections.fat, 3),
-        form: dose.corrections.form
-      }
+      coldTempC: coldTemp
     },
     params: {
       hydration,
@@ -2939,6 +2994,20 @@ function buildNotes(c) {
       code: "note.levain_ripe",
       severity: "tip",
       values: { hours: c.levainPeakHours, temp: round(c.roomTemp, 1) }
+    });
+  }
+  if (c.driver === "time" && c.starterEquivalentPct <= LEAVEN_PCT_MIN * 1.5) {
+    notes.push({
+      code: "note.time_too_long",
+      severity: "warn",
+      values: { hours: round(c.totalTime, 1), temp: round(c.roomTemp, 1) }
+    });
+  }
+  if (c.starterEquivalentPct >= VERY_FAST_LEAVEN_PCT) {
+    notes.push({
+      code: "note.very_fast",
+      severity: "warn",
+      values: { pct: round(c.starterEquivalentPct, 1) }
     });
   }
   if (c.inoculationPct >= INOCULATION_HIGH) {
@@ -3206,32 +3275,17 @@ ${ingredientLines}
 Why these weights: everything is a percentage of the **total** flour (${formatGrams(r.totals.flour)} g), including the flour inside any preferment or starter. The flour weight itself is solved backwards from the dough weight you asked for \u2014 target \xF7 (100% flour + ${num(p.hydration, 1)}% water + ${num(p.salt, 1)}% salt` + (p.sugar ? ` + ${num(p.sugar, 1)}% sugar` : "") + (p.oil ? ` + ${num(p.oil, 1)}% fat` : "") + `) \u2014 so the finished dough lands on ${formatGrams(r.totals.doughWeight)} g rather than overshooting it.`
     );
     const timeExplain = f.coldHours > 0 ? `You asked for ${num(f.totalHours, 1)} h in total, with ${num(f.coldHours, 1)} h at ${num(f.coldTempC, 1)} \xB0C. Fermentation follows a Q10 law \u2014 every 10 \xB0C roughly multiplies the rate by ${Q10} \u2014 so fridge hours are worth far less than room hours. The model also credits the first 1.5 h in the fridge at the midpoint temperature, because a tub of dough takes hours to actually cool down and ferments briskly on the way. Net effect: this schedule behaves like a **${num(f.roomEquivHours, 1)} h** ferment at ${num(f.roomTempC, 1)} \xB0C, and the leavening is dosed for that number, not for the ${num(f.totalHours, 1)} h on the clock.` : `The whole ${num(f.totalHours, 1)} h runs at ${num(f.roomTempC, 1)} \xB0C, so clock time and effective fermentation time are the same.`;
-    let leavenExplain;
-    if (f.leavenType === "sourdough") {
-      leavenExplain = `This is a levain build at **${num(f.inoculationPct, 1)}% inoculation** \u2014 that share of the total flour arrives already fermented in the starter, which is ${num(f.starterPct, 1)}% ripe levain on flour at ${num(p.starterHydration, 0)}% hydration.
+    const doseLine = f.leavenType === "sourdough" ? `**${num(f.levainOnFlourPct, 1)}% ripe levain on the dough flour** (${num(f.inoculationPct, 1)}% of the total flour counted as starter flour)` : f.leavenType === "hybrid" ? `**${num(f.levainOnFlourPct, 1)}% levain plus ${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}**, each carrying half the leavening power` : `**${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g, worth ${num(f.starterEquivalentPct, 1)}% ripe starter`;
+    const leavenExplain = `Leavening: ${doseLine}.
 
-Why that number: the reference for this style is ${num(f.baseInoculationPct, 1)}% over ${num(f.levainRefHours, 1)} h at ${num(f.levainRefTempC, 1)} \xB0C. Scaling for time (${num(f.levainRefHours, 1)} / ${num(f.roomEquivHours, 1)} h) and for temperature (Q10 = ${Q10}) gives ${num(f.inoculationPct, 1)}%. The starter's flour and water are then subtracted from the main flour and water, so the final hydration still lands on ${num(p.hydration, 1)}%.`;
-    } else {
-      const c = f.corrections;
-      const lines = [
-        `- **Base dose**: ${num(style.fermentation.base_yeast_fresh_pct, 3)}% fresh yeast, measured over ${num(style.fermentation.yeast_ref_hours, 1)} h at ${num(style.fermentation.yeast_ref_temp_c, 1)} \xB0C. Every style carries its own reference conditions, so a 2 h enriched dough and a 24 h pizza dough are directly comparable.`,
-        `- **Time** \xD7${num(c.time)}: the dose scales as reference hours \xF7 ${num(f.roomEquivHours, 1)} effective hours. Half the time needs twice the yeast.`,
-        `- **Temperature** \xD7${num(c.temperature)}: at ${num(f.roomTempC, 1)} \xB0C the dough ferments differently than at the reference, by Q10 = ${Q10}.`,
-        `- **Salt at ${num(p.salt, 1)}%** \xD7${num(c.salt)}: salt draws water out of yeast cells, so more salt needs more yeast.`,
-        `- **Sugar at ${num(p.sugar, 1)}%** \xD7${num(c.sugar)}: sugar feeds yeast at low doses but stresses it osmotically above ~8%.`,
-        `- **Hydration at ${num(p.hydration, 1)}%** \xD7${num(c.hydration)}: a wetter dough is more mobile and ferments faster, so it needs slightly less.`,
-        `- **Fat at ${num(p.oil, 1)}%** \xD7${num(c.fat)}: fat coats the gluten and slows gas capture, so rich doughs need a nudge up.`,
-        f.yeastForm !== "fresh" ? `- **Form conversion** \xD7${num(c.form)}: fresh yeast \u2192 ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}, because dried yeast is far more concentrated.` : null,
-        p.prefermentFlourPct > 0 ? `- **Preferment discount**: ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented and full of active yeast, so the final dough needs less.` : null,
-        f.leavenType === "hybrid" ? `- **Hybrid**: the levain carries half the lift, so both doses are halved against their solo equivalents.` : null
-      ].filter(Boolean);
-      leavenExplain = `Yeast: **${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g.
-
-Each correction in turn:
-${lines.join("\n")}
-
-Every correction is clamped, so an extreme input can bend the answer but never produce a negative or absurd dose.`;
-    }
+Why that number \u2014 the fermentation clock:
+- At ${num(f.roomTempC, 1)} \xB0C this dough's population doubles every **${num(f.doublingHours, 2)} h**. That doubling time is interpolated from a measured table of bulk times across eight temperatures and eight starter doses.
+- Fermentation time is **logarithmic** in the dose, not inversely proportional to it: every doubling of the leavening saves exactly ${num(f.doublingHours, 2)} h, whatever the dose already is. Fifty times the starter is roughly 3.7\xD7 the speed, not fifty times \u2014 because the yeast grows during the ferment, so the starting population only buys a fixed number of doublings.
+- The temperature curve is not a single Q10. It is steep when cold (about 5 between 10 and 13 \xB0C), around 3 near room temperature, and flattens approaching the yeast optimum near 29 \xB0C.
+` + (f.timeCorrection !== 1 ? `- Salt at ${num(p.salt, 1)}%, hydration at ${num(p.hydration, 1)}%${p.sugar ? `, sugar at ${num(p.sugar, 1)}%` : ""}${p.oil ? `, fat at ${num(p.oil, 1)}%` : ""} together ${f.timeCorrection > 1 ? "stretch" : "compress"} the clock by ${num(Math.abs(f.timeCorrection - 1) * 100, 0)}%.
+` : "") + (p.prefermentFlourPct > 0 ? `- ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented in the preferment, so the final dough needs less.
+` : "") + (f.yeastForm !== "fresh" && f.yeastPct > 0 ? `- Commercial yeast rides the same curve and is converted at the end, so switching leavening does not silently change the schedule.
+` : "");
     sections.push(`## Fermentation
 ${timeExplain}
 

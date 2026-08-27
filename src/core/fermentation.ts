@@ -32,6 +32,7 @@ import {
 } from './constants';
 import type { YeastForm } from './constants';
 import type { LeavenType } from './types';
+import { leavenPctForTotal, starterToFreshYeastPct } from './growth';
 
 export interface RoomEquivInput {
   totalHours: number;
@@ -77,11 +78,7 @@ export function coldSlowdownFactor(roomTemp: number, coldTemp = DEFAULT_COLD_TEM
 }
 
 export interface YeastDoseInput {
-  /** Reference dose of fresh yeast, % of flour, at the reference conditions. */
-  baseFreshPct: number;
-  refHours: number;
-  refTempC: number;
-  /** Room-equivalent hours the dough will actually ferment. */
+  /** Room-equivalent hours the dough will actually ferment, bulk plus proof. */
   effectiveHours: number;
   roomTemp: number;
   saltPct: number;
@@ -92,127 +89,125 @@ export interface YeastDoseInput {
   leavenType: LeavenType;
   /** A preferment already carries part of the leavening; discount the final dose. */
   prefermentFlourPct?: number;
+  /** Scales the whole clock for this style. See `BreadStyle.fermentFactor`. */
+  fermentFactor?: number;
 }
 
 export interface YeastDose {
   /** Final dose in the requested yeast form, % of total flour. */
   pct: number;
   freshPct: number;
+  /** What this dose is worth as ripe starter — the currency both leavens share. */
+  starterEquivalentPct: number;
   clamped: boolean;
-  corrections: {
-    time: number;
-    temperature: number;
-    salt: number;
-    sugar: number;
-    hydration: number;
-    fat: number;
-    form: number;
-    preferment: number;
-  };
 }
 
 /**
- * Commercial yeast dose, in the requested form, as a % of total flour.
+ * Commercial yeast dose for a target time, in the requested form.
  *
- * Each correction is a multiplier on the reference dose, and each is clamped so
- * that a nonsense input (95% hydration, 6% salt) can bend the answer but never
- * break it.
+ * Runs the same growth curve as sourdough and converts at the end, so the two
+ * leavening sliders always tell the same story: more leavening is less time,
+ * warmer is less time, and switching from starter to yeast does not silently
+ * change the schedule.
  */
 export function computeYeastDose(input: YeastDoseInput): YeastDose {
-  const identity = {
-    time: 1,
-    temperature: 1,
-    salt: 1,
-    sugar: 1,
-    hydration: 1,
-    fat: 1,
-    form: 1,
-    preferment: 1,
-  };
-
-  if (input.leavenType === 'sourdough' || input.baseFreshPct <= 0) {
-    return { pct: 0, freshPct: 0, clamped: false, corrections: identity };
+  if (input.leavenType === 'sourdough') {
+    return { pct: 0, freshPct: 0, starterEquivalentPct: 0, clamped: false };
   }
 
-  // 1. Time. Half the time needs twice the yeast.
-  const time = input.refHours / Math.max(0.25, input.effectiveHours);
+  const clock = {
+    tempC: input.roomTemp,
+    saltPct: input.saltPct,
+    sugarPct: input.sugarPct,
+    hydrationPct: input.hydrationPct,
+    fatPct: input.fatPct,
+  };
 
-  // 2. Temperature. A warmer room ferments faster, so it needs proportionally less.
-  const temperature = 1 / rateRatio(input.roomTemp, input.refTempC);
+  const hours = input.effectiveHours / (input.fermentFactor ?? 1);
+  let starterEquivalent = leavenPctForTotal(hours, clock);
 
-  // 3. Salt draws water out of yeast cells; above 2% it measurably slows them.
-  const salt = clamp(
-    1 + CORRECTION_SLOPE.saltPerPctOver2 * (input.saltPct - 2),
-    ...CORRECTION_CLAMP.salt,
-  );
+  // A preferment arrives already full of active yeast, so the final dough needs
+  // less. In a logarithmic world that is a subtraction of leavening power, not
+  // a multiplier on the dose.
+  const prefermentShare = clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
+  starterEquivalent *= 1 - 0.6 * prefermentShare;
 
-  // 4. Sugar feeds yeast up to ~8%, then starts stressing it osmotically.
-  const sugarRaw =
-    input.sugarPct <= 8
-      ? 1 + CORRECTION_SLOPE.sugarPerPctUnder8 * input.sugarPct
-      : 1 +
-        CORRECTION_SLOPE.sugarPerPctUnder8 * 8 +
-        CORRECTION_SLOPE.sugarPerPctOver8 * (input.sugarPct - 8);
-  const sugar = clamp(sugarRaw, ...CORRECTION_CLAMP.sugar);
+  // In hybrid mode the levain supplies half the leavening power; cell counts
+  // add, so each side carries half the starter-equivalent dose.
+  if (input.leavenType === 'hybrid') starterEquivalent *= 0.5;
 
-  // 5. A wetter dough is more mobile: enzymes and gas move faster.
-  const hydration = clamp(
-    1 + CORRECTION_SLOPE.hydrationPerPctOver62 * (input.hydrationPct - 62),
-    ...CORRECTION_CLAMP.hydration,
-  );
-
-  // 6. Fat coats the gluten and slows gas capture in rich doughs.
-  const fat = clamp(
-    1 + CORRECTION_SLOPE.fatPerPctOver5 * Math.max(0, input.fatPct - 5),
-    ...CORRECTION_CLAMP.fat,
-  );
-
-  // 7. A preferment arrives already full of active yeast, so the final dough
-  //    needs less. The discount scales with how much of the flour was pre-fermented.
-  const preferment = 1 - 0.6 * clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
-
-  // 8. In hybrid mode the levain carries half the lift.
-  const hybrid = input.leavenType === 'hybrid' ? 0.5 : 1;
-
-  const freshRaw =
-    input.baseFreshPct * time * temperature * salt * sugar * hydration * fat * preferment * hybrid;
-
-  const form = YEAST_CONVERSION[input.yeastForm];
-  const dosed = freshRaw * form;
+  const freshRaw = starterToFreshYeastPct(starterEquivalent);
+  const dosed = freshRaw * YEAST_CONVERSION[input.yeastForm];
   const pct = clamp(dosed, YEAST_PCT_MIN, YEAST_PCT_MAX);
 
   return {
     pct: round(pct, 4),
     freshPct: round(freshRaw, 4),
+    starterEquivalentPct: round(starterEquivalent, 2),
     clamped: Math.abs(pct - dosed) > 1e-9,
-    corrections: { time, temperature, salt, sugar, hydration, fat, form, preferment },
   };
 }
 
 export interface InoculationInput {
-  /** Reference inoculation (starter flour as % of total flour) at the reference conditions. */
-  basePct: number;
-  refHours: number;
-  refTempC: number;
+  /** Room-equivalent hours the dough will actually ferment, bulk plus proof. */
   effectiveHours: number;
   roomTemp: number;
+  saltPct?: number;
+  sugarPct?: number;
+  hydrationPct?: number;
+  fatPct?: number;
   leavenType: LeavenType;
+  starterHydrationPct?: number;
+  /** Scales the whole clock for this style. See `BreadStyle.fermentFactor`. */
+  fermentFactor?: number;
 }
 
 /**
- * Levain inoculation as a % of total flour, i.e. how much of the dough's flour
- * arrives already fermented in the starter. Scales exactly like the yeast dose:
- * more time or a warmer room means less starter.
+ * Levain inoculation for a target time, as starter flour over TOTAL flour.
+ *
+ * The curve works in the convention recipes use — ripe levain over the flour it
+ * joins — so the result is converted at the end. Both are reported downstream
+ * because confusing them is how a recipe ends up with the wrong amount of starter.
  */
 export function computeInoculationPct(input: InoculationInput): number {
-  if (input.leavenType === 'commercial' || input.basePct <= 0) return 0;
+  if (input.leavenType === 'commercial') return 0;
 
-  const time = input.refHours / Math.max(0.25, input.effectiveHours);
-  const temperature = 1 / rateRatio(input.roomTemp, input.refTempC);
-  const hybrid = input.leavenType === 'hybrid' ? 0.5 : 1;
+  const hours = input.effectiveHours / (input.fermentFactor ?? 1);
+  let onFlour = leavenPctForTotal(hours, {
+    tempC: input.roomTemp,
+    saltPct: input.saltPct,
+    sugarPct: input.sugarPct,
+    hydrationPct: input.hydrationPct,
+    fatPct: input.fatPct,
+  });
 
-  const scaled = input.basePct * time * temperature * hybrid;
-  return round(clamp(scaled, INOCULATION_MIN, INOCULATION_MAX), 1);
+  // Hybrid: the yeast carries the other half of the leavening power.
+  if (input.leavenType === 'hybrid') onFlour *= 0.5;
+
+  // Three decimals, not one: a long room-temperature ferment lands under 0.2%
+  // of the total flour, and rounding that to a single decimal collapses a whole
+  // range of real doses onto the same answer.
+  return round(
+    clamp(
+      inoculationFromLevainOnFlour(onFlour, input.starterHydrationPct ?? 100),
+      INOCULATION_MIN,
+      INOCULATION_MAX,
+    ),
+    3,
+  );
+}
+
+/**
+ * Invert `levainOnFlourPct`: ripe levain over dough flour → starter flour over
+ * total flour. The two denominators differ by the starter's own flour, so this
+ * is not simply a halving.
+ */
+export function inoculationFromLevainOnFlour(
+  onFlourPct: number,
+  starterHydrationPct = 100,
+): number {
+  const ratio = onFlourPct / 100 / (1 + starterHydrationPct / 100);
+  return (ratio / (1 + ratio)) * 100;
 }
 
 /**

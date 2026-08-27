@@ -212,8 +212,8 @@ describe('the levain section header matches the schedule', () => {
     expect(section.meta!.tempC).toBe(19);
     expect(section.meta!.hours).toBe(r.fermentation.levainPeakHours);
     expect(section.meta!.hours).toBe(step.values!.hours);
-    // 19 °C is well below the style's 23 °C reference, so the build must be longer.
-    expect(section.meta!.hours).toBeGreaterThan(style.fermentation.levain_ref_hours!);
+    // A 19 °C kitchen is slow going for a starter; the build must run long.
+    expect(section.meta!.hours).toBeGreaterThan(8);
   });
 });
 

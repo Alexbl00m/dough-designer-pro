@@ -87,6 +87,29 @@ export const en: Record<string, string> = {
   'field.percentBasis.dough': 'Dough flour',
   'field.percentBasis.help':
     'Which flour the percentages divide by. “Total flour” counts the flour inside the starter and preferment; “dough flour” counts only what you weigh out separately. Recipes use both and rarely say which — switch here if the numbers do not match the recipe you are reading.',
+  'clock.title': 'The fermentation clock',
+  'clock.doubling': 'Doubling {hours} h',
+  'clock.lead':
+    'At {temp} °C the population doubles every {hours} h. That is the whole trick: every doubling of the leavening shortens bulk by exactly that much, however much you already have in. It is why 50× the starter makes the dough about 3.7× faster, not 50×.',
+  'clock.dose': '{pct}% levain',
+  'clock.bulk': '{hours} h bulk',
+  'clock.slower': "This recipe's salt, sugar, water and fat stretch the clock by {pct}%.",
+  'clock.faster': "This recipe's salt, sugar, water and fat compress the clock by {pct}%.",
+  'clock.yeastEquivalent':
+    '{yeast}% {form} ({grams} g) is worth {starter}% ripe starter in leavening power. Yeast and sourdough ride the same clock, so switching leavening does not change the schedule.',
+  'clock.source':
+    'The curve is interpolated from a measured table of bulk times across eight temperatures and eight starter doses. The temperature dependence is not a single Q10: steep in the cold, around 3 at room temperature, flattening near the yeast optimum around 29 °C.',
+
+  'field.driver': 'What are you holding?',
+  'field.driver.time': 'I choose the time',
+  'field.driver.dose': 'I choose the amount',
+  'field.driver.help':
+    'Two ways to hold the same equation. Choose the time and the leavening follows; choose the leavening and the time follows. They can never contradict each other.',
+  'field.leavenPct': 'Leavening amount',
+  'field.leavenPct.help':
+    'Ripe levain as a percentage of the dough flour — the figure recipes mean by "inoculation". Yeast is converted to the same scale.',
+  'field.computedTime': 'Calculated fermentation time',
+
   'field.hydration': 'Hydration',
   'field.hydration.help': 'Water as a percentage of flour weight.',
   'field.salt': 'Salt',
@@ -204,7 +227,7 @@ export const en: Record<string, string> = {
     '{grams} g of ripe levain at {hydration}% hydration. That is {onFlour}% against the dough flour — the figure most recipes mean by “inoculation” — or {inoculation}% of the total flour if you count the starter\'s flour separately.',
   'sd.peak': 'The levain needs roughly {hours} h to peak at {temp} °C.',
   'sd.base':
-    'The reference for this style is {base}% at {temp} °C over {hours} h. The dose scales with Q10: twice the time ≈ half the starter, +10 °C ≈ {q10}× faster fermentation.',
+    'The amount follows the fermentation clock: at {temp} °C the population doubles every {hours} h, so every halving of the starter adds exactly that much to the bulk.',
   'sd.now': 'Right now: {total} h at {temp} °C{cold}.',
   'sd.nowCold': ' ({cold} h cold → {equiv} h room-equivalent)',
   'sd.checklist': 'Is the starter ripe?',
@@ -217,7 +240,7 @@ export const en: Record<string, string> = {
   'sd.checkFoot': 'A sluggish or freshly fed starter ferments slower than the model assumes — give it the extra hour.',
   'sd.sensitivity': 'Sensitivity: time and temperature',
   'sd.sensitivityLead':
-    'Levain as % of the dough flour, with starter flour as a share of the total in brackets. Your setting is highlighted.',
+    'Levain as % of dough flour needed to hit each time and temperature. Your setting is highlighted.',
   'sd.sensitivityFoot':
     'The table assumes room temperature throughout. Cold hours convert to room-equivalent time before the dose is set.',
   'sd.time': 'Time',
@@ -415,6 +438,10 @@ export const en: Record<string, string> = {
   'note.yeast_clamped': 'The dose hit the model\'s limit and stops at {pct}% ({grams} g). Adjust time or temperature instead.',
   'note.tiny_yeast':
     'Only {grams} g of yeast. Use a 0.01 g scale, or dissolve a larger amount in water and use part of the solution.',
+  'note.time_too_long':
+    '{hours} h at {temp} °C needs less leavening than you can weigh. Drop the temperature, move part of the time into the fridge, or shorten the ferment.',
+  'note.very_fast':
+    'A lot of leavening ({pct}% levain-equivalent). This dough moves fast — go by how it looks and feels, not by the clock.',
   'note.levain_ratio':
     'Starter ratio: {onFlour}% ripe levain on the dough flour — the figure most recipes mean by “inoculation”. That is {grams} g of levain at {hydration}% hydration, which is {inoculation}% of the total flour counted as starter flour.',
   'note.levain_ripe':

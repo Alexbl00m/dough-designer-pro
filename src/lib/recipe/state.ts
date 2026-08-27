@@ -8,7 +8,7 @@
 
 import { BREAD_STYLES, getStyleById } from '@/data/styles';
 import type { BreadStyle } from '@/data/styles';
-import type { LeavenType, PercentBasis, ScaleMode } from '@/core/types';
+import type { FermentDriver, LeavenType, PercentBasis, ScaleMode } from '@/core/types';
 import type { MixingMethod, YeastForm } from '@/core/constants';
 
 export interface RecipeParams {
@@ -22,7 +22,9 @@ export interface RecipeParams {
   salt: number;
   sugar: number;
   oil: number;
+  driver: FermentDriver;
   totalTime: number;
+  leavenPct: number;
   roomTemp: number;
   coldHours: number;
   coldTemp: number;
@@ -52,7 +54,9 @@ export function paramsForStyle(style: BreadStyle): RecipeParams {
     salt: p.salt_pct,
     sugar: p.sugar_pct,
     oil: p.oil_pct,
+    driver: 'time',
     totalTime: d.totalTime,
+    leavenPct: style.defaultLevainPct ?? 20,
     roomTemp: d.roomTemp,
     coldHours: d.coldHours,
     coldTemp: 4,
@@ -79,7 +83,9 @@ const KEYS: Record<keyof RecipeParams, string> = {
   salt: 'sa',
   sugar: 'su',
   oil: 'o',
+  driver: 'dr',
   totalTime: 't',
+  leavenPct: 'lp',
   roomTemp: 'rt',
   coldHours: 'ch',
   coldTemp: 'ct',
@@ -121,6 +127,7 @@ const NUMERIC: (keyof RecipeParams)[] = [
   'sugar',
   'oil',
   'totalTime',
+  'leavenPct',
   'roomTemp',
   'coldHours',
   'coldTemp',
@@ -135,6 +142,7 @@ const ENUMS: Partial<Record<keyof RecipeParams, readonly string[]>> = {
   yeastForm: ['fresh', 'active_dry', 'instant'],
   mixing: ['hand', 'dlx', 'planetary', 'spiral'],
   percentBasis: ['total', 'dough'],
+  driver: ['time', 'dose'],
 };
 
 /**

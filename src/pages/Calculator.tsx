@@ -96,7 +96,9 @@ export default function Calculator() {
         ballCount: params.ballCount,
         targetFlour: params.targetFlour,
         targetDough: params.targetDough,
+        driver: params.driver,
         totalTime: params.totalTime,
+        leavenPct: params.leavenPct,
         roomTemp: params.roomTemp,
         coldTemp: params.coldTemp,
         coldHours: params.coldHours,
@@ -191,6 +193,10 @@ export default function Calculator() {
                   <CalculatorInputs
                     style={style}
                     params={params}
+                    computed={{
+                      totalHours: results?.fermentation.totalHours ?? params.totalTime,
+                      leavenPct: results?.fermentation.starterEquivalentPct ?? params.leavenPct,
+                    }}
                     onChange={handleParamChange}
                     onReset={handleReset}
                     startTime={startTime}

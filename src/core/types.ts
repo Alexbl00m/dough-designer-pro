@@ -19,6 +19,16 @@ export type ScaleMode = 'pieces' | 'flour' | 'dough';
  */
 export type PercentBasis = 'total' | 'dough';
 
+/**
+ * Which end of the fermentation clock the baker is holding.
+ *
+ * 'time' — "I need it ready by six": the schedule is fixed and the dose follows.
+ * 'dose' — "I have this much starter": the dose is fixed and the time follows.
+ *
+ * Both run the same equation, so the two sliders can never disagree.
+ */
+export type FermentDriver = 'time' | 'dose';
+
 export interface CalculationInputs {
   style: BreadStyle;
   /** How the batch is sized: by pieces, by a flour weight you have, or by a total dough weight. */
@@ -29,8 +39,15 @@ export interface CalculationInputs {
   targetFlour?: number;
   targetDough?: number;
 
-  /** Fermentation time in hours for the final dough (bulk + proof), excluding any preferment. */
+  /** Which end of the clock is fixed. Default 'time'. */
+  driver?: FermentDriver;
+  /** Fermentation time in hours (bulk + proof). Used when `driver` is 'time'. */
   totalTime: number;
+  /**
+   * Leavening dose as ripe levain over dough flour — the convention recipes
+   * use. Commercial yeast is converted into it. Used when `driver` is 'dose'.
+   */
+  leavenPct?: number;
   roomTemp: number;
   coldTemp?: number;
   coldHours?: number;
@@ -164,9 +181,6 @@ export interface CalculationResults {
      * mean by "20% inoculation", so it is the figure to show a baker.
      */
     levainOnFlourPct: number;
-    baseInoculationPct: number;
-    levainRefHours: number;
-    levainRefTempC: number;
     /** How long the levain itself needs to peak at the baker's room temperature. */
     levainPeakHours: number;
     /** Seed as a share of the finished levain, e.g. 0.2 for a 1:2:2 feed. */
@@ -174,16 +188,13 @@ export interface CalculationResults {
     leavenType: LeavenType;
     roomTempC: number;
     coldTempC: number;
-    /** The multipliers that produced the final yeast dose, for the explain view. */
-    corrections: {
-      time: number;
-      temperature: number;
-      salt: number;
-      sugar: number;
-      hydration: number;
-      fat: number;
-      form: number;
-    };
+    driver: FermentDriver;
+    /** Hours saved per doubling of the dose at this temperature. */
+    doublingHours: number;
+    /** How much the recipe's salt, sugar, water and fat stretch the clock. */
+    timeCorrection: number;
+    /** The dose expressed in the currency both leavening types share. */
+    starterEquivalentPct: number;
   };
   params: {
     hydration: number;

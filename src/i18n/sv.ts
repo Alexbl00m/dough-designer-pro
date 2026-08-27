@@ -87,6 +87,29 @@ export const sv: Record<string, string> = {
   'field.percentBasis.dough': 'Degens mjöl',
   'field.percentBasis.help':
     'Vilket mjöl procenten räknas på. “Totalt mjöl” räknar in surdegens och förjäsningens mjöl; “degens mjöl” bara det du väger upp separat. Recept använder båda och skriver sällan vilket – byt hit om siffrorna inte stämmer med receptet du läser.',
+  'clock.title': 'Jäsningsklockan',
+  'clock.doubling': 'Fördubbling {hours} h',
+  'clock.lead':
+    'Vid {temp} °C fördubblas jästpopulationen var {hours} h. Det är själva nyckeln: varje fördubbling av jäsmedlet kortar bulken med exakt så mycket – oavsett hur mycket du redan har i. Därför gör 50× mer surdeg degen ungefär 3,7× snabbare, inte 50×.',
+  'clock.dose': '{pct}% levain',
+  'clock.bulk': '{hours} h bulk',
+  'clock.slower': 'Salt, socker, vatten och fett i det här receptet drar ut klockan med {pct}%.',
+  'clock.faster': 'Salt, socker, vatten och fett i det här receptet kortar klockan med {pct}%.',
+  'clock.yeastEquivalent':
+    '{yeast}% {form} ({grams} g) motsvarar {starter}% mogen surdeg i jäskraft. Jäst och surdeg går på samma klocka – byter du jäsmedel ändras inte schemat.',
+  'clock.source':
+    'Kurvan är interpolerad ur en mätt tabell över bulktider vid åtta temperaturer och åtta surdegsmängder. Temperaturberoendet är inte ett enda Q10: brant i kylan, omkring 3 vid rumstemperatur, och planar ut nära jästens optimum runt 29 °C.',
+
+  'field.driver': 'Vad styr du?',
+  'field.driver.time': 'Jag väljer tiden',
+  'field.driver.dose': 'Jag väljer mängden',
+  'field.driver.help':
+    'Två sätt att hålla i samma ekvation. Väljer du tiden räknas mängden jäsmedel ut; väljer du mängden räknas tiden ut. De kan aldrig säga emot varandra.',
+  'field.leavenPct': 'Mängd jäsmedel',
+  'field.leavenPct.help':
+    'Mogen levain i procent av degens mjöl – siffran recept menar med “inokulering”. Jäst räknas om till samma skala.',
+  'field.computedTime': 'Beräknad jäsningstid',
+
   'field.hydration': 'Hydrering',
   'field.hydration.help': 'Vatten i procent av mjölvikten.',
   'field.salt': 'Salt',
@@ -204,7 +227,7 @@ export const sv: Record<string, string> = {
     '{grams} g mogen levain vid {hydration}% hydrering. Det är {onFlour}% räknat på degens mjöl – siffran de flesta recept menar med “inokulering” – eller {inoculation}% av det totala mjölet om man räknar surdegens mjöl för sig.',
   'sd.peak': 'Levainen behöver ungefär {hours} h för att nå toppen vid {temp} °C.',
   'sd.base':
-    'Basen för den här stilen är {base}% vid {temp} °C och {hours} h. Mängden skalas med Q10: dubbelt så lång tid ≈ halva mängden, +10 °C ≈ {q10}× snabbare jäsning.',
+    'Mängden följer jäsningsklockan: vid {temp} °C fördubblas populationen var {hours} h, så varje halvering av surdegen förlänger bulken med just den tiden.',
   'sd.now': 'Just nu: {total} h vid {temp} °C{cold}.',
   'sd.nowCold': ' ({cold} h i kyl → {equiv} h rumsekvivalent)',
   'sd.checklist': 'Är surdegen mogen?',
@@ -217,7 +240,7 @@ export const sv: Record<string, string> = {
   'sd.checkFoot': 'Trög eller nymatad surdeg jäser långsammare än beräkningen antar – vänta hellre en timme extra.',
   'sd.sensitivity': 'Känslighet: tid och temperatur',
   'sd.sensitivityLead':
-    'Levain i % av degens mjöl, med surdegens mjöl som andel av totalen inom parentes. Ditt läge är markerat.',
+    'Levain i % av degens mjöl för att träffa varje tid och temperatur. Ditt läge är markerat.',
   'sd.sensitivityFoot':
     'Tabellen gäller jäsning i rumstemperatur hela tiden. Kyltid räknas om till rumsekvivalent tid innan mängden bestäms.',
   'sd.time': 'Tid',
@@ -415,6 +438,10 @@ export const sv: Record<string, string> = {
   'note.yeast_clamped': 'Jästmängden nådde modellens gräns och stannar på {pct}% ({grams} g). Justera tid eller temperatur istället.',
   'note.tiny_yeast':
     'Bara {grams} g jäst. Väg på en 0,01-våg, eller lös upp en större mängd i vatten och använd en del av lösningen.',
+  'note.time_too_long':
+    '{hours} h vid {temp} °C kräver mindre jäsmedel än du kan väga. Sänk temperaturen, lägg en del av tiden i kyl, eller korta jäsningen.',
+  'note.very_fast':
+    'Mycket jäsmedel ({pct}% levainekvivalent). Degen går fort – gå efter hur den ser ut och känns, inte efter klockan.',
   'note.levain_ratio':
     'Surdegsratio: {onFlour}% mogen levain på mjölet i degen – den siffran de flesta recept menar med “inokulering”. Det är {grams} g levain vid {hydration}% hydrering, vilket motsvarar {inoculation}% av det totala mjölet räknat som surdegens mjöl.',
   'note.levain_ripe':

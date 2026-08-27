@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { IngredientTable } from '@/components/recipe/IngredientTable';
 import { RecipeTimeline } from '@/components/recipe/RecipeTimeline';
 import { DoughTempCard } from '@/components/recipe/DoughTempCard';
-import { YeastExplainer } from '@/components/recipe/YeastExplainer';
+import { FermentationClock } from '@/components/recipe/FermentationClock';
 import { SourdoughPanel } from '@/components/recipe/SourdoughPanel';
 import { NotesList } from '@/components/recipe/NotesList';
 import { FlourAdvisor } from '@/components/recipe/FlourAdvisor';
@@ -153,7 +153,7 @@ export function RecipeResults({
       </div>
 
       <div className="print-grid grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <YeastExplainer style={style} results={results} />
+        <FermentationClock results={results} />
         <FlourAdvisor style={style} effectiveHours={results.fermentation.roomEquivHours} />
       </div>
 
@@ -161,6 +161,8 @@ export function RecipeResults({
         fermentation={results.fermentation}
         starterHydration={results.params.starterHydration}
         totalFlour={results.totals.flour}
+        salt={results.params.salt}
+        hydration={results.params.hydration}
       />
 
       {/* ── Timeline ── */}

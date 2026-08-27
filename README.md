@@ -9,8 +9,11 @@ times on it.
 
 - **24 styles** across pizza, bread, enriched doughs and preferments, each
   carrying its own hydration, salt, timing, process and default batch size.
-- **Q10 fermentation model.** The yeast dose or levain inoculation is scaled to
-  the time and temperature you actually have, not to the one the recipe assumed.
+- **A fermentation clock that runs both ways.** Fix the time and the leavening
+  follows; fix the leavening and the time follows. Same equation, so the two
+  sliders can never contradict each other.
+- **One currency for both leavens.** Sourdough and commercial yeast ride the
+  same curve, so switching between them does not change the schedule under you.
 - **Cold retards done properly.** Fridge hours convert to room-equivalent hours,
   including the time the dough is still warm on its way down.
 - **Preferments.** Poolish, biga and levain are built as their own sections and
@@ -28,31 +31,59 @@ times on it.
 
 ## The model
 
-Two ideas carry the engine:
+Everything is one equation and its inverse:
 
-1. Fermentation *rate* follows a Q10 law — every 10 °C multiplies it by a
-   constant.
-2. Total gas produced is rate × time, so to keep a dough ready at a different
-   time or temperature you scale the dose by the inverse of the change.
+```
+bulk hours = k(T) · log₂(S* / leaven%)
+leaven%    = S* / 2^(hours / k(T))
+```
 
-Everything else — salt, sugar, hydration, fat, cold retards, preferment
-discounts, yeast-form conversion — is a correction on top of those two, and each
-one is clamped so extreme input can bend the answer but never break it.
+`k(T)` is the population doubling time and `S*` the dose at which a dough is
+already fermented. Because the two directions are the same equation rearranged,
+the time slider and the dose slider can never disagree — which is the whole
+point of them.
 
-Constants live in `src/core/constants.ts` with the reasoning attached. Two of
-them are calibrated against published figures rather than picked:
+The important consequence is that **fermentation time is logarithmic in the
+dose, not inversely proportional to it**. Fifty times the starter buys about
+3.7× the speed, not fifty times. Every doubling of the leavening saves exactly
+`k(T)` hours, whatever the dose already was. That follows from the yeast growing
+during the ferment: the starting population only buys a fixed number of
+doublings.
+
+Both leavening types share one currency — ripe levain as a share of the flour it
+joins — so switching from starter to commercial yeast does not silently change
+the schedule.
+
+Everything else (salt, sugar, hydration, fat, cold retards, preferment
+discounts, yeast-form conversion) is a correction on top, each clamped so
+extreme input can bend the answer but never break it.
+
+### Where the numbers come from
+
+Constants live in `src/core/constants.ts` and `src/data/fermentationTable.ts`
+with the reasoning attached. The important ones are measured, not chosen:
 
 | Constant | Value | Calibrated against |
 | --- | --- | --- |
-| `Q10` (dough) | 2.0 | Full Proof Baking's bulk times at a fixed 20% levain — 7 h at 21.1 °C, 6 h at 23.3 °C, 4.5–5 h at 26.7 °C. Reproduced to within 0.2%. |
+| `FERMENTATION_CURVE` | 8 anchors | A table of bulk and proof times across 8 temperatures × 8 starter doses. Fitting the law above to all 64 points recovers a near-constant `S*` (max residual 4.5%). |
+| `FULL_FERMENT_PCT` | 97.7 | Recovered from that same fit rather than assumed. |
 | `Q10_STARTER` | 3.8 | Russell Peace Baker's starter peak windows — 10–14 h at 18 °C, 6–8 h at 22 °C, 3–5 h at 26 °C. |
+| `FRESH_YEAST_TO_STARTER` | 30 | Straight-dough practice across the range. The least certain constant, and the first place to look if yeast timings feel off. |
 
-A starter and a dough deliberately do **not** share a coefficient: a starter has
-to eat through a fixed amount of fresh flour before it peaks, so temperature
-compresses its lag phase and growth rate together.
+The temperature curve is deliberately **not** a single Q10: the measurements put
+it near 5 between 10 and 13 °C, around 3 at room temperature, and flattening to
+1.3 approaching the yeast optimum near 29 °C. Yeast has an optimum, and no
+single exponent describes both a cold retard and a proofing box.
 
-`src/core/__tests__/references.test.ts` pins the model to those sources, so a
-retuned constant that drifts away from what happens on a bench fails the suite.
+A per-style `fermentFactor` scales the whole clock. The curve fixes the *shape*
+of fermentation but not its absolute level, which depends on how far a baker
+pushes bulk — Full Proof Baking's 6 h bulk at 20% levain runs about 1.5× the
+table's, because they stop at 50–60% rise. Each factor is solved so the engine
+reproduces its published recipe.
+
+`src/core/__tests__/growth.test.ts` validates the model against all 64 source
+points, and `references.test.ts` pins the recipes, so a retuned constant that
+drifts away from what happens on a bench fails the suite.
 
 ### Two levain conventions
 

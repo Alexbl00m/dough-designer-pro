@@ -59,40 +59,28 @@ export default defineTool({
         : `The whole ${num(f.totalHours, 1)} h runs at ${num(f.roomTempC, 1)} °C, so clock time and effective fermentation time are the same.`;
 
     // ── Leavening ──
-    let leavenExplain: string;
-    if (f.leavenType === "sourdough") {
-      leavenExplain =
-        `This is a levain build at **${num(f.inoculationPct, 1)}% inoculation** — that share of the total flour arrives already fermented in the starter, ` +
-        `which is ${num(f.starterPct, 1)}% ripe levain on flour at ${num(p.starterHydration, 0)}% hydration.\n\n` +
-        `Why that number: the reference for this style is ${num(f.baseInoculationPct, 1)}% over ${num(f.levainRefHours, 1)} h at ${num(f.levainRefTempC, 1)} °C. ` +
-        `Scaling for time (${num(f.levainRefHours, 1)} / ${num(f.roomEquivHours, 1)} h) and for temperature (Q10 = ${Q10}) gives ${num(f.inoculationPct, 1)}%. ` +
-        `The starter's flour and water are then subtracted from the main flour and water, so the final hydration still lands on ${num(p.hydration, 1)}%.`;
-    } else {
-      const c = f.corrections;
-      const lines = [
-        `- **Base dose**: ${num(style.fermentation.base_yeast_fresh_pct, 3)}% fresh yeast, measured over ${num(style.fermentation.yeast_ref_hours, 1)} h at ${num(style.fermentation.yeast_ref_temp_c, 1)} °C. Every style carries its own reference conditions, so a 2 h enriched dough and a 24 h pizza dough are directly comparable.`,
-        `- **Time** ×${num(c.time)}: the dose scales as reference hours ÷ ${num(f.roomEquivHours, 1)} effective hours. Half the time needs twice the yeast.`,
-        `- **Temperature** ×${num(c.temperature)}: at ${num(f.roomTempC, 1)} °C the dough ferments differently than at the reference, by Q10 = ${Q10}.`,
-        `- **Salt at ${num(p.salt, 1)}%** ×${num(c.salt)}: salt draws water out of yeast cells, so more salt needs more yeast.`,
-        `- **Sugar at ${num(p.sugar, 1)}%** ×${num(c.sugar)}: sugar feeds yeast at low doses but stresses it osmotically above ~8%.`,
-        `- **Hydration at ${num(p.hydration, 1)}%** ×${num(c.hydration)}: a wetter dough is more mobile and ferments faster, so it needs slightly less.`,
-        `- **Fat at ${num(p.oil, 1)}%** ×${num(c.fat)}: fat coats the gluten and slows gas capture, so rich doughs need a nudge up.`,
-        f.yeastForm !== "fresh"
-          ? `- **Form conversion** ×${num(c.form)}: fresh yeast → ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}, because dried yeast is far more concentrated.`
-          : null,
-        p.prefermentFlourPct > 0
-          ? `- **Preferment discount**: ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented and full of active yeast, so the final dough needs less.`
-          : null,
-        f.leavenType === "hybrid"
-          ? `- **Hybrid**: the levain carries half the lift, so both doses are halved against their solo equivalents.`
-          : null,
-      ].filter(Boolean);
+    const doseLine =
+      f.leavenType === 'sourdough'
+        ? `**${num(f.levainOnFlourPct, 1)}% ripe levain on the dough flour** (${num(f.inoculationPct, 1)}% of the total flour counted as starter flour)`
+        : f.leavenType === 'hybrid'
+        ? `**${num(f.levainOnFlourPct, 1)}% levain plus ${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}**, each carrying half the leavening power`
+        : `**${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g, worth ${num(f.starterEquivalentPct, 1)}% ripe starter`;
 
-      leavenExplain =
-        `Yeast: **${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g.\n\n` +
-        `Each correction in turn:\n${lines.join("\n")}\n\n` +
-        `Every correction is clamped, so an extreme input can bend the answer but never produce a negative or absurd dose.`;
-    }
+    const leavenExplain =
+      `Leavening: ${doseLine}.\n\n` +
+      `Why that number — the fermentation clock:\n` +
+      `- At ${num(f.roomTempC, 1)} °C this dough's population doubles every **${num(f.doublingHours, 2)} h**. That doubling time is interpolated from a measured table of bulk times across eight temperatures and eight starter doses.\n` +
+      `- Fermentation time is **logarithmic** in the dose, not inversely proportional to it: every doubling of the leavening saves exactly ${num(f.doublingHours, 2)} h, whatever the dose already is. Fifty times the starter is roughly 3.7× the speed, not fifty times — because the yeast grows during the ferment, so the starting population only buys a fixed number of doublings.\n` +
+      `- The temperature curve is not a single Q10. It is steep when cold (about 5 between 10 and 13 °C), around 3 near room temperature, and flattens approaching the yeast optimum near 29 °C.\n` +
+      (f.timeCorrection !== 1
+        ? `- Salt at ${num(p.salt, 1)}%, hydration at ${num(p.hydration, 1)}%${p.sugar ? `, sugar at ${num(p.sugar, 1)}%` : ''}${p.oil ? `, fat at ${num(p.oil, 1)}%` : ''} together ${f.timeCorrection > 1 ? 'stretch' : 'compress'} the clock by ${num(Math.abs(f.timeCorrection - 1) * 100, 0)}%.\n`
+        : '') +
+      (p.prefermentFlourPct > 0
+        ? `- ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented in the preferment, so the final dough needs less.\n`
+        : '') +
+      (f.yeastForm !== 'fresh' && f.yeastPct > 0
+        ? `- Commercial yeast rides the same curve and is converted at the end, so switching leavening does not silently change the schedule.\n`
+        : '');
 
     sections.push(`## Fermentation\n${timeExplain}\n\n${leavenExplain}`);
 

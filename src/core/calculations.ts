@@ -32,6 +32,16 @@ import {
   levainOnFlourPct,
   starterPeakHours,
 } from './fermentation';
+import {
+  bulkHoursFor,
+  doublingHoursAt,
+  leavenPctForTotal,
+  proofHoursAt,
+  timeCorrection,
+  totalHoursFor,
+} from './growth';
+import { VERY_FAST_LEAVEN_PCT } from '@/data/fermentationTable';
+import { LEAVEN_PCT_MIN } from './growth';
 import { buildSchedule } from './schedule';
 import type {
   CalculationInputs,
@@ -77,8 +87,6 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   const roomTemp = clamp(inputs.roomTemp, 4, 40);
   const coldTemp = clamp(inputs.coldTemp ?? DEFAULT_COLD_TEMP_C, -2, 18);
   const totalTime = Math.max(0.5, inputs.totalTime);
-  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
-  const coldHours = Math.min(requestedCold, totalTime);
   const coldPhase = inputs.coldPhase ?? style.process.coldPhase;
   const desiredDoughTemp = clamp(inputs.desiredDoughTemp, 15, 35);
   const flourTemp = inputs.flourTemp ?? roomTemp;
@@ -90,22 +98,56 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   const preferment = usePreferment ? style.preferment : undefined;
   const percentBasis = inputs.percentBasis ?? 'total';
 
-  if (requestedCold > totalTime) {
-    notes.push({ code: 'note.cold_clamped', severity: 'warn', values: { hours: round(coldHours, 1) } });
+  // ── 2. Fermentation: the clock, run in whichever direction the baker holds ──
+  const driver = inputs.driver ?? 'time';
+  const clock = {
+    tempC: roomTemp,
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+  };
+  const fermentFactor = style.fermentFactor ?? 1;
+  const usesLevain = leavenType === 'sourdough' || leavenType === 'hybrid';
+
+  // In dose mode the schedule follows from the dose; in time mode the dose
+  // follows from the schedule. Both are the same equation, so the two agree.
+  let requestedTotal: number;
+  let leavenOnFlour: number;
+
+  if (driver === 'dose') {
+    leavenOnFlour = Math.max(0.2, inputs.leavenPct ?? style.defaultLevainPct ?? 20);
+    requestedTotal = round(totalHoursFor(leavenOnFlour, clock) * fermentFactor, 2);
+  } else {
+    requestedTotal = totalTime;
+    leavenOnFlour = leavenPctForTotal(totalTime / fermentFactor, clock);
   }
 
-  // ── 2. Fermentation: how much leavening, given the real time and temperature ──
+  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
+  const coldHours = Math.min(requestedCold, requestedTotal);
+
+  if (requestedCold > requestedTotal) {
+    notes.push({
+      code: 'note.cold_clamped',
+      severity: 'warn',
+      values: { hours: round(coldHours, 1) },
+    });
+  }
+
   const roomEquivHours = computeRoomEquivHours({
-    totalHours: totalTime,
+    totalHours: requestedTotal,
     coldHours,
     roomTemp,
     coldTemp,
   });
 
+  // Cold hours are worth less than clock hours, so the dose has to be set for
+  // the room-equivalent time, not the time on the wall.
+  if (driver === 'time') {
+    leavenOnFlour = leavenPctForTotal(roomEquivHours / fermentFactor, clock);
+  }
+
   const dose = computeYeastDose({
-    baseFreshPct: style.fermentation.base_yeast_fresh_pct,
-    refHours: style.fermentation.yeast_ref_hours,
-    refTempC: style.fermentation.yeast_ref_temp_c,
     effectiveHours: roomEquivHours,
     roomTemp,
     saltPct: salt,
@@ -115,32 +157,33 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     yeastForm,
     leavenType,
     prefermentFlourPct: preferment?.flour_pct,
+    fermentFactor,
   });
-
-  const usesLevain = leavenType === 'sourdough' || leavenType === 'hybrid';
-  const baseInoculation = style.fermentation.base_inoculation_pct ?? 20;
-  const levainRefHours = style.fermentation.levain_ref_hours ?? 6;
-  const levainRefTemp = style.fermentation.levain_ref_temp_c ?? 24;
 
   const inoculationPct = usesLevain
     ? computeInoculationPct({
-        basePct: baseInoculation,
-        refHours: levainRefHours,
-        refTempC: levainRefTemp,
         effectiveHours: roomEquivHours,
         roomTemp,
+        saltPct: salt,
+        sugarPct: sugar,
+        hydrationPct: hydration,
+        fatPct: fat,
         leavenType,
+        starterHydrationPct: starterHydration,
+        fermentFactor,
       })
     : 0;
 
   // How long the levain itself needs is a function of the baker's kitchen, not
-  // of the style's reference conditions: the same 1:2:2 feed peaks in 4 h at
-  // 27 °C and 11 h at 18 °C.
+  // of any style reference: the same feed peaks in 4 h at 27 °C and 13 h at 18 °C.
   const levainPeakHours = starterPeakHours(roomTemp);
 
-  if (usesLevain && style.fermentation.base_inoculation_pct === undefined) {
-    notes.push({ code: 'note.levain_generic', severity: 'info', values: { style: style.name } });
-  }
+  const correction = timeCorrection({
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+  });
 
   // ── 3. Solve the flour weight so the finished dough hits the target ──
   const extras = style.extras ?? [];
@@ -451,8 +494,23 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   // ── 7. Bulk / proof split ──
   const ratioSum =
     style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
-  const bulkHours = totalTime * (style.fermentation.bulk_ratio / ratioSum);
-  const proofHours = totalTime * (style.fermentation.proof_ratio / ratioSum);
+  let bulkHours = requestedTotal * (style.fermentation.bulk_ratio / ratioSum);
+  let proofHours = requestedTotal * (style.fermentation.proof_ratio / ratioSum);
+
+  // The style ratio decides how the schedule is divided, but it does not know
+  // the temperature. A shaped loaf left warm for six hours is over-proofed
+  // whatever the ratio says, so the *warm* part of the proof is capped at the
+  // measured proof time and the surplus goes back into bulk, where a dough can
+  // safely spend it. Cold hours are exempt: a long retard is the whole point of
+  // an overnight proof.
+  const coldInProof = coldPhase === 'proof' ? Math.min(coldHours, proofHours) : 0;
+  const warmProof = proofHours - coldInProof;
+  const maxWarmProof = proofHoursAt(roomTemp) * correction;
+  if (warmProof > maxWarmProof) {
+    const surplus = warmProof - maxWarmProof;
+    proofHours -= surplus;
+    bulkHours += surplus;
+  }
 
   // ── 8. Schedule ──
   const startTime = inputs.startTime ?? new Date();
@@ -499,9 +557,11 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       coldHours,
       coldPhase,
       roomEquivHours,
-      totalTime,
+      totalTime: requestedTotal,
       roomTemp,
       coldTemp,
+      driver,
+      starterEquivalentPct: usesLevain ? leavenOnFlour : dose.starterEquivalentPct,
       totalFlour,
       basisFlour,
       percentBasis,
@@ -543,7 +603,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       coldHours: round(coldHours, 2),
       coldPhase,
       roomEquivHours: round(roomEquivHours, 2),
-      totalHours: round(totalTime, 2),
+      totalHours: round(requestedTotal, 2),
       yeastPct: dose.pct,
       yeastForm,
       inoculationPct,
@@ -552,23 +612,17 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       // total including the levain's own flour. Report both so a baker can
       // compare this recipe with any other they read.
       levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
-      baseInoculationPct: baseInoculation,
-      levainRefHours,
-      levainRefTempC: levainRefTemp,
       levainPeakHours,
       levainSeedShare: LEVAIN_SEED_SHARE,
+      driver,
+      doublingHours: round(doublingHoursAt(roomTemp), 2),
+      timeCorrection: round(correction, 3),
+      starterEquivalentPct: usesLevain
+        ? round(leavenOnFlour, 2)
+        : dose.starterEquivalentPct,
       leavenType,
       roomTempC: roomTemp,
       coldTempC: coldTemp,
-      corrections: {
-        time: round(dose.corrections.time, 3),
-        temperature: round(dose.corrections.temperature, 3),
-        salt: round(dose.corrections.salt, 3),
-        sugar: round(dose.corrections.sugar, 3),
-        hydration: round(dose.corrections.hydration, 3),
-        fat: round(dose.corrections.fat, 3),
-        form: dose.corrections.form,
-      },
     },
     params: {
       hydration,
@@ -626,6 +680,8 @@ interface NoteContext {
   totalTime: number;
   roomTemp: number;
   coldTemp: number;
+  driver: 'time' | 'dose';
+  starterEquivalentPct: number;
   totalFlour: number;
   basisFlour: number;
   percentBasis: 'total' | 'dough';
@@ -702,6 +758,22 @@ function buildNotes(c: NoteContext): Note[] {
       code: 'note.levain_ripe',
       severity: 'tip',
       values: { hours: c.levainPeakHours, temp: round(c.roomTemp, 1) },
+    });
+  }
+  // Near the floor the answer stops responding to the slider, which is the
+  // honest signal that no weighable dose stretches this room that far.
+  if (c.driver === 'time' && c.starterEquivalentPct <= LEAVEN_PCT_MIN * 1.5) {
+    notes.push({
+      code: 'note.time_too_long',
+      severity: 'warn',
+      values: { hours: round(c.totalTime, 1), temp: round(c.roomTemp, 1) },
+    });
+  }
+  if (c.starterEquivalentPct >= VERY_FAST_LEAVEN_PCT) {
+    notes.push({
+      code: 'note.very_fast',
+      severity: 'warn',
+      values: { pct: round(c.starterEquivalentPct, 1) },
     });
   }
   if (c.inoculationPct >= INOCULATION_HIGH) {

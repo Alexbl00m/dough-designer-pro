@@ -1,12 +1,7 @@
 import { Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Q10 } from '@/core/constants';
-import {
-  computeInoculationPct,
-  computeRoomEquivHours,
-  levainOnFlourPct,
-} from '@/core/fermentation';
+import { leavenPctForTotal } from '@/core/growth';
 import type { CalculationResults } from '@/core/types';
 import { useI18n } from '@/i18n';
 import { formatGrams, formatNumber } from '@/lib/format';
@@ -16,6 +11,8 @@ interface SourdoughPanelProps {
   fermentation: CalculationResults['fermentation'];
   starterHydration: number;
   totalFlour: number;
+  salt: number;
+  hydration: number;
 }
 
 const TIMES = [4, 6, 8, 12, 18, 24, 36];
@@ -26,6 +23,8 @@ export function SourdoughPanel({
   fermentation: f,
   starterHydration,
   totalFlour,
+  salt,
+  hydration,
 }: SourdoughPanelProps) {
   const { t, lang } = useI18n();
   if (f.inoculationPct <= 0) return null;
@@ -53,12 +52,7 @@ export function SourdoughPanel({
         </p>
 
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          {t('sd.base', {
-            base: n(f.baseInoculationPct),
-            temp: n(f.levainRefTempC),
-            hours: n(f.levainRefHours),
-            q10: n(Q10),
-          })}
+          {t('sd.base', { hours: n(f.doublingHours), temp: n(f.roomTempC) })}
         </p>
 
         <p className="mt-2 text-sm text-muted-foreground">
@@ -121,17 +115,10 @@ export function SourdoughPanel({
                     {hours} h
                   </th>
                   {TEMPS.map((temp) => {
-                    const pct = computeInoculationPct({
-                      basePct: f.baseInoculationPct,
-                      refHours: f.levainRefHours,
-                      refTempC: f.levainRefTempC,
-                      effectiveHours: computeRoomEquivHours({
-                        totalHours: hours,
-                        coldHours: 0,
-                        roomTemp: temp,
-                      }),
-                      roomTemp: temp,
-                      leavenType: f.leavenType === 'commercial' ? 'sourdough' : f.leavenType,
+                    const pct = leavenPctForTotal(hours, {
+                      tempC: temp,
+                      saltPct: salt,
+                      hydrationPct: hydration,
                     });
                     const current =
                       Math.abs(hours - f.totalHours) < 0.01 &&
@@ -147,8 +134,7 @@ export function SourdoughPanel({
                             : 'text-muted-foreground',
                         )}
                       >
-                        {n(levainOnFlourPct(pct, starterHydration))}%
-                        <span className="text-xs opacity-70"> ({n(pct)}%)</span>
+                        {n(pct, pct < 10 ? 2 : 1)}%
                       </td>
                     );
                   })}

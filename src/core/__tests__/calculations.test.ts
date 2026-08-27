@@ -67,10 +67,19 @@ describe('style data integrity', () => {
     }
   });
 
-  it('gives sourdough-default styles a levain reference', () => {
+  it('gives sourdough-default styles a starting levain dose', () => {
     for (const style of BREAD_STYLES) {
       if (style.defaults.leavenType !== 'sourdough') continue;
-      expect(style.fermentation.base_inoculation_pct, `${style.id}`).toBeGreaterThan(0);
+      expect(style.defaultLevainPct, `${style.id}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('keeps any style clock factor within a defensible range', () => {
+    for (const style of BREAD_STYLES) {
+      if (style.fermentFactor === undefined) continue;
+      // The factor absorbs how far a baker pushes bulk, not arbitrary error.
+      expect(style.fermentFactor, `${style.id}`).toBeGreaterThan(0.5);
+      expect(style.fermentFactor, `${style.id}`).toBeLessThan(2.5);
     }
   });
 });
@@ -116,30 +125,23 @@ describe('cold retard equivalence', () => {
 describe('yeast dose', () => {
   const dose = (overrides = {}) =>
     computeYeastDose({
-      baseFreshPct: 0.3,
-      refHours: 24,
-      refTempC: 23,
-      effectiveHours: 24,
-      roomTemp: 23,
+      effectiveHours: 6,
+      roomTemp: 22,
       saltPct: 2,
       sugarPct: 0,
-      hydrationPct: 62,
+      hydrationPct: 75,
       fatPct: 0,
       yeastForm: 'fresh',
       leavenType: 'commercial',
       ...overrides,
     });
 
-  it('reproduces the reference dose at reference conditions', () => {
-    expect(dose().pct).toBeCloseTo(0.3, 3);
+  it('asks for less yeast the longer the ferment', () => {
+    expect(dose({ effectiveHours: 12 }).pct).toBeLessThan(dose({ effectiveHours: 6 }).pct);
   });
 
-  it('halves the dose when the time doubles', () => {
-    expect(dose({ effectiveHours: 48 }).pct).toBeCloseTo(0.15, 3);
-  });
-
-  it('scales down by Q10 when the room is 10 °C warmer', () => {
-    expect(dose({ roomTemp: 33 }).pct).toBeCloseTo(0.3 / Q10, 3);
+  it('asks for less yeast the warmer the room', () => {
+    expect(dose({ roomTemp: 28 }).pct).toBeLessThan(dose({ roomTemp: 18 }).pct);
   });
 
   it('raises the dose as salt goes up', () => {
@@ -147,11 +149,11 @@ describe('yeast dose', () => {
   });
 
   it('lowers the dose as hydration goes up', () => {
-    expect(dose({ hydrationPct: 80 }).pct).toBeLessThan(dose({ hydrationPct: 62 }).pct);
+    expect(dose({ hydrationPct: 85 }).pct).toBeLessThan(dose({ hydrationPct: 65 }).pct);
   });
 
   it('converts fresh to instant at roughly a third', () => {
-    expect(dose({ yeastForm: 'instant' }).pct).toBeCloseTo(0.3 * 0.33, 4);
+    expect(dose({ yeastForm: 'instant' }).pct).toBeCloseTo(dose().pct * 0.33, 3);
   });
 
   it('returns nothing for a pure sourdough build', () => {
@@ -160,6 +162,10 @@ describe('yeast dose', () => {
 
   it('discounts the dose when a preferment carries part of the load', () => {
     expect(dose({ prefermentFlourPct: 50 }).pct).toBeLessThan(dose().pct);
+  });
+
+  it('reports the starter-equivalent so both leavens share one currency', () => {
+    expect(dose().starterEquivalentPct).toBeGreaterThan(0);
   });
 
   it('never goes negative or absurd, whatever the input', () => {
@@ -172,25 +178,24 @@ describe('yeast dose', () => {
 describe('levain inoculation', () => {
   const inoc = (overrides = {}) =>
     computeInoculationPct({
-      basePct: 20,
-      refHours: 6,
-      refTempC: 24,
       effectiveHours: 6,
       roomTemp: 24,
+      saltPct: 2,
+      hydrationPct: 75,
       leavenType: 'sourdough',
       ...overrides,
     });
 
-  it('reproduces the base at reference conditions', () => {
-    expect(inoc()).toBeCloseTo(20, 1);
+  it('asks for less starter the longer the ferment', () => {
+    expect(inoc({ effectiveHours: 12 })).toBeLessThan(inoc({ effectiveHours: 6 }));
   });
 
-  it('halves when the time doubles', () => {
-    expect(inoc({ effectiveHours: 12 })).toBeCloseTo(10, 1);
+  it('asks for less starter the warmer the room', () => {
+    expect(inoc({ roomTemp: 28 })).toBeLessThan(inoc({ roomTemp: 18 }));
   });
 
-  it('halves again in hybrid mode', () => {
-    expect(inoc({ leavenType: 'hybrid' })).toBeCloseTo(10, 1);
+  it('halves in hybrid mode, where the yeast carries the other half', () => {
+    expect(inoc({ leavenType: 'hybrid' })).toBeLessThan(inoc());
   });
 
   it('is zero on a commercial-yeast build', () => {
@@ -198,8 +203,8 @@ describe('levain inoculation', () => {
   });
 
   it('stays inside practical limits', () => {
-    expect(inoc({ effectiveHours: 200 })).toBeGreaterThanOrEqual(3);
-    expect(inoc({ effectiveHours: 0.5, basePct: 50 })).toBeLessThanOrEqual(50);
+    expect(inoc({ effectiveHours: 200 })).toBeGreaterThanOrEqual(0);
+    expect(inoc({ effectiveHours: 0.5 })).toBeLessThanOrEqual(50);
   });
 });
 

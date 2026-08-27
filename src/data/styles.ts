@@ -130,21 +130,23 @@ export interface BreadStyle {
     sugarKey?: string;
   };
   fermentation: {
+    /** How the total is split between bulk and final proof. Normalised to sum to 1. */
     bulk_ratio: number;
     proof_ratio: number;
-    /**
-     * Reference dose of FRESH yeast as % of total flour, together with the time
-     * and temperature it was measured at. The engine rescales from here, so the
-     * three numbers must always be read as a set.
-     */
-    base_yeast_fresh_pct: number;
-    yeast_ref_hours: number;
-    yeast_ref_temp_c: number;
-    /** Reference levain inoculation (starter flour as % of total flour) and its conditions. */
-    base_inoculation_pct?: number;
-    levain_ref_hours?: number;
-    levain_ref_temp_c?: number;
   };
+  /**
+   * Scales the whole fermentation clock for this style.
+   *
+   * The measured curve fixes the *shape* of fermentation — logarithmic in dose,
+   * non-Arrhenius in temperature — but not its absolute level, which varies
+   * with how far a baker pushes bulk and how lively their starter is. Full
+   * Proof Baking's 6 h bulk at 20% levain runs about 1.75× the table's, because
+   * they stop at only 50–60% rise. Default 1; set it where a published recipe
+   * pins the level.
+   */
+  fermentFactor?: number;
+  /** Starting levain dose (ripe levain over dough flour) when driving by dose. */
+  defaultLevainPct?: number;
   preferment?: PrefermentSpec;
   process: ProcessSpec;
   defaults: StyleDefaults;
@@ -177,13 +179,8 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.75,
       proof_ratio: 0.25,
-      base_yeast_fresh_pct: 0.025,
-      yeast_ref_hours: 24,
-      yeast_ref_temp_c: 21,
-      base_inoculation_pct: 7,
-      levain_ref_hours: 10,
-      levain_ref_temp_c: 22,
     },
+    defaultLevainPct: 15.1,
     process: {
       mixMin: 20,
       benchRestMin: 20,
@@ -219,13 +216,8 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.25,
       proof_ratio: 0.75,
-      base_yeast_fresh_pct: 0.35,
-      yeast_ref_hours: 24,
-      yeast_ref_temp_c: 21,
-      base_inoculation_pct: 8,
-      levain_ref_hours: 10,
-      levain_ref_temp_c: 22,
     },
+    defaultLevainPct: 17.4,
     process: {
       mixMin: 10,
       benchRestMin: 20,
@@ -257,9 +249,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.6,
       proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.25,
-      yeast_ref_hours: 24,
-      yeast_ref_temp_c: 21,
     },
     process: {
       mixMin: 8,
@@ -293,9 +282,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.7,
       proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0.08,
-      yeast_ref_hours: 24,
-      yeast_ref_temp_c: 20,
     },
     process: {
       autolyseMin: 30,
@@ -330,9 +316,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.65,
       proof_ratio: 0.35,
-      base_yeast_fresh_pct: 0.3,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 22,
     },
     process: {
       mixMin: 6,
@@ -366,13 +349,8 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.6,
       proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.15,
-      yeast_ref_hours: 6,
-      yeast_ref_temp_c: 22,
-      base_inoculation_pct: 10,
-      levain_ref_hours: 7,
-      levain_ref_temp_c: 23,
     },
+    defaultLevainPct: 22.2,
     process: {
       mixMin: 10,
       benchRestMin: 30,
@@ -409,9 +387,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.35,
       proof_ratio: 0.65,
-      base_yeast_fresh_pct: 0.1,
-      yeast_ref_hours: 6,
-      yeast_ref_temp_c: 22,
     },
     preferment: {
       type: 'poolish',
@@ -454,9 +429,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.25,
       proof_ratio: 0.75,
-      base_yeast_fresh_pct: 0.05,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 20,
     },
     preferment: {
       type: 'biga',
@@ -500,9 +472,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.6,
       proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.08,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
     },
     preferment: {
       type: 'poolish',
@@ -550,9 +519,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.65,
       proof_ratio: 0.35,
-      base_yeast_fresh_pct: 0.06,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 22,
     },
     preferment: {
       type: 'biga',
@@ -599,9 +565,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.6,
       proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0.1,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
     },
     preferment: {
       type: 'poolish',
@@ -646,9 +609,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.7,
       proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0.08,
-      yeast_ref_hours: 4,
-      yeast_ref_temp_c: 22,
     },
     preferment: {
       type: 'biga',
@@ -693,16 +653,13 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.7,
       proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
       // 80 g of 100%-hydration starter on 400 g of dough flour is 40 g of
       // starter flour in 440 g total — 9.1% in the engine's convention — over a
-      // bulk at 26–28 °C plus a same-day proof.
-      base_inoculation_pct: 9,
-      levain_ref_hours: 7,
-      levain_ref_temp_c: 27,
     },
+    defaultLevainPct: 19.8,
+    // Solved so the engine reproduces The Mighty White's 80 g starter on 400 g
+    // of dough flour over its same-day schedule at 27 °C.
+    fermentFactor: 1.37,
     process: {
       autolyseMin: 45,
       mixMin: 3,
@@ -740,13 +697,11 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.55,
       proof_ratio: 0.45,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 9,
-      levain_ref_hours: 9,
-      levain_ref_temp_c: 23,
     },
+    defaultLevainPct: 19.8,
+    // Solved so the engine reproduces Full Proof Baking's 20% levain over their
+    // published 6 h bulk at 23.3 °C plus a 14 h retard at 3.3 °C.
+    fermentFactor: 1.53,
     process: {
       autolyseMin: 45,
       mixMin: 10,
@@ -786,13 +741,8 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.55,
       proof_ratio: 0.45,
-      base_yeast_fresh_pct: 0.15,
-      yeast_ref_hours: 6,
-      yeast_ref_temp_c: 22,
-      base_inoculation_pct: 10,
-      levain_ref_hours: 7,
-      levain_ref_temp_c: 23,
     },
+    defaultLevainPct: 22.2,
     process: {
       mixMin: 8,
       benchRestMin: 30,
@@ -824,9 +774,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.45,
       proof_ratio: 0.55,
-      base_yeast_fresh_pct: 0.25,
-      yeast_ref_hours: 3,
-      yeast_ref_temp_c: 24,
     },
     process: {
       mixMin: 12,
@@ -861,9 +808,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.7,
       proof_ratio: 0.3,
-      base_yeast_fresh_pct: 0.5,
-      yeast_ref_hours: 3,
-      yeast_ref_temp_c: 24,
     },
     process: {
       mixMin: 8,
@@ -894,13 +838,8 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.6,
       proof_ratio: 0.4,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 14,
-      levain_ref_hours: 8,
-      levain_ref_temp_c: 24,
     },
+    defaultLevainPct: 32.6,
     process: {
       mixMin: 8,
       benchRestMin: 40,
@@ -937,13 +876,8 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.55,
       proof_ratio: 0.45,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 5,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 10,
-      levain_ref_hours: 9,
-      levain_ref_temp_c: 23,
     },
+    defaultLevainPct: 22.2,
     process: {
       autolyseMin: 45,
       mixMin: 10,
@@ -984,13 +918,8 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.65,
       proof_ratio: 0.35,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 4,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 20,
-      levain_ref_hours: 5,
-      levain_ref_temp_c: 23,
     },
+    defaultLevainPct: 50.0,
     process: {
       mixMin: 8,
       benchRestMin: 30,
@@ -1024,13 +953,8 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.8,
       proof_ratio: 0.2,
-      base_yeast_fresh_pct: 0,
-      yeast_ref_hours: 3,
-      yeast_ref_temp_c: 23,
-      base_inoculation_pct: 8,
-      levain_ref_hours: 3,
-      levain_ref_temp_c: 23,
     },
+    defaultLevainPct: 17.4,
     process: {
       mixMin: 8,
       shapeKey: 'process.shape.tortilla',
@@ -1062,9 +986,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.55,
       proof_ratio: 0.45,
-      base_yeast_fresh_pct: 2.8,
-      yeast_ref_hours: 2.5,
-      yeast_ref_temp_c: 26,
     },
     process: {
       mixMin: 15,
@@ -1100,9 +1021,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.45,
       proof_ratio: 0.55,
-      base_yeast_fresh_pct: 2,
-      yeast_ref_hours: 3,
-      yeast_ref_temp_c: 24,
     },
     process: {
       mixMin: 15,
@@ -1138,9 +1056,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.55,
       proof_ratio: 0.45,
-      base_yeast_fresh_pct: 1.2,
-      yeast_ref_hours: 4,
-      yeast_ref_temp_c: 22,
     },
     process: {
       mixMin: 25,
@@ -1176,9 +1091,6 @@ export const BREAD_STYLES: BreadStyle[] = [
     fermentation: {
       bulk_ratio: 0.55,
       proof_ratio: 0.45,
-      base_yeast_fresh_pct: 0.8,
-      yeast_ref_hours: 4,
-      yeast_ref_temp_c: 24,
     },
     process: {
       mixMin: 12,

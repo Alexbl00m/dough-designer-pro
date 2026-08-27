@@ -17,13 +17,16 @@ import type { BreadStyle } from '@/data/styles';
 import type { RecipeParams } from '@/lib/recipe/state';
 import { FRICTION_FACTOR_C } from '@/core/constants';
 import type { MixingMethod, YeastForm } from '@/core/constants';
-import type { LeavenType, PercentBasis, ScaleMode } from '@/core/types';
+import type { FermentDriver, LeavenType, PercentBasis, ScaleMode } from '@/core/types';
 import { useI18n } from '@/i18n';
 import { formatNumber, toDateTimeLocal } from '@/lib/format';
+import { totalHoursFor } from '@/core/growth';
 
 interface CalculatorInputsProps {
   style: BreadStyle;
   params: RecipeParams;
+  /** The other end of the clock, so the fixed side always shows what it implies. */
+  computed: { totalHours: number; leavenPct: number };
   onChange: <K extends keyof RecipeParams>(key: K, value: RecipeParams[K]) => void;
   onReset: () => void;
   startTime: Date;
@@ -33,6 +36,7 @@ interface CalculatorInputsProps {
 export function CalculatorInputs({
   style,
   params,
+  computed,
   onChange,
   onReset,
   startTime,
@@ -209,26 +213,62 @@ export function CalculatorInputs({
       {/* ── Fermentation ── */}
       <Card className="p-5" data-print-card>
         <h3 className="mb-4 text-base font-semibold">{t('params.fermentation')}</h3>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <SliderField
-            id="totalTime"
-            label={t('field.totalTime')}
-            value={params.totalTime}
-            min={1}
-            max={96}
-            step={0.5}
-            display={`${num(params.totalTime)} h`}
-            onChange={(value) => {
-              onChange('totalTime', value);
-              // Cold time can never outlast the ferment it lives inside.
-              if (params.coldHours > value) onChange('coldHours', value);
-            }}
-            help={t('field.totalTime.help')}
-            reference={{
-              value: style.defaults.totalTime,
-              label: t('field.styleDefault', { value: `${num(style.defaults.totalTime)} h` }),
-            }}
-          />
+        <SelectField<FermentDriver>
+          id="driver"
+          label={t('field.driver')}
+          value={params.driver}
+          onChange={(value) => onChange('driver', value)}
+          help={t('field.driver.help')}
+          options={[
+            { value: 'time', label: t('field.driver.time') },
+            { value: 'dose', label: t('field.driver.dose') },
+          ]}
+        />
+
+        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {params.driver === 'time' ? (
+            <SliderField
+              id="totalTime"
+              label={t('field.totalTime')}
+              value={params.totalTime}
+              min={1}
+              max={96}
+              step={0.5}
+              display={`${num(params.totalTime)} h`}
+              onChange={(value) => {
+                onChange('totalTime', value);
+                // Cold time can never outlast the ferment it lives inside.
+                if (params.coldHours > value) onChange('coldHours', value);
+              }}
+              help={t('field.totalTime.help')}
+              reference={{
+                value: style.defaults.totalTime,
+                label: t('field.styleDefault', { value: `${num(style.defaults.totalTime)} h` }),
+              }}
+            />
+          ) : (
+            <SliderField
+              id="leavenPct"
+              label={t('field.leavenPct')}
+              value={params.leavenPct}
+              min={0.5}
+              max={60}
+              step={0.5}
+              display={`${num(params.leavenPct)}%`}
+              onChange={(value) => onChange('leavenPct', value)}
+              help={t('field.leavenPct.help')}
+              reference={
+                style.defaultLevainPct
+                  ? {
+                      value: style.defaultLevainPct,
+                      label: t('field.styleDefault', {
+                        value: `${num(style.defaultLevainPct)}%`,
+                      }),
+                    }
+                  : undefined
+              }
+            />
+          )}
           <SliderField
             id="roomTemp"
             label={t('field.roomTemp')}
@@ -265,6 +305,22 @@ export function CalculatorInputs({
               { value: 'proof', label: t('field.coldPhase.proof') },
             ]}
           />
+
+          <div className="flex flex-col justify-center rounded-lg bg-muted px-4 py-3 sm:col-span-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {params.driver === 'time' ? t('field.leavenPct') : t('field.computedTime')}
+            </span>
+            <span className="mt-0.5 text-xl font-semibold tabular">
+              {params.driver === 'time'
+                ? `${num(computed.leavenPct, 2)}%`
+                : `${num(computed.totalHours)} h`}
+            </span>
+            <span className="mt-1 text-xs text-muted-foreground">
+              {params.driver === 'time'
+                ? t('field.leavenPct.help')
+                : t('field.totalTime.help')}
+            </span>
+          </div>
 
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="startTime" className="text-sm">

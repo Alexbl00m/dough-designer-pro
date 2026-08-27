@@ -97,8 +97,13 @@ export const YEAST_DANGER_TEMP_C = 50;
 export const YEAST_PCT_MIN = 0.005;
 export const YEAST_PCT_MAX = 4;
 
-/** Practical limits for levain inoculation (starter flour as a share of total flour). */
-export const INOCULATION_MIN = 3;
+/**
+ * Practical limits for levain inoculation (starter flour as a share of total
+ * flour). The floor is deliberately low: a long room-temperature ferment
+ * genuinely wants only a few percent of levain, and clamping at 3% used to pin
+ * every ferment past about 14 hours to the same answer.
+ */
+export const INOCULATION_MIN = 0.1;
 export const INOCULATION_MAX = 50;
 /** Above this the dough is levain-dominant and behaves very differently; worth a note. */
 export const INOCULATION_HIGH = 20;
