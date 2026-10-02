@@ -2,124 +2,162 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Premium Baker's Calculator Design System 
-Inspired by Apple, Nike, Tesla - Clean, Modern, Elegant
-All colors MUST be HSL.
+/*
+  Design system.
+
+  A warm bakery palette — flour, crust, crumb — with enough contrast to read on
+  a phone propped against a mixer. Every colour is an HSL triple so Tailwind can
+  compose opacity on top of it. Dark mode is a full palette, not an inversion.
+
+  The craft rules follow DESIGN.md (Apple), the palette deliberately does not:
+
+  - One accent carries every interactive element. There is no second accent.
+  - Elevation comes from a surface change or a hairline, not from a shadow.
+    Shadow is reserved for something genuinely floating over content.
+  - No decorative gradients. A scrim over photography is for contrast, which is
+    a different thing.
+  - Weight 500 is absent from the ladder: 300 / 400 / 600 / 700 only.
+  - Display sizes carry negative tracking; body runs at 17px, not 16px.
+  - Radii keep three grammars — compact utility, cards, and the pill that means
+    "this is an action" — with nothing in between.
 */
 
 @layer base {
   :root {
-    /* Core neutral palette */
-    --background: 45 15% 97%;
-    --foreground: 25 15% 15%;
+    color-scheme: light;
 
-    /* Card system with warm tones */
-    --card: 40 25% 98%;
-    --card-foreground: 25 15% 15%;
+    /* Surfaces: warm off-white paper, not clinical grey */
+    --background: 40 30% 97%;
+    --foreground: 25 25% 12%;
 
-    --popover: 40 25% 98%;
-    --popover-foreground: 25 15% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 25% 12%;
+    --card-muted: 38 28% 96%;
 
-    /* Premium brand colors - warm golden primary */
-    --primary: 35 85% 45%;
-    --primary-foreground: 40 25% 98%;
-    --primary-hover: 35 85% 40%;
-    --primary-glow: 35 85% 65%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 25% 12%;
 
-    /* Sophisticated secondary - warm gray */
-    --secondary: 30 8% 92%;
-    --secondary-foreground: 25 15% 25%;
-    --secondary-hover: 30 8% 88%;
+    /* Brand: baked-crust amber */
+    --primary: 28 78% 42%;
+    --primary-foreground: 40 40% 99%;
+    --primary-hover: 28 78% 36%;
+    --primary-glow: 35 88% 58%;
+    --primary-soft: 33 75% 94%;
 
-    /* Refined muted tones */
-    --muted: 35 12% 94%;
-    --muted-foreground: 25 8% 55%;
+    --secondary: 33 22% 92%;
+    --secondary-foreground: 25 30% 22%;
+    --secondary-hover: 33 22% 87%;
 
-    /* Elegant accent - deep warm brown */
-    --accent: 25 25% 85%;
-    --accent-foreground: 25 35% 25%;
+    --muted: 36 20% 94%;
+    --muted-foreground: 28 12% 42%;
 
-    /* Premium gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --gradient-warm: linear-gradient(45deg, hsl(35 85% 55%), hsl(25 75% 45%));
+    --accent: 33 40% 90%;
+    --accent-foreground: 25 40% 20%;
 
-    /* Elegant shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(var(--primary) / 0.15);
-    --shadow-medium: 0 8px 30px -8px hsl(var(--primary) / 0.2);
-    --shadow-strong: 0 16px 40px -12px hsl(var(--primary) / 0.3);
+    --destructive: 4 72% 46%;
+    --destructive-foreground: 40 40% 99%;
 
-    /* Smooth animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --success: 145 55% 32%;
+    --warning: 32 88% 40%;
+    --info: 205 62% 38%;
 
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 40 25% 98%;
+    /* Ingredient dots — distinguishable without relying on colour alone */
+    --ing-flour: 38 65% 55%;
+    --ing-water: 205 72% 52%;
+    --ing-salt: 220 8% 55%;
+    --ing-yeast: 45 80% 48%;
+    --ing-starter: 25 55% 40%;
+    --ing-fat: 82 45% 42%;
+    --ing-sugar: 330 55% 62%;
+    --ing-dairy: 45 40% 78%;
+    --ing-egg: 40 85% 62%;
+    --ing-other: 265 35% 58%;
 
-    --border: 35 15% 88%;
-    --input: 35 15% 92%;
-    --ring: 35 85% 45%;
+    --border: 34 20% 87%;
+    --input: 34 20% 89%;
+    --ring: 28 78% 42%;
 
-    --radius: 12px;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* The one shadow in the system, for elements that genuinely float over
+       content. Cards, buttons and text never take it. */
+    --shadow-float: 0 8px 30px -8px hsl(25 25% 12% / 0.22);
+    /* A hairline does the work a card shadow used to. */
+    --hairline: 34 20% 87%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* The sidebar shares the app palette instead of a stray grey one */
+    --sidebar-background: 38 28% 95%;
+    --sidebar-foreground: 25 25% 20%;
+    --sidebar-primary: 28 78% 42%;
+    --sidebar-primary-foreground: 40 40% 99%;
+    --sidebar-accent: 33 30% 89%;
+    --sidebar-accent-foreground: 25 40% 18%;
+    --sidebar-border: 34 20% 86%;
+    --sidebar-ring: 28 78% 42%;
   }
 
   .dark {
-    --background: 25 15% 8%;
-    --foreground: 40 25% 95%;
+    color-scheme: dark;
 
-    --card: 25 20% 12%;
-    --card-foreground: 40 25% 95%;
+    --background: 26 18% 8%;
+    --foreground: 38 25% 93%;
 
-    --popover: 25 20% 12%;
-    --popover-foreground: 40 25% 95%;
+    --card: 26 16% 12%;
+    --card-foreground: 38 25% 93%;
+    --card-muted: 26 14% 15%;
 
-    --primary: 35 85% 55%;
-    --primary-foreground: 25 15% 8%;
-    --primary-hover: 35 85% 50%;
-    --primary-glow: 35 85% 70%;
+    --popover: 26 16% 13%;
+    --popover-foreground: 38 25% 93%;
 
-    --secondary: 25 15% 15%;
-    --secondary-foreground: 40 25% 95%;
-    --secondary-hover: 25 15% 20%;
+    --primary: 34 82% 56%;
+    --primary-foreground: 26 30% 10%;
+    --primary-hover: 34 82% 62%;
+    --primary-glow: 40 90% 68%;
+    --primary-soft: 30 30% 18%;
 
-    --muted: 25 15% 18%;
-    --muted-foreground: 35 8% 65%;
+    --secondary: 26 14% 18%;
+    --secondary-foreground: 38 25% 93%;
+    --secondary-hover: 26 14% 23%;
 
-    --accent: 25 25% 20%;
-    --accent-foreground: 40 25% 95%;
+    --muted: 26 14% 17%;
+    --muted-foreground: 34 12% 66%;
 
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 40 25% 98%;
+    --accent: 28 22% 22%;
+    --accent-foreground: 38 25% 93%;
 
-    --border: 25 15% 20%;
-    --input: 25 15% 18%;
-    --ring: 35 85% 55%;
+    --destructive: 4 68% 56%;
+    --destructive-foreground: 26 30% 10%;
 
-    /* Dark mode overrides */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --success: 145 45% 55%;
+    --warning: 38 85% 60%;
+    --info: 205 65% 62%;
+
+    --ing-flour: 38 60% 62%;
+    --ing-water: 205 68% 62%;
+    --ing-salt: 220 10% 68%;
+    --ing-yeast: 45 75% 60%;
+    --ing-starter: 25 50% 58%;
+    --ing-fat: 82 42% 55%;
+    --ing-sugar: 330 50% 70%;
+    --ing-dairy: 45 35% 78%;
+    --ing-egg: 40 78% 68%;
+    --ing-other: 265 40% 70%;
+
+    --border: 26 14% 22%;
+    --input: 26 14% 20%;
+    --ring: 34 82% 56%;
+
+    --shadow-float: 0 8px 30px -8px hsl(0 0% 0% / 0.55);
+    --hairline: 26 14% 22%;
+
+    --sidebar-background: 26 16% 11%;
+    --sidebar-foreground: 38 22% 88%;
+    --sidebar-primary: 34 82% 56%;
+    --sidebar-primary-foreground: 26 30% 10%;
+    --sidebar-accent: 26 14% 18%;
+    --sidebar-accent-foreground: 38 25% 93%;
+    --sidebar-border: 26 14% 20%;
+    --sidebar-ring: 34 82% 56%;
   }
 }
 
@@ -128,7 +166,149 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground;
+  html {
+    scroll-behavior: smooth;
   }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* 17px, not 16px — the extra pixel sets the reading pace, and at a floury
+       arm's length on a phone it is the difference between glancing and squinting. */
+    @apply text-body;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Headings carry the tight tracking that keeps a large size from sprawling. */
+  h1 {
+    @apply text-display-xl;
+  }
+
+  h2 {
+    @apply text-display-lg;
+  }
+
+  h3 {
+    @apply text-display-md;
+  }
+
+  h4 {
+    @apply text-display-sm;
+  }
+
+  /* A visible focus ring is the difference between usable and unusable by keyboard. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Numbers in tables must line up; proportional digits make weights hard to scan. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* A card is defined by its hairline and its fill, never by a shadow. */
+  .surface {
+    @apply rounded-card border border-hairline bg-card text-card-foreground;
+  }
+
+  /* The one floating treatment, for things that sit above the page rather than in it. */
+  .floating {
+    box-shadow: var(--shadow-float);
+  }
+
+  .stat-value {
+    @apply text-display-sm tabular;
+  }
+
+  .stat-label {
+    @apply text-micro uppercase tracking-wide text-muted-foreground;
+  }
+
+  /* Press feedback, applied system-wide so every control answers the same way. */
+  .pressable {
+    @apply transition-transform duration-100 active:scale-[0.97];
+  }
+}
+
+/*
+  Print: a bake sheet, not a screenshot of an app. Chrome, sidebar, buttons and
+  decorative panels come off; the recipe reflows to a single column that fits an
+  A4 page and stays readable in black and white.
+*/
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  :root,
+  .dark {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --muted-foreground: 0 0% 30%;
+    --border: 0 0% 75%;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .surface,
+  [data-print-card] {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .print-grid {
+    display: block !important;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+
+.print-only {
+  display: none;
 }

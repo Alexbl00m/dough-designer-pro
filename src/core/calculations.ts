@@ -1,851 +1,813 @@
-import { BreadStyle } from '@/data/styles';
+/**
+ * The recipe engine.
+ *
+ * Takes a style plus the baker's parameters and returns a complete, internally
+ * consistent recipe: ingredient weights that add up to the dough weight you
+ * asked for, baker's percentages that match those weights, a leavening dose
+ * scaled to the actual time and temperature, a water temperature that hits the
+ * target dough temperature, and a wall-clock schedule.
+ *
+ * There are no per-style branches here. Everything a style needs to behave
+ * differently is declared as data in `src/data/styles.ts`.
+ */
 
-export interface CalculationInputs {
-  style: BreadStyle;
-  ballWeight: number;
-  ballCount: number;
-  totalTime: number;
-  roomTemp: number;
-  coldTemp?: number;
-  coldHours?: number;
-  leavenType: 'commercial' | 'sourdough' | 'hybrid';
-  yeastForm: 'fresh' | 'active_dry' | 'instant';
-  mixing: 'hand' | 'spiral' | 'planetary' | 'dlx';
-  desiredDoughTemp: number;
-  /** Optional user overrides of the style defaults (baker's %) */
-  hydration?: number;
-  salt?: number;
-  sugar?: number;
-  oil?: number;
-}
+import type { BreadStyle, IngredientType } from '@/data/styles';
+import {
+  DEFAULT_COLD_TEMP_C,
+  FRICTION_FACTOR_C,
+  INOCULATION_HIGH,
+  LEVAIN_SEED_SHARE,
+  WATER_TEMP_MAX_C,
+  WATER_TEMP_MIN_C,
+  YEAST_DANGER_TEMP_C,
+  clamp,
+  round,
+} from './constants';
+import {
+  computeIceSplit,
+  computeInoculationPct,
+  computeRoomEquivHours,
+  computeWaterTemp,
+  computeYeastDose,
+  levainOnFlourPct,
+  starterPeakHours,
+} from './fermentation';
+import {
+  bulkHoursFor,
+  doublingHoursAt,
+  leavenPctForTotal,
+  proofHoursAt,
+  timeCorrection,
+  totalHoursFor,
+} from './growth';
+import { VERY_FAST_LEAVEN_PCT } from '@/data/fermentationTable';
+import { LEAVEN_PCT_MIN } from './growth';
+import { buildSchedule } from './schedule';
+import type {
+  CalculationInputs,
+  CalculationResults,
+  Ingredient,
+  Note,
+  RecipeSection,
+} from './types';
 
-export interface Ingredient {
-  name: string;
-  grams: number;
-  percentage: number;
-  type: 'flour' | 'water' | 'salt' | 'yeast' | 'starter' | 'oil' | 'sugar' | 'preferment';
-}
+export * from './types';
+export * from './fermentation';
+export {
+  Q10,
+  REFERENCE_TEMP_C,
+  FRICTION_FACTOR_C,
+  YEAST_CONVERSION,
+  INOCULATION_MIN,
+  INOCULATION_MAX,
+  DEFAULT_COLD_TEMP_C,
+} from './constants';
 
-export interface CalculationResults {
-  ingredients: Ingredient[];
-  waterTemp: number;
-  bulkTime: number;
-  proofTime: number;
-  totalFlour: number;
-  yeastPercentage: number;
-  timeline: TimelineStep[];
-  notes: string[];
-  /** Effective parameters actually used for the calculation */
-  params: {
-    hydration: number;
-    salt: number;
-    sugar: number;
-    oil: number;
-    roomEquivTime: number;
-    coldHours: number;
-    totalTime: number;
-    totalDoughWeight: number;
-    inoculationPct: number;
-    baseInoculationPct: number;
-    leavenType: 'commercial' | 'sourdough' | 'hybrid';
-    roomTemp: number;
-  };
-}
-
-export interface TimelineStep {
-  time: string;
-  action: string;
-  description: string;
-  temperature?: number;
-}
-
-// Yeast conversion factors
-const YEAST_CONVERSIONS = {
-  fresh_to_ady: 0.4,
-  fresh_to_idy: 0.33,
-  ady_to_idy: 0.82
+const YEAST_KEY: Record<string, string> = {
+  fresh: 'ing.yeast_fresh',
+  active_dry: 'ing.yeast_active_dry',
+  instant: 'ing.yeast_instant',
 };
 
-// Q10 temperature correction
-function getTemperatureFactor(temp: number, refTemp: number = 23, q10: number = 2.2): number {
-  return Math.pow(q10, (temp - refTemp) / 10);
-}
+/** Weights below 10 g are shown to two decimals; a 0.4 g yeast dose matters. */
+export const formatGrams = (grams: number): string =>
+  grams < 10 ? grams.toFixed(2) : Math.round(grams).toString();
 
-/** The base inoculation assumes ~6h room-equivalent bulk at 23°C. */
-export const REFERENCE_LEVAIN_TIME = 6;
-export const REFERENCE_LEVAIN_TEMP = 23;
-/** Practical limits bakers actually use: 3–25% flour (= 6–50% starter at 100% hydration) */
-export const INOCULATION_MIN = 3;
-export const INOCULATION_MAX = 25;
-
-/** Room-equivalent fermentation hours, accounting for time spent at 4°C. */
-export function computeRoomEquivTime(totalTime: number, coldHours: number = 0): number {
-  const coldRetardFactor = 0.3; // Cold slows fermentation by ~70%
-  const effectiveColdHours = Math.min(Math.max(coldHours, 0), totalTime);
-  return Math.max(0.5, (totalTime - effectiveColdHours) + effectiveColdHours * coldRetardFactor);
-}
-
-/** Starter (levain) inoculation as % of total flour, scaled by time and temperature. */
-export function computeInoculationPct(
-  baseInoculation: number,
-  roomEquivTime: number,
-  roomTemp: number,
-  leavenType: 'commercial' | 'sourdough' | 'hybrid' = 'sourdough'
-): number {
-  if (leavenType === 'commercial') return 0;
-  const tempFactor = getTemperatureFactor(roomTemp);
-  const scaled = baseInoculation * (REFERENCE_LEVAIN_TIME / roomEquivTime) / tempFactor;
-  let pct = Math.min(Math.max(scaled, INOCULATION_MIN), INOCULATION_MAX);
-  if (leavenType === 'hybrid') pct *= 0.5;
-  return Math.round(pct * 10) / 10;
-}
-
-// Baker's percentage calculations
 export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
-  const { style, ballWeight, ballCount, totalTime, roomTemp, leavenType, yeastForm, mixing, desiredDoughTemp, coldTemp = 4, coldHours = 0 } = inputs;
+  const { style } = inputs;
+  const notes: Note[] = [];
 
-  // Effective parameters: user overrides win over style defaults
-  const hydrationPct = inputs.hydration ?? style.defaultParams.hydration_pct;
-  const saltPct = inputs.salt ?? style.defaultParams.salt_pct;
-  const sugarPct = inputs.sugar ?? style.defaultParams.sugar_pct;
-  const oilPct = inputs.oil ?? style.defaultParams.oil_pct;
+  // ── 1. Resolve parameters: user overrides beat style defaults ──
+  const hydration = clamp(inputs.hydration ?? style.defaultParams.hydration_pct, 30, 120);
+  const salt = clamp(inputs.salt ?? style.defaultParams.salt_pct, 0, 6);
+  const sugar = clamp(inputs.sugar ?? style.defaultParams.sugar_pct, 0, 40);
+  const fat = clamp(inputs.oil ?? style.defaultParams.oil_pct, 0, 60);
+  const starterHydration = clamp(inputs.starterHydration ?? 100, 40, 200);
 
-  // Calculate total dough weight and flour weight
-  const totalDoughWeight = Math.max(0, ballWeight * ballCount);
-  // Extra dry ingredients that add weight but are not part of the flour base
-  const extrasPct = style.id === 'milkbread' ? 4.6 : 0;
-  const totalPercentage = 100 + hydrationPct + saltPct + sugarPct + oilPct + extrasPct;
-  const totalFlour = totalDoughWeight / (totalPercentage / 100);
+  const roomTemp = clamp(inputs.roomTemp, 4, 40);
+  const coldTemp = clamp(inputs.coldTemp ?? DEFAULT_COLD_TEMP_C, -2, 18);
+  const totalTime = Math.max(0.5, inputs.totalTime);
+  const coldPhase = inputs.coldPhase ?? style.process.coldPhase;
+  const desiredDoughTemp = clamp(inputs.desiredDoughTemp, 15, 35);
+  const flourTemp = inputs.flourTemp ?? roomTemp;
+  const mixing = inputs.mixing;
+  const yeastForm = inputs.yeastForm;
+  const leavenType = inputs.leavenType;
 
-  // Room equivalent time calculation (cold hours can never exceed total time)
-  const effectiveColdHours = Math.min(Math.max(coldHours, 0), totalTime);
-  const roomEquivTime = computeRoomEquivTime(totalTime, effectiveColdHours);
+  const usePreferment = (inputs.usePreferment ?? true) && Boolean(style.preferment);
+  const preferment = usePreferment ? style.preferment : undefined;
+  const percentBasis = inputs.percentBasis ?? 'total';
 
-  // Calculate yeast percentage
-  let yeastPercentage = 0;
-  if (leavenType === 'commercial' || leavenType === 'hybrid') {
-    // Styles that are sourdough-only have no base yeast: fall back to a sane default
-    const baseFreshYeast = style.fermentation.base_yeast_fresh_pct || 0.3;
-    const tempFactor = getTemperatureFactor(roomTemp);
-    const timeFactor = 24 / roomEquivTime; // Base calculation for 24h
-    
-    // Style corrections (clamped so extreme inputs can never produce absurd/negative yeast)
-    const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
-    const saltCorrection = clamp(1 + 0.05 * (saltPct - 2.0), 0.8, 1.4);
-    const sugarCorrection = clamp(1 + 0.02 * sugarPct, 0.8, 1.5);
-    const hydrationCorrection = clamp(1 - 0.005 * (hydrationPct - 62), 0.7, 1.3);
-    
-    let freshYeastPct = baseFreshYeast * timeFactor / tempFactor * saltCorrection * sugarCorrection * hydrationCorrection;
-    // In hybrid mode the sourdough carries part of the load
-    if (leavenType === 'hybrid') freshYeastPct *= 0.5;
-    
-    // Convert to desired yeast form
-    if (yeastForm === 'active_dry') {
-      yeastPercentage = freshYeastPct * YEAST_CONVERSIONS.fresh_to_ady;
-    } else if (yeastForm === 'instant') {
-      yeastPercentage = freshYeastPct * YEAST_CONVERSIONS.fresh_to_idy;
-    } else {
-      yeastPercentage = freshYeastPct;
-    }
+  // ── 2. Fermentation: the clock, run in whichever direction the baker holds ──
+  const driver = inputs.driver ?? 'time';
+  const clock = {
+    tempC: roomTemp,
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+  };
+  const fermentFactor = style.fermentFactor ?? 1;
+  const usesLevain = leavenType === 'sourdough' || leavenType === 'hybrid';
+
+  // In dose mode the schedule follows from the dose; in time mode the dose
+  // follows from the schedule. Both are the same equation, so the two agree.
+  let requestedTotal: number;
+  let leavenOnFlour: number;
+
+  if (driver === 'dose') {
+    leavenOnFlour = Math.max(0.2, inputs.leavenPct ?? style.defaultLevainPct ?? 20);
+    requestedTotal = round(totalHoursFor(leavenOnFlour, clock) * fermentFactor, 2);
+  } else {
+    requestedTotal = totalTime;
+    leavenOnFlour = leavenPctForTotal(totalTime / fermentFactor, clock);
   }
 
-  // Sourdough inoculation actually used
-  const usesStarter = leavenType === 'sourdough' || leavenType === 'hybrid';
-  const baseInoculation = style.fermentation.base_inoculation_pct ?? 20;
-  const inoculationPct = usesStarter
-    ? computeInoculationPct(baseInoculation, roomEquivTime, roomTemp, leavenType)
+  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
+  const coldHours = Math.min(requestedCold, requestedTotal);
+
+  if (requestedCold > requestedTotal) {
+    notes.push({
+      code: 'note.cold_clamped',
+      severity: 'warn',
+      values: { hours: round(coldHours, 1) },
+    });
+  }
+
+  const roomEquivHours = computeRoomEquivHours({
+    totalHours: requestedTotal,
+    coldHours,
+    roomTemp,
+    coldTemp,
+  });
+
+  // Cold hours are worth less than clock hours, so the dose has to be set for
+  // the room-equivalent time, not the time on the wall.
+  if (driver === 'time') {
+    leavenOnFlour = leavenPctForTotal(roomEquivHours / fermentFactor, clock);
+  }
+
+  const dose = computeYeastDose({
+    effectiveHours: roomEquivHours,
+    roomTemp,
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+    yeastForm,
+    leavenType,
+    prefermentFlourPct: preferment?.flour_pct,
+    fermentFactor,
+  });
+
+  const inoculationPct = usesLevain
+    ? computeInoculationPct({
+        effectiveHours: roomEquivHours,
+        roomTemp,
+        saltPct: salt,
+        sugarPct: sugar,
+        hydrationPct: hydration,
+        fatPct: fat,
+        leavenType,
+        starterHydrationPct: starterHydration,
+        fermentFactor,
+      })
     : 0;
 
-  // Build ingredients list
-  const ingredients: Ingredient[] = [];
-  
-  // Add flour(s) - either blend or single
-  if (style.flourBlend && style.flourBlend.length > 0) {
-    style.flourBlend.forEach(flour => {
-      ingredients.push({
-        name: flour.name,
-        grams: Math.round(totalFlour * (flour.percentage / 100) * 10) / 10,
-        percentage: flour.percentage,
-        type: 'flour'
-      });
-    });
+  // How long the levain itself needs is a function of the baker's kitchen, not
+  // of any style reference: the same feed peaks in 4 h at 27 °C and 13 h at 18 °C.
+  const levainPeakHours = starterPeakHours(roomTemp);
+
+  const correction = timeCorrection({
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+  });
+
+  // ── 3. Solve the flour weight so the finished dough hits the target ──
+  const extras = style.extras ?? [];
+  const extrasPct = extras.reduce((sum, e) => sum + e.pct, 0);
+  const prefermentExtrasPct = preferment
+    ? (preferment.extras ?? []).reduce(
+        (sum, e) => sum + e.pct * (preferment.flour_pct / 100),
+        0,
+      )
+    : 0;
+
+  // Fractions of the TOTAL flour that go into the preferment and the levain.
+  // Everything below is expressed against total flour so the solve stays linear.
+  const prefFlourFrac = preferment ? preferment.flour_pct / 100 : 0;
+  const prefWaterFrac = prefFlourFrac * ((preferment?.hydration_pct ?? 0) / 100);
+  const levainFlourFrac = inoculationPct / 100;
+  const levainWaterFrac = levainFlourFrac * (starterHydration / 100);
+
+  // On a dough basis the percentages are measured against only the flour added
+  // directly to the final mix, so they buy proportionally less of everything.
+  // The floor keeps a 100%-preferment style (where no fresh flour is added)
+  // from collapsing the denominator to zero.
+  const basisShare =
+    percentBasis === 'dough'
+      ? Math.max(0.05, 1 - prefFlourFrac - levainFlourFrac)
+      : 1;
+
+  const saltFrac = basisShare * (salt / 100);
+  const sugarFrac = basisShare * (sugar / 100);
+  const fatFrac = basisShare * (fat / 100);
+  const extrasFrac = basisShare * (extrasPct / 100);
+
+  // Water added to the final dough. On a total basis the stated hydration
+  // covers every drop including the preferment's and the starter's, so those
+  // come off; on a dough basis it covers only what goes into the final mix.
+  const finalWaterFrac =
+    percentBasis === 'dough'
+      ? basisShare * (hydration / 100)
+      : hydration / 100 - prefWaterFrac - levainWaterFrac;
+  const totalWaterFrac = finalWaterFrac + prefWaterFrac + levainWaterFrac;
+
+  // The levain and preferment add flour and water that are subtracted again
+  // from the main dough, so they are weight-neutral. Yeast and extras add weight.
+  const totalPct =
+    100 +
+    100 * (totalWaterFrac + saltFrac + sugarFrac + fatFrac + extrasFrac) +
+    prefermentExtrasPct +
+    dose.pct;
+
+  const pieces = Math.max(1, Math.round(inputs.ballCount || 1));
+  const scaleMode = inputs.scaleMode ?? 'pieces';
+
+  let totalFlour: number;
+  let targetDoughWeight: number;
+  if (scaleMode === 'flour' && inputs.targetFlour) {
+    totalFlour = Math.max(1, inputs.targetFlour);
+    targetDoughWeight = totalFlour * (totalPct / 100);
+  } else if (scaleMode === 'dough' && inputs.targetDough) {
+    targetDoughWeight = Math.max(1, inputs.targetDough);
+    totalFlour = targetDoughWeight / (totalPct / 100);
   } else {
-    ingredients.push({
-      name: 'Mjöl (Tipo 00/Vetemjöl)',
-      grams: Math.round(totalFlour * 10) / 10,
-      percentage: 100,
-      type: 'flour'
-    });
+    targetDoughWeight = Math.max(1, (inputs.ballWeight || 1) * pieces);
+    totalFlour = targetDoughWeight / (totalPct / 100);
   }
-  
-  // Add water
-  ingredients.push({
-    name: 'Vatten',
-    grams: Math.round(totalFlour * (hydrationPct / 100) * 10) / 10,
-    percentage: hydrationPct,
-    type: 'water'
-  });
-  
-  // Add salt
-  ingredients.push({
-    name: 'Salt',
-    grams: Math.round(totalFlour * (saltPct / 100) * 10) / 10,
-    percentage: saltPct,
-    type: 'salt'
-  });
 
-  // Add yeast if commercial
-  if (yeastPercentage > 0) {
-    const yeastNames = {
-      fresh: 'Färsk jäst',
-      active_dry: 'Torrjäst (aktiv)',
-      instant: 'Torrjäst (instant)'
-    };
-    
-    ingredients.push({
-      name: yeastNames[yeastForm],
-      grams: Math.round(totalFlour * (yeastPercentage / 100) * 100) / 100,
-      percentage: Math.round(yeastPercentage * 100) / 100,
-      type: 'yeast'
+  // ── 4. Split the flour and water between preferment, levain and final dough ──
+  const totalWater = totalFlour * totalWaterFrac;
+  const basisFlour = totalFlour * basisShare;
+
+  const prefermentFlour = totalFlour * prefFlourFrac;
+  const prefermentWater = totalFlour * prefWaterFrac;
+  const prefermentSalt = preferment?.salt_pct
+    ? prefermentFlour * (preferment.salt_pct / 100)
+    : 0;
+  const prefermentYeast = preferment?.yeast_fresh_pct
+    ? prefermentFlour *
+      (preferment.yeast_fresh_pct / 100) *
+      (yeastForm === 'fresh' ? 1 : yeastForm === 'instant' ? 0.33 : 0.4)
+    : 0;
+
+  const levainFlour = totalFlour * levainFlourFrac;
+  const levainWater = totalFlour * levainWaterFrac;
+  const levainTotal = levainFlour + levainWater;
+
+  const finalFlour = totalFlour - prefermentFlour - levainFlour;
+  const finalWater = totalFlour * finalWaterFrac;
+
+  if (finalFlour < 0) {
+    notes.push({ code: 'note.flour_overdrawn', severity: 'warn' });
+  }
+  if (finalWater < 0) {
+    notes.push({
+      code: 'note.water_overdrawn',
+      severity: 'warn',
+      values: { hydration: round(hydration, 1) },
     });
   }
 
-  // Add sourdough starter if needed
-  if (usesStarter && inoculationPct > 0) {
-    const starterFlour = totalFlour * (inoculationPct / 100);
-    const starterWater = starterFlour;
-    const totalStarter = starterFlour + starterWater;
-    
-    ingredients.push({
-      name: 'Surdeg (100% hydrering)',
-      grams: Math.round(totalStarter * 10) / 10,
-      percentage: Math.round(inoculationPct * 2 * 10) / 10, // flour + water
-      type: 'starter'
-    });
-    
-    // Adjust flour and water for single flour or first flour in blend
-    const firstFlourIndex = ingredients.findIndex(ing => ing.type === 'flour');
-    const waterIndex = ingredients.findIndex(ing => ing.type === 'water');
-    
-    if (firstFlourIndex !== -1) {
-      ingredients[firstFlourIndex].grams = Math.round(Math.max(0, ingredients[firstFlourIndex].grams - starterFlour) * 10) / 10;
-      ingredients[firstFlourIndex].name += ' (utöver surdegen)';
-    }
-    if (waterIndex !== -1) {
-      ingredients[waterIndex].grams = Math.round(Math.max(0, ingredients[waterIndex].grams - starterWater) * 10) / 10;
-      ingredients[waterIndex].name += ' (utöver surdegen)';
-    }
-  }
+  // ── 5. Build the ingredient sections ──
+  const sections: RecipeSection[] = [];
+  const pct = (grams: number) => (basisFlour > 0 ? round((grams / basisFlour) * 100, 2) : 0);
 
-  // Add sugar if needed
-  if (sugarPct > 0) {
-    const sugarName = style.id === 'pain_de_mie_traditional' ? 'Honung' :
-                     style.id === 'milkbread' ? 'Strösocker' : 'Socker';
-    ingredients.push({
-      name: sugarName,
-      grams: Math.round(totalFlour * (sugarPct / 100) * 10) / 10,
-      percentage: sugarPct,
-      type: 'sugar'
+  if (usesLevain && levainTotal > 0) {
+    const levainIngredients: Ingredient[] = [
+        {
+        key: 'ing.starter_seed',
+        grams: round(levainTotal * LEVAIN_SEED_SHARE, 1),
+        percentage: pct(levainTotal * LEVAIN_SEED_SHARE),
+        type: 'starter',
+      },
+      { key: 'ing.flour', grams: round(levainFlour, 1), percentage: pct(levainFlour), type: 'flour' },
+      { key: 'ing.water', grams: round(levainWater, 1), percentage: pct(levainWater), type: 'water' },
+    ];
+    sections.push({
+      id: 'levain',
+      titleKey: 'section.levain',
+      // The build time the baker needs is the one for their kitchen, not the
+      // reference conditions the dose happens to be calibrated against.
+      meta: { hours: levainPeakHours, tempC: roomTemp, type: 'levain' },
+      ingredients: levainIngredients,
+      totalGrams: round(levainTotal, 1),
     });
   }
 
-  // Add special ingredients for specific recipes
-  if (style.id === 'milkbread') {
-    // Add milk powder (4.6% of flour weight)
-    ingredients.push({
-      name: 'Torrmjölkspulver',
-      grams: Math.round(totalFlour * 0.046 * 10) / 10,
-      percentage: 4.6,
-      type: 'flour' // Treat as flour for calculation purposes
-    });
-  }
-
-  if (style.id === 'pain_de_mie_traditional') {
-    // Replace some water with milk (50/50 split)
-    const waterIndex = ingredients.findIndex(ing => ing.type === 'water');
-    if (waterIndex !== -1) {
-      const totalLiquid = ingredients[waterIndex].grams;
-      const waterAmount = totalLiquid / 2;
-      const milkAmount = totalLiquid / 2;
-      
-      ingredients[waterIndex].grams = Math.round(waterAmount * 10) / 10;
-      ingredients[waterIndex].name = 'Fingervarmt vatten';
-      ingredients[waterIndex].percentage = Math.round((waterAmount / totalFlour) * 1000) / 10;
-      
-      ingredients.push({
-        name: 'Standardmjölk',
-        grams: Math.round(milkAmount * 10) / 10,
-        percentage: Math.round((milkAmount / totalFlour) * 1000) / 10,
-        type: 'water'
+  let prefermentExtrasGrams = 0;
+  if (preferment) {
+    const prefIngredients: Ingredient[] = [
+      { key: 'ing.flour', grams: round(prefermentFlour, 1), percentage: pct(prefermentFlour), type: 'flour' },
+      { key: 'ing.water', grams: round(prefermentWater, 1), percentage: pct(prefermentWater), type: 'water' },
+    ];
+    if (prefermentYeast > 0) {
+      prefIngredients.push({
+        key: YEAST_KEY[yeastForm],
+        grams: round(prefermentYeast, 2),
+        percentage: pct(prefermentYeast),
+        type: 'yeast',
       });
     }
-  }
-
-  if (style.id === 'sourdough_tortillas') {
-    // Replace some water with hot water
-    const waterIndex = ingredients.findIndex(ing => ing.type === 'water');
-    if (waterIndex !== -1) {
-      ingredients[waterIndex].name = 'Hett vatten';
+    if (prefermentSalt > 0) {
+      prefIngredients.push({
+        key: 'ing.salt',
+        grams: round(prefermentSalt, 1),
+        percentage: pct(prefermentSalt),
+        type: 'salt',
+      });
     }
-  }
-
-  // Add oil if needed
-  if (oilPct > 0) {
-    const oilName = style.id === 'brioche' ? 'Smör' : 
-                   style.id === 'focaccia' ? 'Olivolja' :
-                   style.id === 'milkbread' ? 'Smör' :
-                   style.id === 'pain_de_mie_traditional' ? 'Smör' :
-                   style.id === 'sourdough_tortillas' ? 'Smält smör' : 'Olja';
-    ingredients.push({
-      name: oilName,
-      grams: Math.round(totalFlour * (oilPct / 100) * 10) / 10,
-      percentage: oilPct,
-      type: 'oil'
+    for (const extra of preferment.extras ?? []) {
+      const grams = prefermentFlour * (extra.pct / 100);
+      prefermentExtrasGrams += grams;
+      prefIngredients.push({
+        key: extra.key,
+        grams: round(grams, 1),
+        percentage: pct(grams),
+        type: extra.type,
+      });
+    }
+    sections.push({
+      id: 'preferment',
+      titleKey: `section.${preferment.type}`,
+      meta: { hours: preferment.hours, tempC: preferment.temp_c, type: preferment.type },
+      ingredients: prefIngredients.filter((i) => i.grams > 0.004),
+      totalGrams: round(
+        prefIngredients.reduce((sum, i) => sum + i.grams, 0),
+        1,
+      ),
     });
   }
 
-  // Calculate water temperature (DDT)
-  const frictionFactors = { hand: 2, spiral: 8, planetary: 6, dlx: 4 };
-  const frictionFactor = frictionFactors[mixing];
-  const flourTemp = roomTemp; // Flour equilibrates to the room it is stored in
-  const rawWaterTemp = desiredDoughTemp * 3 - flourTemp - roomTemp - frictionFactor;
-  const waterTemp = Math.min(Math.max(rawWaterTemp, 1), 55);
+  // Final dough
+  const finalIngredients: Ingredient[] = [];
 
-  // Calculate bulk and proof times from the real clock time, normalised so the
-  // ratios always sum to 1 (some styles' ratios did not).
-  const ratioSum = style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
-  const bulkTime = totalTime * (style.fermentation.bulk_ratio / ratioSum);
-  const proofTime = totalTime * (style.fermentation.proof_ratio / ratioSum);
-
-  // Make displayed baker's percentages consistent with the grams actually listed.
-  // (Previously flour showed 100% and water the target hydration even after the
-  // starter's flour/water had been subtracted from them.)
-  ingredients.forEach(ing => {
-    const pct = totalFlour > 0 ? (ing.grams / totalFlour) * 100 : 0;
-    ing.percentage = ing.type === 'yeast'
-      ? Math.round(pct * 1000) / 1000
-      : Math.round(pct * 10) / 10;
-  });
-
-  // Generate timeline
-  const timeline = generateTimeline(bulkTime, proofTime, mixing, style);
-
-  // Generate notes
-  const notes = generateNotes(inputs, yeastPercentage, waterTemp, {
-    hydrationPct,
-    oilPct,
-    rawWaterTemp,
-    coldHours: effectiveColdHours,
-  });
-
-  if (usesStarter && inoculationPct > 0) {
-    notes.push(
-      `ℹ️ Procenten visar varje ingrediens andel av det totala mjölet (${Math.round(totalFlour)}g), där surdegens mjöl (${Math.round(totalFlour * (inoculationPct / 100))}g) och vatten redan är avräknade från mjöl- och vattenposten. Total hydrering blir ${hydrationPct}%.`
-    );
-    notes.push(
-      `🫙 Surdegsratio: ${inoculationPct}% av mjölvikten kommer från surdegen, dvs ${Math.round(inoculationPct * 2 * 10) / 10}% färdig surdeg (100% hydrering) på mjölet. Basen är ${baseInoculation}% vid 23°C och ~6h jäsning – mängden skalas ned vid längre tid eller varmare rum och begränsas till 3–25%.`
-    );
-    notes.push(
-      '🫙 Använd mogen surdeg: mata 1:5:5 och använd den på toppen (ca 4–6h vid 23°C). Trög eller nymatad surdeg = längre jäsning än beräknat.'
-    );
+  // Flour, split across the blend. The preferment and levain draw from the
+  // blend proportionally so the overall blend ratio is preserved.
+  const blend = style.flourBlend;
+  if (blend?.length) {
+    for (const component of blend) {
+      const grams = finalFlour * (component.percentage / 100);
+      finalIngredients.push({
+        key: component.key,
+        grams: round(grams, 1),
+        percentage: pct(grams),
+        type: 'flour',
+      });
+    }
+  } else {
+    finalIngredients.push({
+      key: 'ing.flour',
+      grams: round(finalFlour, 1),
+      percentage: pct(finalFlour),
+      type: 'flour',
+    });
   }
+
+  // Liquids: plain water unless the style declares a split (milk, eggs…).
+  let trueWater = 0;
+  const liquids = style.liquids ?? [{ key: 'ing.water', share: 1, waterFraction: 1, type: 'water' as IngredientType }];
+  for (const liquid of liquids) {
+    const grams = finalWater * liquid.share;
+    trueWater += grams * liquid.waterFraction;
+    finalIngredients.push({
+      key: liquid.key,
+      grams: round(grams, 1),
+      percentage: pct(grams),
+      type: liquid.type,
+    });
+  }
+  trueWater += prefermentWater + levainWater;
+
+  const saltGrams = totalFlour * saltFrac - prefermentSalt;
+  finalIngredients.push({
+    key: 'ing.salt',
+    grams: round(saltGrams, 1),
+    percentage: pct(saltGrams),
+    type: 'salt',
+  });
+
+  if (usesLevain && levainTotal > 0) {
+    finalIngredients.push({
+      key: 'ing.levain_ripe',
+      grams: round(levainTotal, 1),
+      percentage: pct(levainTotal),
+      type: 'starter',
+    });
+  }
+
+  if (dose.pct > 0) {
+    finalIngredients.push({
+      key: YEAST_KEY[yeastForm],
+      grams: round(totalFlour * (dose.pct / 100), 2),
+      percentage: pct(totalFlour * (dose.pct / 100)),
+      type: 'yeast',
+    });
+  }
+
+  if (preferment) {
+    // A pointer to the preferment section, not a separate ingredient: it carries
+    // the whole weight so the final-dough total adds up, and the same weight
+    // drives its percentage so grams and % never disagree.
+    const prefermentTotal =
+      prefermentFlour + prefermentWater + prefermentYeast + prefermentSalt + prefermentExtrasGrams;
+    finalIngredients.push({
+      key: `ing.${preferment.type}_all`,
+      grams: round(prefermentTotal, 1),
+      percentage: pct(prefermentTotal),
+      type: 'other',
+      note: 'note.from_section',
+    });
+  }
+
+  if (sugar > 0) {
+    const grams = totalFlour * sugarFrac;
+    finalIngredients.push({
+      key: style.defaultParams.sugarKey ?? 'ing.sugar',
+      grams: round(grams, 1),
+      percentage: pct(grams),
+      type: 'sugar',
+    });
+  }
+
+  if (fat > 0) {
+    const grams = totalFlour * fatFrac;
+    finalIngredients.push({
+      key: style.defaultParams.fatKey ?? 'ing.oil',
+      grams: round(grams, 1),
+      percentage: pct(grams),
+      type: 'fat',
+    });
+  }
+
+  for (const extra of extras) {
+    const grams = totalFlour * basisShare * (extra.pct / 100);
+    trueWater += grams * (extra.waterFraction ?? 0);
+    finalIngredients.push({
+      key: extra.key,
+      grams: round(grams, 1),
+      percentage: pct(grams),
+      type: extra.type,
+    });
+  }
+
+  // Drop zero-weight lines: a 100% biga leaves no fresh flour in the final dough,
+  // and "0 g bread flour" is noise on a bake sheet.
+  const finalLines = finalIngredients.filter((i) => i.grams > 0.004);
+
+  sections.push({
+    id: 'final',
+    titleKey: 'section.final',
+    ingredients: finalLines,
+    totalGrams: round(
+      finalLines.reduce((sum, i) => sum + i.grams, 0),
+      1,
+    ),
+  });
+
+  // ── 6. Water temperature ──
+  const frictionC = FRICTION_FACTOR_C[mixing];
+  const { rawTempC, factors } = computeWaterTemp({
+    desiredDoughTempC: desiredDoughTemp,
+    flourTempC: flourTemp,
+    roomTempC: roomTemp,
+    frictionC,
+    prefermentTempC: preferment ? preferment.temp_c : undefined,
+  });
+  const waterTempC = clamp(rawTempC, WATER_TEMP_MIN_C, WATER_TEMP_MAX_C);
+  const clampedWater = Math.abs(rawTempC - waterTempC) > 0.05;
+  const iceGrams = computeIceSplit(finalWater, waterTempC);
+
+  // ── 7. Bulk / proof split ──
+  const ratioSum =
+    style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
+  let bulkHours = requestedTotal * (style.fermentation.bulk_ratio / ratioSum);
+  let proofHours = requestedTotal * (style.fermentation.proof_ratio / ratioSum);
+
+  // The style ratio decides how the schedule is divided, but it does not know
+  // the temperature. A shaped loaf left warm for six hours is over-proofed
+  // whatever the ratio says, so the *warm* part of the proof is capped at the
+  // measured proof time and the surplus goes back into bulk, where a dough can
+  // safely spend it. Cold hours are exempt: a long retard is the whole point of
+  // an overnight proof.
+  const coldInProof = coldPhase === 'proof' ? Math.min(coldHours, proofHours) : 0;
+  const warmProof = proofHours - coldInProof;
+  const maxWarmProof = proofHoursAt(roomTemp) * correction;
+  if (warmProof > maxWarmProof) {
+    const surplus = warmProof - maxWarmProof;
+    proofHours -= surplus;
+    bulkHours += surplus;
+  }
+
+  // ── 8. Schedule ──
+  const startTime = inputs.startTime ?? new Date();
+  const { steps, readyAt } = buildSchedule({
+    style,
+    startTime,
+    bulkHours,
+    proofHours,
+    coldHours,
+    coldPhase,
+    roomTempC: roomTemp,
+    coldTempC: coldTemp,
+    pieces,
+    usePreferment: Boolean(preferment),
+    prefermentHours: preferment?.hours,
+    prefermentTempC: preferment?.temp_c,
+    prefermentType: preferment?.type,
+    usesLevain: usesLevain && levainTotal > 0,
+    levainHours: levainPeakHours,
+    levainTempC: roomTemp,
+  });
+
+  // ── 9. Notes ──
+  const doughWeight = sections
+    .filter((s) => s.id === 'final')
+    .reduce((sum, s) => sum + s.totalGrams, 0);
+  const trueHydrationPct = totalFlour > 0 ? round((trueWater / totalFlour) * 100, 1) : 0;
+
+  notes.push(
+    ...buildNotes({
+      style,
+      hydration,
+      trueHydrationPct,
+      salt,
+      fat,
+      waterTempC,
+      rawTempC,
+      clampedWater,
+      iceGrams,
+      dose,
+      inoculationPct,
+      starterHydration,
+      leavenType,
+      coldHours,
+      coldPhase,
+      roomEquivHours,
+      totalTime: requestedTotal,
+      roomTemp,
+      coldTemp,
+      driver,
+      starterEquivalentPct: usesLevain ? leavenOnFlour : dose.starterEquivalentPct,
+      totalFlour,
+      basisFlour,
+      percentBasis,
+      levainTotal,
+      levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
+      levainPeakHours,
+      preferment: Boolean(preferment),
+    }),
+  );
+
+  const mergedIngredients = mergeIngredients(sections);
 
   return {
-    ingredients,
-    waterTemp: Math.round(waterTemp * 10) / 10,
-    bulkTime: Math.round(bulkTime * 10) / 10,
-    proofTime: Math.round(proofTime * 10) / 10,
-    totalFlour: Math.round(totalFlour),
-    yeastPercentage: Math.round(yeastPercentage * 1000) / 1000,
-    timeline,
-    notes,
-    params: {
-      hydration: hydrationPct,
-      salt: saltPct,
-      sugar: sugarPct,
-      oil: oilPct,
-      roomEquivTime: Math.round(roomEquivTime * 10) / 10,
-      coldHours: effectiveColdHours,
-      totalTime,
-      totalDoughWeight,
+    sections,
+    ingredients: mergedIngredients,
+    totals: {
+      flour: round(totalFlour, 1),
+      water: round(totalWater, 1),
+      trueWater: round(trueWater, 1),
+      trueHydrationPct,
+      doughWeight: round(doughWeight, 1),
+      targetDoughWeight: round(targetDoughWeight, 1),
+      perPiece: round(doughWeight / pieces, 1),
+      pieces,
+    },
+    water: {
+      tempC: round(waterTempC, 1),
+      rawTempC: round(rawTempC, 1),
+      clamped: clampedWater,
+      factors,
+      frictionC,
+      flourTempC: flourTemp,
+      desiredDoughTempC: desiredDoughTemp,
+      iceGrams,
+    },
+    fermentation: {
+      bulkHours: round(bulkHours, 2),
+      proofHours: round(proofHours, 2),
+      coldHours: round(coldHours, 2),
+      coldPhase,
+      roomEquivHours: round(roomEquivHours, 2),
+      totalHours: round(requestedTotal, 2),
+      yeastPct: dose.pct,
+      yeastForm,
       inoculationPct,
-      baseInoculationPct: baseInoculation,
+      starterPct: round(inoculationPct * (1 + starterHydration / 100), 1),
+      // Recipes quote the levain against the flour it joins, not against the
+      // total including the levain's own flour. Report both so a baker can
+      // compare this recipe with any other they read.
+      levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
+      levainPeakHours,
+      levainSeedShare: LEVAIN_SEED_SHARE,
+      driver,
+      doublingHours: round(doublingHoursAt(roomTemp), 2),
+      timeCorrection: round(correction, 3),
+      starterEquivalentPct: usesLevain
+        ? round(leavenOnFlour, 2)
+        : dose.starterEquivalentPct,
       leavenType,
-      roomTemp,
-    }
+      roomTempC: roomTemp,
+      coldTempC: coldTemp,
+    },
+    params: {
+      hydration,
+      salt,
+      sugar,
+      oil: fat,
+      starterHydration,
+      prefermentFlourPct: preferment?.flour_pct ?? 0,
+      percentBasis,
+      basisFlour: round(basisFlour, 1),
+    },
+    timeline: steps,
+    notes,
+    readyAt,
   };
 }
 
-function generateTimeline(bulkTime: number, proofTime: number, mixing: string, style: BreadStyle): TimelineStep[] {
-  const timeline: TimelineStep[] = [];
-  
-  // Style-specific timelines
-  switch (style.id) {
-    case 'neapolitan':
-      return generateNeapolitanTimeline(bulkTime, proofTime);
-    case 'pizza_poolish':
-      return generatePoolishTimeline(bulkTime, proofTime);
-    case 'pizza_biga':
-      return generateBigaTimeline(bulkTime, proofTime);
-    case 'milkbread':
-      return generateMilkbreadTimeline(bulkTime, proofTime);
-    case 'pain_de_mie_traditional':
-      return generatePainDeMieTimeline(bulkTime, proofTime);
-    case 'sourdough_form_bread':
-      return generateSourdoughFormTimeline(bulkTime, proofTime);
-    case 'sourdough_tortillas':
-      return generateTortillaTimeline(bulkTime, proofTime);
-    case 'country_sourdough':
-      return generateCountrySourdoughTimeline(bulkTime, proofTime);
-    case 'baguette':
-      return generateBaguetteTimeline(bulkTime, proofTime);
-    default:
-      return generateGenericTimeline(bulkTime, proofTime, mixing, style);
+/** Flatten the sections into one shopping list, summing duplicate ingredients. */
+function mergeIngredients(sections: RecipeSection[]): Ingredient[] {
+  const merged = new Map<string, Ingredient>();
+  for (const section of sections) {
+    for (const ing of section.ingredients) {
+      // The "all of the poolish" line is a pointer to another section, not an
+      // ingredient you buy; and the levain seed is already counted in its own flour.
+      if (ing.note === 'note.from_section') continue;
+      const existing = merged.get(ing.key);
+      if (existing) {
+        existing.grams = round(existing.grams + ing.grams, 2);
+        existing.percentage = round(existing.percentage + ing.percentage, 2);
+      } else {
+        merged.set(ing.key, { ...ing });
+      }
+    }
   }
+  return [...merged.values()].filter((i) => i.grams > 0.004);
 }
 
-function generateNeapolitanTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: '00:00',
-      action: 'Blanda vatten, salt och jäst',
-      description: '15°C vatten, 28-30g salt, 0.25g färsk jäst - rör tills upplöst'
-    },
-    {
-      time: '00:05',
-      action: 'Tillsätt mjöl',
-      description: 'Häll i 1000g mjöl (Caputo Pizzeria + Vigevano), blanda snabbt för hand'
-    },
-    {
-      time: '00:30',
-      action: 'Första vikningen',
-      description: 'Vik degen 4-5 gånger tills spänd och slät, vila 15 min'
-    },
-    {
-      time: '00:45',
-      action: 'Andra vikningen',
-      description: 'Upprepa vikning, vila 15 min'
-    },
-    {
-      time: '01:00',
-      action: 'Tredje vikningen',
-      description: 'Sista vikning, ta ut 80g för jäsningskontroll'
-    },
-    {
-      time: formatTime(bulkTime),
-      action: 'Dela och bolla',
-      description: 'Dela till 265g bollar, bolla med spänning'
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: 'Klart för utbakning',
-      description: 'Kontrollera jäsning (25-29 på regnmätare), kavla försiktigt'
-    }
-  ];
+interface NoteContext {
+  style: BreadStyle;
+  hydration: number;
+  trueHydrationPct: number;
+  salt: number;
+  fat: number;
+  waterTempC: number;
+  rawTempC: number;
+  clampedWater: boolean;
+  iceGrams: number;
+  dose: ReturnType<typeof computeYeastDose>;
+  inoculationPct: number;
+  starterHydration: number;
+  leavenType: string;
+  coldHours: number;
+  coldPhase: 'bulk' | 'proof';
+  roomEquivHours: number;
+  totalTime: number;
+  roomTemp: number;
+  coldTemp: number;
+  driver: 'time' | 'dose';
+  starterEquivalentPct: number;
+  totalFlour: number;
+  basisFlour: number;
+  percentBasis: 'total' | 'dough';
+  levainTotal: number;
+  levainOnFlourPct: number;
+  levainPeakHours: number;
+  preferment: boolean;
 }
 
-function generatePoolishTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: 'DAG 1 - 00:00',
-      action: 'Gör poolish',
-      description: '175g mjöl + 175g ljummet vatten + 3g honung + 1g torrjäst'
-    },
-    {
-      time: 'DAG 1 - 02:00',
-      action: 'Poolish i kyl',
-      description: 'Poolish till kylskåp i 18-24h'
-    },
-    {
-      time: 'DAG 2 - 00:00',
-      action: 'Poolish till rumstemperatur',
-      description: 'Ta ut poolish 1h före användning'
-    },
-    {
-      time: 'DAG 2 - 01:00',
-      action: 'Blanda slutdeg',
-      description: 'Poolish + 125g vatten + 325g mjöl + 12g salt, knåda 5-8 min'
-    },
-    {
-      time: `DAG 2 - ${formatTime(1 + bulkTime)}`,
-      action: 'Dela och bolla',
-      description: 'Dela till 270g bollar, vila 20 min'
-    },
-    {
-      time: `DAG 2 - ${formatTime(1 + bulkTime + proofTime)}`,
-      action: 'Klart för utbakning',
-      description: 'Degen ska vara luftig och lätt att sträcka'
-    }
-  ];
-}
+function buildNotes(c: NoteContext): Note[] {
+  const notes: Note[] = [];
 
-function generateBigaTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: 'DAG 1 - 00:00',
-      action: 'Gör biga',
-      description: '1000g mjöl + 450-500ml vatten + 2-3g jäst, blanda till jämn deg'
-    },
-    {
-      time: 'DAG 1 - 18:00',
-      action: 'Biga färdig',
-      description: 'Biga klar efter 18h vid 16°C, ska lukta tydligt'
-    },
-    {
-      time: 'DAG 2 - 00:00',
-      action: 'Knåda slutdeg',
-      description: 'Biga + 200-250ml isvatten + 28g salt + 10g malt'
-    },
-    {
-      time: 'DAG 2 - 00:30',
-      action: 'Windowpane-test',
-      description: 'Degen ska klara windowpane-test och kännas tuggumiaktig'
-    },
-    {
-      time: `DAG 2 - ${formatTime(0.5 + bulkTime)}`,
-      action: 'Dela och bolla',
-      description: 'Dela till 260-280g bollar för 36cm pizzor'
-    },
-    {
-      time: `DAG 2 - ${formatTime(0.5 + bulkTime + proofTime)}`,
-      action: 'Klart för utbakning',
-      description: 'Degbollar redo efter 3h vid rumstemperatur'
-    }
-  ];
-}
+  if (c.clampedWater) {
+    notes.push({
+      code: 'note.water_clamped',
+      severity: 'warn',
+      values: { raw: round(c.rawTempC, 1), used: round(c.waterTempC, 1) },
+    });
+  }
+  if (c.iceGrams > 0) {
+    notes.push({
+      code: 'note.use_ice',
+      severity: 'tip',
+      values: { grams: c.iceGrams, temp: round(c.waterTempC, 1) },
+    });
+  }
+  if (c.waterTempC > YEAST_DANGER_TEMP_C) {
+    notes.push({ code: 'note.water_hot', severity: 'warn', values: { limit: YEAST_DANGER_TEMP_C } });
+  }
 
-function generateMilkbreadTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: '00:00',
-      action: 'Gör tangzhong',
-      description: 'Koka 30g mjöl + 150ml mjölk/vatten till tjock konsistens, kyl'
-    },
-    {
-      time: '00:30',
-      action: 'Blanda deg',
-      description: 'Mjöl, socker, salt, torrjäst, tangzhong, mjölk - knåda 8 min'
-    },
-    {
-      time: '00:38',
-      action: 'Tillsätt smör',
-      description: 'Rumstempererat smör portionsvis, knåda till slätt'
-    },
-    {
-      time: formatTime(bulkTime),
-      action: 'Forma bröd',
-      description: 'Dela degen, forma och lägg i smörd form'
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: 'Pensla och grädda',
-      description: 'Pensla med mjölk, grädda 180°C i 30-35 min'
-    }
-  ];
-}
-
-function generatePainDeMieTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: '00:00',
-      action: 'Lös jäst i mjölk',
-      description: 'Blanda jäst i fingervarmt mjölk/vatten (50/50)'
-    },
-    {
-      time: '00:05',
-      action: 'Tillsätt mjöl och honung',
-      description: 'Blanda mjöl, honung och jästblandning'
-    },
-    {
-      time: '00:15',
-      action: 'Knåda med smör',
-      description: 'Knåda 10-15 min till slät deg med smör'
-    },
-    {
-      time: formatTime(bulkTime),
-      action: 'Forma och lägg i form',
-      description: 'Forma till limpa, lägg i smörd form med lock'
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: 'Grädda',
-      description: 'Grädda 220°C till dubbel storlek, sänk till 190°C'
-    }
-  ];
-}
-
-function generateSourdoughFormTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: '00:00',
-      action: 'Autolys',
-      description: 'Blanda mjöl och vatten, vila 30 min'
-    },
-    {
-      time: '00:30',
-      action: 'Tillsätt surdeg och salt',
-      description: 'Arbeta in aktiv surdeg och salt försiktigt'
-    },
-    {
-      time: '01:00',
-      action: 'Första vikningen',
-      description: 'Vikning i bunke, vila 30 min'
-    },
-    {
-      time: '01:30',
-      action: 'Andra vikningen',
-      description: 'Upprepa vikning, vila 30 min'
-    },
-    {
-      time: '02:00',
-      action: 'Tredje vikningen',
-      description: 'Sista vikning i bunke'
-    },
-    {
-      time: formatTime(bulkTime),
-      action: 'Forma till limpa',
-      description: 'Forma till avlång limpa, lägg i korg'
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: 'Grädda',
-      description: 'Grädda med ånga 230°C i 20 min, sedan 200°C'
-    }
-  ];
-}
-
-function generateTortillaTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: '00:00',
-      action: 'MMS-metod: Het vätska',
-      description: 'Blanda hett vatten (80°C) med smält smör'
-    },
-    {
-      time: '00:05',
-      action: 'Tillsätt mjöl och surdeg',
-      description: 'Blanda mjöl, surdeg och het vätskeblandning'
-    },
-    {
-      time: '00:15',
-      action: 'Knåda till slät deg',
-      description: 'Knåda till mjuk, elastisk deg'
-    },
-    {
-      time: formatTime(bulkTime),
-      action: 'Dela och vila',
-      description: 'Dela till 8 bitar, forma bollar, vila under handduk'
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: 'Kavla och stek',
-      description: 'Kavla tunna, stek i torr panna 20-30 sek per sida'
-    }
-  ];
-}
-
-function generateCountrySourdoughTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: '00:00',
-      action: 'Autolys',
-      description: 'Blanda mjöl och vatten, vila 30-60 min'
-    },
-    {
-      time: '01:00',
-      action: 'Tillsätt surdeg och salt',
-      description: 'Arbeta in aktiv surdeg och salt'
-    },
-    {
-      time: '01:30',
-      action: 'Första set vikningar',
-      description: 'Stretch & fold var 30:e minut, 4 set totalt'
-    },
-    {
-      time: formatTime(bulkTime),
-      action: 'Förbollning',
-      description: 'Forma till boll, vila 20-30 min'
-    },
-    {
-      time: formatTime(bulkTime + 0.5),
-      action: 'Slutformning',
-      description: 'Forma till limpa, lägg i banneton'
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: 'Grädda',
-      description: 'Grädda med ånga 250°C i 20 min, sedan 230°C'
-    }
-  ];
-}
-
-function generateBaguetteTimeline(bulkTime: number, proofTime: number): TimelineStep[] {
-  return [
-    {
-      time: '00:00',
-      action: 'Blanda grunddeg',
-      description: 'Mjöl, vatten, salt, jäst - blanda till jämn deg'
-    },
-    {
-      time: '00:45',
-      action: 'Första vikningen',
-      description: 'Bokvikning i bunke, vila 45 min'
-    },
-    {
-      time: '01:30',
-      action: 'Andra vikningen',
-      description: 'Upprepa vikning, vila 45 min'
-    },
-    {
-      time: formatTime(bulkTime),
-      action: 'Förforma',
-      description: 'Dela degen, förforma till korta stockar'
-    },
-    {
-      time: formatTime(bulkTime + 0.5),
-      action: 'Slutforma baguetter',
-      description: 'Forma till långa baguetter, lägg i dukkorg'
-    },
-    {
-      time: formatTime(bulkTime + proofTime),
-      action: 'Skär och grädda',
-      description: 'Gör snitt, grädda med ånga 240°C'
-    }
-  ];
-}
-
-function generateGenericTimeline(bulkTime: number, proofTime: number, mixing: string, style: BreadStyle): TimelineStep[] {
-  const timeline: TimelineStep[] = [];
-  
-  timeline.push({
-    time: '00:00',
-    action: 'Blanda ingredienser',
-    description: `Blanda mjöl, vatten (${mixing === 'hand' ? 'för hand' : 'med maskin'})`
-  });
-
-  if (style.defaultParams.hydration_pct > 65 && style.defaultParams.sugar_pct < 5) {
-    timeline.push({
-      time: '00:30',
-      action: 'Autolys',
-      description: 'Vila degen 30 min för glutenutveckling'
+  if (c.coldHours > 0) {
+    notes.push({
+      code: 'note.cold_retard',
+      severity: 'info',
+      values: {
+        cold: round(c.coldHours, 1),
+        total: round(c.totalTime, 1),
+        equiv: round(c.roomEquivHours, 1),
+        coldTemp: c.coldTemp,
+        phase: c.coldPhase,
+      },
     });
   }
 
-  timeline.push({
-    time: style.defaultParams.hydration_pct > 65 ? '01:00' : '00:30',
-    action: 'Tillsätt salt och jäst',
-    description: 'Arbeta in salt och jäst, börja bulkjäsning'
-  });
-
-  if (mixing === 'hand' && style.defaultParams.hydration_pct > 65) {
-    timeline.push({
-      time: '01:30',
-      action: 'Första vikningen',
-      description: 'Coil fold eller stretch & fold'
-    });
-    
-    timeline.push({
-      time: '02:15',
-      action: 'Andra vikningen',
-      description: 'Coil fold eller stretch & fold'
+  if (c.dose.clamped && c.dose.pct > 0) {
+    notes.push({
+      code: 'note.yeast_clamped',
+      severity: 'warn',
+      values: { pct: c.dose.pct, grams: round(c.totalFlour * (c.dose.pct / 100), 2) },
     });
   }
 
-  timeline.push({
-    time: formatTime(bulkTime),
-    action: style.category === 'pizza' ? 'Dela och bolla' : 'Forma',
-    description: style.category === 'pizza' ? 'Dela degen och forma bollar' : 'Forma bröd och lägg i korg/form'
+  if (c.dose.pct > 0 && c.totalFlour * (c.dose.pct / 100) < 0.5) {
+    notes.push({
+      code: 'note.tiny_yeast',
+      severity: 'tip',
+      values: { grams: round(c.totalFlour * (c.dose.pct / 100), 2) },
+    });
+  }
+
+  if (c.inoculationPct > 0) {
+    notes.push({
+      code: 'note.levain_ratio',
+      severity: 'info',
+      values: {
+        inoculation: c.inoculationPct,
+        starter: round(c.inoculationPct * (1 + c.starterHydration / 100), 1),
+        onFlour: c.levainOnFlourPct,
+        grams: round(c.levainTotal, 0),
+        hydration: c.starterHydration,
+      },
+    });
+    notes.push({
+      code: 'note.levain_ripe',
+      severity: 'tip',
+      values: { hours: c.levainPeakHours, temp: round(c.roomTemp, 1) },
+    });
+  }
+  // Near the floor the answer stops responding to the slider, which is the
+  // honest signal that no weighable dose stretches this room that far.
+  if (c.driver === 'time' && c.starterEquivalentPct <= LEAVEN_PCT_MIN * 1.5) {
+    notes.push({
+      code: 'note.time_too_long',
+      severity: 'warn',
+      values: { hours: round(c.totalTime, 1), temp: round(c.roomTemp, 1) },
+    });
+  }
+  if (c.starterEquivalentPct >= VERY_FAST_LEAVEN_PCT) {
+    notes.push({
+      code: 'note.very_fast',
+      severity: 'warn',
+      values: { pct: round(c.starterEquivalentPct, 1) },
+    });
+  }
+  if (c.inoculationPct >= INOCULATION_HIGH) {
+    notes.push({ code: 'note.levain_high', severity: 'warn', values: { pct: c.inoculationPct } });
+  }
+
+  if (c.hydration > 78) {
+    notes.push({ code: 'note.high_hydration', severity: 'tip', values: { pct: round(c.hydration, 1) } });
+  }
+  if (c.trueHydrationPct > 0 && Math.abs(c.trueHydrationPct - c.hydration) > 1) {
+    notes.push({
+      code: 'note.true_hydration',
+      severity: 'info',
+      values: { stated: round(c.hydration, 1), actual: c.trueHydrationPct },
+    });
+  }
+  if (c.salt < 1.5) {
+    notes.push({ code: 'note.low_salt', severity: 'warn', values: { pct: round(c.salt, 1) } });
+  }
+  if (c.salt > 3.2) {
+    notes.push({ code: 'note.high_salt', severity: 'warn', values: { pct: round(c.salt, 1) } });
+  }
+  if (c.fat > 12) {
+    notes.push({ code: 'note.rich_dough', severity: 'tip', values: { pct: round(c.fat, 1) } });
+  }
+  if (c.preferment) {
+    notes.push({ code: 'note.preferment', severity: 'info' });
+  }
+
+  notes.push({
+    code: c.percentBasis === 'dough' ? 'note.percent_basis_dough' : 'note.percent_basis_total',
+    severity: 'info',
+    values: { flour: round(c.basisFlour, 0), total: round(c.totalFlour, 0) },
   });
 
-  timeline.push({
-    time: formatTime(bulkTime + proofTime),
-    action: 'Klar att grädda',
-    description: style.category === 'pizza' ? 'Kavla ut och toppa pizza' : 'Baka brödet'
-  });
-
-  return timeline;
-}
-
-function formatTime(hours: number): string {
-  const h = Math.floor(hours);
-  const m = Math.round((hours % 1) * 60);
-  return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
-}
-
-function generateNotes(
-  inputs: CalculationInputs,
-  yeastPct: number,
-  waterTemp: number,
-  eff: { hydrationPct: number; oilPct: number; rawWaterTemp: number; coldHours: number }
-): string[] {
-  const notes: string[] = [];
-  
-  if (eff.rawWaterTemp !== waterTemp) {
-    notes.push(`⚠️ Beräknad vattentemperatur (${eff.rawWaterTemp.toFixed(1)}°C) ligger utanför praktiskt intervall och har justerats till ${waterTemp.toFixed(1)}°C.`);
-  }
-
-  if ((inputs.coldHours ?? 0) > inputs.totalTime) {
-    notes.push(`⚠️ Kyltiden var längre än den totala tiden och har begränsats till ${eff.coldHours}h.`);
-  }
-
-  if (waterTemp < 5) {
-    notes.push('⚠️ Vattentemperaturen är mycket låg. Överväg kortare jäsningstid eller högre rumstemperatur.');
-  } else if (waterTemp > 50) {
-    notes.push('⚠️ Vattentemperaturen är hög. Kontrollera att jästen inte dödas (max 50°C för färsk jäst).');
-  }
-  
-  if (eff.hydrationPct > 75) {
-    notes.push('💡 Hög hydrering: Använd våta händer vid vikning och var försiktig vid formning.');
-  }
-  
-  if (inputs.leavenType !== 'sourdough' && yeastPct > 0 && yeastPct < 0.02) {
-    notes.push('⚠️ Mycket lite jäst beräknat. Kontrollera jäsningstid och temperatur.');
-  }
-  
-  if (eff.oilPct > 10) {
-    notes.push('💡 Fet deg: Tillsätt fett efter glutenutveckling för bästa resultat.');
-  }
-
-  // Style-specific notes
-  switch (inputs.style.id) {
-    case 'neapolitan':
-      notes.push('🍕 Traditionell napolitansk: Vikning 3x med 15min vila. Bulkjäsning 12-14h vid 21°C.');
-      notes.push('🍕 Gräddas vid 900°C i 60-90 sekunder. Hemugn: 250°C med bakstål, 8-12 min.');
-      break;
-    case 'ny_style':
-      notes.push('🍕 Gräddas vid 250°C i 12-15 minuter. Använd bakstål för bästa resultat.');
-      break;
-    case 'pizza_poolish':
-      notes.push('🍕 Poolish dag 1: Blanda och jäs 2h rumstemperatur, sedan 18-24h i kyl.');
-      notes.push('🍕 Dag 2: Knåda slutdeg, 2h rumstemperatur före utbakning. Mål: leopard spotting.');
-      break;
-    case 'pizza_biga':
-      notes.push('🍕 Biga dag 1: Torr biga 18h vid 16°C. Kräver W300+ mjöl för styrka.');
-      notes.push('🍕 Dag 2: Knåda med isvatten + malt. Windowpane-test måste klara. 3h bollning.');
-      break;
-    case 'country_sourdough':
-      notes.push('🍞 Gräddas med ånga första 20 min, sedan utan lock. 230°C → 200°C.');
-      break;
-    case 'baguette':
-      notes.push('🥖 Gör snitt precis före gräddning. Ånga första 15 min.');
-      break;
-    case 'milkbread':  
-      notes.push('🍞 Tangzhong-metod: Koka 30g mjöl + 150ml mjölk/vatten till tjock konsistens.');
-      notes.push('🍞 Tillsätt 25g torrmjölkspulver för extra mjukhet. Pensla med mjölk.');
-      break;
-    case 'pain_de_mie_traditional':
-      notes.push('🍞 Blanda jäst i fingervarmt vatten. Knåda 10-15 min till slät deg.');
-      notes.push('🍞 Baka i lock till dubbel storlek vid 220°C, sänk till 190°C.');
-      break;
-    case 'sourdough_form_bread':
-      notes.push('🍞 Vikning i bunke flera gånger. 30 min vila mellan vikningar.');
-      notes.push('🍞 Forma till avlång limpa. 3-4h jäsning vid rumstemperatur.');
-      break;
-    case 'sourdough_tortillas':
-      notes.push('🌮 MMS-metoden: Hett vatten + smält smör = mjuka tortillas.');
-      notes.push('🌮 Stek i torr panna 20-30 sek per sida tills de bubblar.');
-      break;
-  }
-  
   return notes;
 }
