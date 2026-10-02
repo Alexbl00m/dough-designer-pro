@@ -63,7 +63,7 @@ export function AppSidebar({
                       aria-current={active ? 'step' : undefined}
                       tooltip={t(labelKey)}
                       className={cn(
-                        active && 'bg-sidebar-accent font-medium text-sidebar-accent-foreground',
+                        active && 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground',
                         disabled && 'cursor-not-allowed opacity-40',
                       )}
                     >
@@ -86,7 +86,7 @@ export function AppSidebar({
           <SidebarGroup>
             <SidebarGroupLabel>{t('styles.selected')}</SidebarGroupLabel>
             <SidebarGroupContent>
-              <p className="px-2 text-sm font-medium leading-snug text-sidebar-foreground">
+              <p className="px-2 text-sm font-semibold leading-snug text-sidebar-foreground">
                 {styleName}
               </p>
             </SidebarGroupContent>

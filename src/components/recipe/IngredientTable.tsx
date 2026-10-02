@@ -74,7 +74,7 @@ export function IngredientTable({ section, subdued, percentBasis }: IngredientTa
             >
               <th
                 scope="row"
-                className="px-4 py-2.5 text-left font-medium sm:px-5"
+                className="px-4 py-2.5 text-left font-normal sm:px-5"
               >
                 <span className="flex items-center gap-2.5">
                   <span

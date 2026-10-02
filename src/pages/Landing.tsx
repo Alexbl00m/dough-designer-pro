@@ -42,14 +42,12 @@ export default function Landing() {
         <div className="relative z-10 mx-auto max-w-3xl animate-fade-up px-5 text-center text-white">
           <ChefHat className="mx-auto mb-5 h-12 w-12 text-primary-glow" aria-hidden />
 
-          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
+          <h1 className="text-display-lg sm:text-display-xl">
             {t('hero.title')}{' '}
-            <span className="bg-gradient-to-r from-primary-glow to-primary bg-clip-text text-transparent">
-              {t('hero.titleAccent')}
-            </span>
+            <span className="text-primary-glow">{t('hero.titleAccent')}</span>
           </h1>
 
-          <p className="mx-auto mt-5 max-w-xl whitespace-pre-line text-base leading-relaxed text-white/85 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-xl whitespace-pre-line text-lead text-white/85">
             {t('hero.lead')}
           </p>
 
@@ -80,8 +78,8 @@ export default function Landing() {
       <section id="features" className="scroll-mt-8 bg-muted/40 py-20">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t('feature.title')}</h2>
-            <p className="mt-3 text-lg text-muted-foreground">{t('feature.lead')}</p>
+            <h2 className="text-display-md sm:text-display-lg">{t('feature.title')}</h2>
+            <p className="mt-3 text-lead text-muted-foreground">{t('feature.lead')}</p>
           </div>
 
           <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -90,7 +88,7 @@ export default function Landing() {
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
                   <Icon className="h-6 w-6" aria-hidden />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold">
+                <h3 className="mb-2 text-display-sm">
                   {t(`feature.${key}.title`, { n: styleCount })}
                 </h3>
                 <p className="leading-relaxed text-muted-foreground">

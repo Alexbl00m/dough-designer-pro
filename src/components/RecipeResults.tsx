@@ -74,10 +74,10 @@ export function RecipeResults({
   return (
     <div className="space-y-4">
       {/* ── Headline ── */}
-      <Card className="bg-gradient-to-br from-primary-soft to-card p-5" data-print-card>
+      <Card className="bg-primary-soft p-5" data-print-card>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-xl font-semibold tracking-tight">{style.name}</h3>
+            <h3 className="text-display-md">{style.name}</h3>
             <p className="mt-0.5 text-sm text-muted-foreground">
               {t('recipe.for', {
                 count: results.totals.pieces,

@@ -41,7 +41,7 @@ export default function Saved() {
 
       <main className="mx-auto w-full max-w-4xl p-4 sm:p-6">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight">{t('saved.title')}</h1>
+          <h1 className="text-display-md">{t('saved.title')}</h1>
           <p className="mt-1 text-muted-foreground">{t('saved.lead')}</p>
         </header>
 
@@ -61,7 +61,7 @@ export default function Saved() {
                   <Card className="p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h2 className="font-semibold">{bake.name}</h2>
+                        <h2 className="text-display-sm">{bake.name}</h2>
                         <p className="mt-0.5 text-sm text-muted-foreground">
                           {style ? t(style.regionKey) : bake.params.styleId} ·{' '}
                           {t('saved.date')} {formatDate(bake.savedAt, lang)}
@@ -95,7 +95,7 @@ export default function Saved() {
                     <div className="mt-4">
                       <label
                         htmlFor={`note-${bake.id}`}
-                        className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                        className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
                       >
                         {t('saved.note')}
                       </label>

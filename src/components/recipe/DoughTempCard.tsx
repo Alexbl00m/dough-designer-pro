@@ -33,7 +33,7 @@ export function DoughTempCard({
 
       <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
         <div>
-          <p className="stat-value text-3xl text-primary">{n(water.tempC)} °C</p>
+          <p className="stat-value text-display-lg text-primary">{n(water.tempC)} °C</p>
           <p className="stat-label mt-0.5">{t('recipe.waterTemp')}</p>
         </div>
         {water.iceGrams > 0 && (

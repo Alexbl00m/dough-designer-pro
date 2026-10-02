@@ -94,14 +94,14 @@ export function SourdoughPanel({
             <caption className="sr-only">{t('sd.sensitivity')}</caption>
             <thead>
               <tr>
-                <th scope="col" className="py-2 pr-3 text-left font-medium text-muted-foreground">
+                <th scope="col" className="py-2 pr-3 text-left font-normal text-muted-foreground">
                   {t('sd.time')}
                 </th>
                 {TEMPS.map((temp) => (
                   <th
                     key={temp}
                     scope="col"
-                    className="px-2 py-2 text-right font-medium tabular text-muted-foreground"
+                    className="px-2 py-2 text-right font-normal tabular text-muted-foreground"
                   >
                     {temp} °C
                   </th>
@@ -111,7 +111,7 @@ export function SourdoughPanel({
             <tbody>
               {TIMES.map((hours) => (
                 <tr key={hours} className="border-t border-border">
-                  <th scope="row" className="py-2 pr-3 text-left font-medium tabular">
+                  <th scope="row" className="py-2 pr-3 text-left font-normal tabular">
                     {hours} h
                   </th>
                   {TEMPS.map((temp) => {

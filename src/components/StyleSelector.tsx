@@ -166,13 +166,13 @@ function StyleCard({ style, selected, onSelect, t, lang }: StyleCardProps) {
       aria-pressed={selected}
       aria-label={t('styles.select', { name: style.name })}
       className={cn(
-        'surface group flex h-full flex-col gap-3 p-5 text-left transition-all duration-200',
-        'hover:-translate-y-0.5 hover:shadow-medium',
-        selected && 'border-primary bg-primary-soft ring-2 ring-primary',
+        'surface pressable group flex h-full flex-col gap-3 p-5 text-left',
+        'transition-colors duration-150 hover:border-primary/40 hover:bg-card-muted',
+        selected && 'border-primary bg-primary-soft',
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <h4 className="font-semibold leading-tight">{style.name}</h4>
+        <h4 className="text-display-sm leading-tight">{style.name}</h4>
         {selected ? (
           <Badge className="shrink-0 gap-1">
             <Check className="h-3 w-3" aria-hidden />
@@ -191,7 +191,7 @@ function StyleCard({ style, selected, onSelect, t, lang }: StyleCardProps) {
 
       {style.flourBlend && (
         <p className="text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">{t('styles.blend')}:</span>{' '}
+          <span className="font-semibold text-foreground">{t('styles.blend')}:</span>{' '}
           {getFlourBlendText(style.flourBlend, t)}
         </p>
       )}

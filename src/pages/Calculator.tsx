@@ -160,14 +160,14 @@ export default function Calculator() {
 
           <main ref={mainRef} className="flex-1 overflow-auto p-4 sm:p-6">
             <div className="mx-auto w-full max-w-5xl">
-              <p className="no-print mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="no-print mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {t('nav.step', { n: index + 1, total: SECTION_ORDER.length })}
               </p>
 
               {section === 'styles' && (
                 <section aria-labelledby="section-heading">
                   <header className="mb-6">
-                    <h2 id="section-heading" className="text-2xl font-bold tracking-tight">
+                    <h2 id="section-heading" className="text-display-md">
                       {t('styles.title')}
                     </h2>
                     <p className="mt-1 text-muted-foreground">{t('styles.lead')}</p>
@@ -182,7 +182,7 @@ export default function Calculator() {
               {section === 'parameters' && style && params && (
                 <section aria-labelledby="section-heading">
                   <header className="mb-6">
-                    <h2 id="section-heading" className="text-2xl font-bold tracking-tight">
+                    <h2 id="section-heading" className="text-display-md">
                       {t('params.title')}
                     </h2>
                     <p className="mt-1 text-muted-foreground">
@@ -223,7 +223,7 @@ export default function Calculator() {
               {section === 'recipe' && style && params && results && (
                 <section aria-labelledby="section-heading">
                   <header className="mb-6">
-                    <h2 id="section-heading" className="text-2xl font-bold tracking-tight">
+                    <h2 id="section-heading" className="text-display-md">
                       {t('recipe.title')}
                     </h2>
                     <p className="mt-1 text-muted-foreground">{t('app.tagline')}</p>

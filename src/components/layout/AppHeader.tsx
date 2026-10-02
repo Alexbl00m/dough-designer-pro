@@ -71,7 +71,7 @@ export function AppHeader({ showSidebarTrigger = true, context }: AppHeaderProps
         <div className="flex min-w-0 items-center gap-2">
           {showSidebarTrigger && <SidebarTrigger className="shrink-0" />}
           {showSidebarTrigger ? (
-            <p className="truncate text-sm font-medium text-muted-foreground">
+            <p className="truncate text-body-sm text-muted-foreground">
               {context ?? t('app.tagline')}
             </p>
           ) : (

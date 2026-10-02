@@ -96,7 +96,7 @@ export function RecipeTimeline({ steps, startIso }: RecipeTimelineProps) {
                   >
                     {formatClock(step.at, lang)}
                   </time>
-                  <span className="font-medium">{t(step.key, values)}</span>
+                  <span className="font-semibold">{t(step.key, values)}</span>
                   {step.durationMin > 0 && (
                     <span className="text-xs tabular text-muted-foreground">
                       {formatDuration(step.durationMin, t)}

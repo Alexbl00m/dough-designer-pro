@@ -307,7 +307,7 @@ export function CalculatorInputs({
           />
 
           <div className="flex flex-col justify-center rounded-lg bg-muted px-4 py-3 sm:col-span-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {params.driver === 'time' ? t('field.leavenPct') : t('field.computedTime')}
             </span>
             <span className="mt-0.5 text-xl font-semibold tabular">
