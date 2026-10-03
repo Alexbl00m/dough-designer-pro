@@ -42,16 +42,39 @@ export function formatDate(iso: string, lang: Language): string {
   }).format(new Date(iso));
 }
 
+/** "Lördag 3 oktober" — a heading for the steps of one calendar day. */
+export function formatDayHeading(iso: string, lang: Language): string {
+  const text = new Intl.DateTimeFormat(localeOf(lang), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date(iso));
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** The local calendar day of a moment, for grouping steps under a heading. */
+export function localDayKey(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
 /**
- * Which calendar day a step falls on, relative to the schedule's start.
- * Steps before day 1 belong to the preferment built the evening before.
+ * A preferment or levain header: "16 h at 18 °C", or for a build that ends in
+ * the fridge, "2 h at 20 °C + 16 h in the fridge".
  */
-export function dayIndex(startIso: string, stepIso: string): number {
-  const start = new Date(startIso);
-  const step = new Date(stepIso);
-  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-  const stepDay = new Date(step.getFullYear(), step.getMonth(), step.getDate()).getTime();
-  return Math.round((stepDay - startDay) / 86_400_000);
+export function formatSectionMeta(
+  meta: { hours: number; tempC: number; coldHours?: number },
+  t: (key: string, values?: Record<string, string | number>) => string,
+): string {
+  const cold = meta.coldHours ?? 0;
+  if (cold > 0) {
+    return t('section.metaCold', {
+      warm: Math.round((meta.hours - cold) * 10) / 10,
+      temp: meta.tempC,
+      cold: Math.round(cold * 10) / 10,
+    });
+  }
+  return t('section.meta', { hours: meta.hours, temp: meta.tempC });
 }
 
 /** Weights below 10 g need two decimals — a 0.4 g yeast dose is not "0 g". */
@@ -73,6 +96,15 @@ export function formatPercent(value: number, lang: Language): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
+}
+
+/**
+ * A yeast percentage with as many decimals as it needs to stay meaningful:
+ * 1.5%, 0.15%, 0.015%, 0.0015% — never a dose rounded away to "0.00%".
+ */
+export function formatYeastPct(value: number, lang: Language): string {
+  const decimals = value >= 1 ? 2 : value >= 0.1 ? 2 : value >= 0.01 ? 3 : 4;
+  return new Intl.NumberFormat(localeOf(lang), { maximumFractionDigits: decimals }).format(value);
 }
 
 export function formatNumber(value: number, lang: Language, decimals = 1): string {

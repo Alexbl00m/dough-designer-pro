@@ -93,9 +93,6 @@ export const WATER_TEMP_MAX_C = 55;
 /** Yeast starts dying around here; warn the baker before they scald it. */
 export const YEAST_DANGER_TEMP_C = 50;
 
-/** Practical limits for commercial yeast as a share of flour. */
-export const YEAST_PCT_MIN = 0.005;
-export const YEAST_PCT_MAX = 4;
 
 /**
  * Practical limits for levain inoculation (starter flour as a share of total

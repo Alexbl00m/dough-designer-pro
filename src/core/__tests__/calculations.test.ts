@@ -125,7 +125,7 @@ describe('cold retard equivalence', () => {
 describe('yeast dose', () => {
   const dose = (overrides = {}) =>
     computeYeastDose({
-      effectiveHours: 6,
+      totalHours: 6,
       roomTemp: 22,
       saltPct: 2,
       sugarPct: 0,
@@ -137,11 +137,16 @@ describe('yeast dose', () => {
     });
 
   it('asks for less yeast the longer the ferment', () => {
-    expect(dose({ effectiveHours: 12 }).pct).toBeLessThan(dose({ effectiveHours: 6 }).pct);
+    expect(dose({ totalHours: 12 }).pct).toBeLessThan(dose({ totalHours: 6 }).pct);
   });
 
   it('asks for less yeast the warmer the room', () => {
     expect(dose({ roomTemp: 28 }).pct).toBeLessThan(dose({ roomTemp: 18 }).pct);
+  });
+
+  it('asks for less yeast when part of the time is in the fridge than for none', () => {
+    // Same wall-clock hours, but the cold ones count for far less.
+    expect(dose({ totalHours: 24, coldHours: 20 }).pct).toBeGreaterThan(dose({ totalHours: 24 }).pct);
   });
 
   it('raises the dose as salt goes up', () => {
@@ -161,17 +166,28 @@ describe('yeast dose', () => {
   });
 
   it('discounts the dose when a preferment carries part of the load', () => {
-    expect(dose({ prefermentFlourPct: 50 }).pct).toBeLessThan(dose().pct);
+    expect(dose({ prefermentFlourPct: 30 }).pct).toBeLessThan(dose().pct);
   });
 
-  it('reports the starter-equivalent so both leavens share one currency', () => {
-    expect(dose().starterEquivalentPct).toBeGreaterThan(0);
+  it('adds nothing when the preferment already carries the whole load', () => {
+    const r = dose({ totalHours: 12, prefermentFlourPct: 50 });
+    expect(r.pct).toBe(0);
+    expect(r.neededFreshPct).toBeGreaterThan(0);
+  });
+
+  it('halves in hybrid mode, where the levain carries the other half', () => {
+    expect(dose({ leavenType: 'hybrid' }).freshPct).toBeCloseTo(dose().freshPct / 2, 3);
+  });
+
+  it('honours a dose the baker fixed', () => {
+    expect(dose({ fixedFreshPct: 0.4 }).freshPct).toBe(0.4);
   });
 
   it('never goes negative or absurd, whatever the input', () => {
-    const wild = dose({ saltPct: 6, sugarPct: 40, hydrationPct: 120, effectiveHours: 0.1 });
+    const wild = dose({ saltPct: 6, sugarPct: 40, hydrationPct: 120, totalHours: 0.1 });
     expect(wild.pct).toBeGreaterThan(0);
-    expect(wild.pct).toBeLessThanOrEqual(4);
+    expect(wild.freshPct).toBeLessThanOrEqual(8);
+    expect(wild.limit).toBe('max');
   });
 });
 

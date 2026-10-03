@@ -2,12 +2,13 @@ import { defineTool, ToolError } from "@lovable.dev/mcp-js";
 import { recipeInputSchema, resolveRecipe } from "../shared";
 import { Q10 } from "../../../core/constants";
 import { formatGrams } from "../../../core/calculations";
+import { YEAST_ANCHOR, YEAST_TIME_EXPONENT } from "../../../core/yeast";
 
 export default defineTool({
   name: "explain_recipe",
   title: "Explain dough recipe",
   description:
-    "Calculate a recipe and return a plain-language walkthrough of the reasoning behind every number: how the yeast or levain dose was scaled for time and temperature (Q10), what each correction did, how cold hours convert to room-equivalent time, why the water is at that temperature, how a preferment is subtracted from the final dough, and how bulk and proof were split.",
+    "Calculate a recipe and return a plain-language walkthrough of the reasoning behind every number: how the yeast or levain dose was scaled for time and temperature, what each correction did, how cold hours convert to room-equivalent time, why the water is at that temperature, how a preferment is built and what it carries into the final dough, how bulk and proof were split, and when every step happens.",
   inputSchema: recipeInputSchema,
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: (input) => {
@@ -29,8 +30,11 @@ export default defineTool({
     // ── Ingredients ──
     const ingredientLines = r.sections
       .map((section) => {
+        const cold = section.meta?.coldHours ?? 0;
         const meta = section.meta
-          ? ` — ${section.meta.hours} h at ${section.meta.tempC} °C`
+          ? cold > 0
+            ? ` — ${num(section.meta.hours - cold, 1)} h at ${section.meta.tempC} °C, then ${num(cold, 1)} h in the fridge`
+            : ` — ${section.meta.hours} h at ${section.meta.tempC} °C`
           : "";
         const rows = section.ingredients
           .map((i) => `  - ${t(i.key)}: ${formatGrams(i.grams)} g (${i.percentage.toFixed(2)}%)`)
@@ -50,10 +54,14 @@ export default defineTool({
     );
 
     // ── Fermentation time ──
+    const coldLaw =
+      f.leavenType === 'commercial'
+        ? `Yeast activity follows Gänzle's growth-rate curve, which is steep in the cold — the fridge runs roughly ten times slower than 21 °C — so fridge hours are worth far less than room hours. `
+        : `Fermentation follows a Q10 law — every 10 °C roughly multiplies the rate by ${Q10} — so fridge hours are worth far less than room hours. `;
     const timeExplain =
       f.coldHours > 0
         ? `You asked for ${num(f.totalHours, 1)} h in total, with ${num(f.coldHours, 1)} h at ${num(f.coldTempC, 1)} °C. ` +
-          `Fermentation follows a Q10 law — every 10 °C roughly multiplies the rate by ${Q10} — so fridge hours are worth far less than room hours. ` +
+          coldLaw +
           `The model also credits the first 1.5 h in the fridge at the midpoint temperature, because a tub of dough takes hours to actually cool down and ferments briskly on the way. ` +
           `Net effect: this schedule behaves like a **${num(f.roomEquivHours, 1)} h** ferment at ${num(f.roomTempC, 1)} °C, and the leavening is dosed for that number, not for the ${num(f.totalHours, 1)} h on the clock.`
         : `The whole ${num(f.totalHours, 1)} h runs at ${num(f.roomTempC, 1)} °C, so clock time and effective fermentation time are the same.`;
@@ -64,7 +72,22 @@ export default defineTool({
         ? `**${num(f.levainOnFlourPct, 1)}% ripe levain on the dough flour** (${num(f.inoculationPct, 1)}% of the total flour counted as starter flour)`
         : f.leavenType === 'hybrid'
         ? `**${num(f.levainOnFlourPct, 1)}% levain plus ${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}**, each carrying half the leavening power`
-        : `**${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g, worth ${num(f.starterEquivalentPct, 1)}% ripe starter`;
+        : `**${num(f.yeastPct, 4)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** in the final dough = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g`;
+
+    const yeastExplain =
+      `Leavening: ${doseLine}.\n\n` +
+      `Why that number — the yeast clock:\n` +
+      `- Commercial yeast runs on TXCraig1's yeast-prediction model (pizzamaking.com): ${YEAST_ANCHOR.instantPct}% instant yeast is ready in ${YEAST_ANCHOR.hours} h at ${YEAST_ANCHOR.tempC} °C, and the dose scales as time to the power −${YEAST_TIME_EXPONENT}, so doubling the yeast takes about a third off the time.\n` +
+      `- Temperature follows Gänzle et al. (1998): this schedule is worth ${num(f.roomEquivHours, 1)} h at ${num(f.roomTempC, 1)} °C.\n` +
+      `- A very short schedule gets more yeast than the curve alone gives, because a dough needs a few hours to develop and proof however much yeast it carries.\n` +
+      (r.preferment
+        ? `- The ${t(`section.${r.preferment.type}`).toLowerCase()} is built ${num(r.preferment.hours, 1)} h` +
+          (r.preferment.coldHours > 0
+            ? ` (${num(r.preferment.hours - r.preferment.coldHours, 1)} h at ${num(r.preferment.tempC, 1)} °C, then ${num(r.preferment.coldHours, 1)} h in the fridge)`
+            : ` at ${num(r.preferment.tempC, 1)} °C`) +
+          ` with ${num(r.preferment.yeastPct, 4)}% yeast on its own flour, worked out so it is ripe as the dough is mixed. ` +
+          `Ripe, it carries the equivalent of ${num(r.preferment.leaveningPct, 3)}% fresh yeast on all the flour, which the final dough does not need again.\n`
+        : '');
 
     const leavenExplain =
       `Leavening: ${doseLine}.\n\n` +
@@ -76,13 +99,12 @@ export default defineTool({
         ? `- Salt at ${num(p.salt, 1)}%, hydration at ${num(p.hydration, 1)}%${p.sugar ? `, sugar at ${num(p.sugar, 1)}%` : ''}${p.oil ? `, fat at ${num(p.oil, 1)}%` : ''} together ${f.timeCorrection > 1 ? 'stretch' : 'compress'} the clock by ${num(Math.abs(f.timeCorrection - 1) * 100, 0)}%.\n`
         : '') +
       (p.prefermentFlourPct > 0
-        ? `- ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented in the preferment, so the final dough needs less.\n`
-        : '') +
-      (f.yeastForm !== 'fresh' && f.yeastPct > 0
-        ? `- Commercial yeast rides the same curve and is converted at the end, so switching leavening does not silently change the schedule.\n`
+        ? `- ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented in the preferment.\n`
         : '');
 
-    sections.push(`## Fermentation\n${timeExplain}\n\n${leavenExplain}`);
+    sections.push(
+      `## Fermentation\n${timeExplain}\n\n${f.leavenType === 'commercial' ? yeastExplain : leavenExplain}`,
+    );
 
     // ── Water temperature ──
     const prefermentTerm = r.sections.find((s) => s.id === "preferment")?.meta;
@@ -90,7 +112,7 @@ export default defineTool({
       `## Water temperature — ${num(r.water.tempC, 1)} °C\n` +
         `Target dough temperature is ${num(r.water.desiredDoughTempC, 1)} °C. The bakery rule multiplies that target by the number of temperature factors in the mix and subtracts everything you cannot control:\n\n` +
         `\`${r.water.factors} × ${num(r.water.desiredDoughTempC, 1)} − flour ${num(r.water.flourTempC, 1)} − room ${num(f.roomTempC, 1)} − friction ${r.water.frictionC}` +
-        (prefermentTerm ? ` − preferment ${num(prefermentTerm.tempC, 1)}` : "") +
+        (prefermentTerm ? ` − preferment ${num(r.preferment?.mixTempC ?? prefermentTerm.tempC, 1)}` : "") +
         ` = ${num(r.water.rawTempC, 1)} °C\`\n\n` +
         `Why: mixing itself heats the dough, and the more powerful the mixer the more it adds. Water is the only ingredient you can easily temper, so it absorbs the whole correction. ` +
         (prefermentTerm
@@ -132,7 +154,10 @@ export default defineTool({
           const duration = step.durationMin > 0 ? ` (${step.durationMin} min)` : "";
           return `- ${clock} — **${t(step.key, values)}**${duration}: ${t(`${step.key}.body`, values)}`;
         })
-        .join("\n")}\n\nReady at ${new Date(r.readyAt).toISOString().slice(0, 16).replace("T", " ")} UTC.`,
+        .join("\n")}\n\nStarts ${new Date(r.plan.startsAt).toISOString().slice(0, 16).replace("T", " ")} UTC, ready ${new Date(r.readyAt).toISOString().slice(0, 16).replace("T", " ")} UTC.` +
+        (r.plan.startsInPast
+          ? ` That start is already past: the earliest the bake can be finished is ${new Date(r.plan.earliestReadyAt).toISOString().slice(0, 16).replace("T", " ")} UTC.`
+          : ""),
     );
 
     const explanation = sections.join("\n\n");

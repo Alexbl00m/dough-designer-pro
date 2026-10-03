@@ -185,30 +185,10 @@ describe('corrections stretch the clock in the right direction', () => {
   });
 });
 
-describe('commercial yeast rides the same clock', () => {
-  it('converts both ways without drift', () => {
+describe('the starter-equivalent currency', () => {
+  it('converts yeast to starter and back without drift', () => {
     for (const pct of [0.02, 0.1, 0.5, 1, 2]) {
       expect(starterToFreshYeastPct(freshYeastToStarterPct(pct))).toBeCloseTo(pct, 6);
-    }
-  });
-
-  it('reproduces familiar straight-dough timings at room temperature', () => {
-    const at24 = { tempC: 24, saltPct: 2, hydrationPct: 65, sugarPct: 0, fatPct: 0 };
-    const hours = (freshPct: number) => bulkHoursFor(freshYeastToStarterPct(freshPct), at24);
-    // 1% fresh yeast is a couple of hours; 0.1% is most of a working day.
-    expect(hours(1)).toBeGreaterThan(1);
-    expect(hours(1)).toBeLessThan(3);
-    expect(hours(0.1)).toBeGreaterThan(5);
-    expect(hours(0.1)).toBeLessThan(11);
-  });
-
-  it('behaves monotonically, exactly like the starter slider', () => {
-    const at21 = { tempC: 21, saltPct: 2, hydrationPct: 65, sugarPct: 0, fatPct: 0 };
-    let previous = Infinity;
-    for (const freshPct of [0.02, 0.05, 0.1, 0.3, 1, 2]) {
-      const h = bulkHoursFor(freshYeastToStarterPct(freshPct), at21);
-      expect(h, `${freshPct}%`).toBeLessThan(previous);
-      previous = h;
     }
   });
 });

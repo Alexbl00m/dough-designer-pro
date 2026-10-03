@@ -60,16 +60,25 @@ export interface PrefermentSpec {
   /** Share of the TOTAL flour that is pre-fermented. */
   flour_pct: number;
   hydration_pct: number;
-  /** Typical build time and temperature for the preferment itself. */
+  /** Typical build time, fridge included. The baker can change it. */
   hours: number;
-  temp_c: number;
-  /** Fresh yeast as % of the preferment's own flour (poolish/biga). */
-  yeast_fresh_pct?: number;
+  /**
+   * Temperature of the warm part of the build. Leave it out for a preferment
+   * that stands in the kitchen, and it follows the baker's room temperature.
+   */
+  temp_c?: number;
+  /** Hours at the end of the build spent in the fridge, as in an overnight poolish. */
+  cold_hours?: number;
   /** Starter flour as % of the preferment's own flour (levain). */
   inoculation_pct?: number;
   /** Some bigas carry a little salt to slow them down. */
   salt_pct?: number;
-  /** Extras that belong in the preferment rather than the final dough, e.g. honey in a poolish. */
+  /**
+   * The recipe's sugar goes into the preferment rather than the final dough,
+   * as the honey in a pizza poolish does: it feeds the yeast while it builds.
+   */
+  carriesSugar?: boolean;
+  /** Extras that belong in the preferment rather than the final dough. */
   extras?: StyleExtra[];
 }
 
@@ -388,14 +397,16 @@ export const BREAD_STYLES: BreadStyle[] = [
       bulk_ratio: 0.35,
       proof_ratio: 0.65,
     },
+    // The home baker's poolish: mixed in the evening, two hours on the bench
+    // to wake the yeast, then the night in the fridge. With six hours for the
+    // dough that is the 24 h most pizza-with-poolish recipes are built around.
     preferment: {
       type: 'poolish',
       flour_pct: 35,
       hydration_pct: 100,
-      hours: 16,
-      temp_c: 18,
-      yeast_fresh_pct: 0.6,
-      extras: [{ key: 'ing.honey', pct: 1.7, type: 'sugar' }],
+      hours: 18,
+      cold_hours: 16,
+      carriesSugar: true,
     },
     process: {
       mixMin: 12,
@@ -436,7 +447,6 @@ export const BREAD_STYLES: BreadStyle[] = [
       hydration_pct: 47,
       hours: 18,
       temp_c: 16,
-      yeast_fresh_pct: 0.25,
     },
     process: {
       mixMin: 18,
@@ -479,7 +489,6 @@ export const BREAD_STYLES: BreadStyle[] = [
       hydration_pct: 100,
       hours: 14,
       temp_c: 19,
-      yeast_fresh_pct: 0.3,
     },
     process: {
       autolyseMin: 30,
@@ -526,7 +535,6 @@ export const BREAD_STYLES: BreadStyle[] = [
       hydration_pct: 45,
       hours: 16,
       temp_c: 18,
-      yeast_fresh_pct: 0.2,
     },
     process: {
       mixMin: 12,
@@ -572,7 +580,6 @@ export const BREAD_STYLES: BreadStyle[] = [
       hydration_pct: 100,
       hours: 14,
       temp_c: 19,
-      yeast_fresh_pct: 0.3,
     },
     process: {
       autolyseMin: 40,
@@ -616,7 +623,6 @@ export const BREAD_STYLES: BreadStyle[] = [
       hydration_pct: 45,
       hours: 16,
       temp_c: 18,
-      yeast_fresh_pct: 0.2,
     },
     process: {
       mixMin: 12,
@@ -1117,6 +1123,14 @@ export const BREAD_STYLES: BreadStyle[] = [
     characteristicCount: 4,
   },
 ];
+
+/**
+ * Pizza is a matter of shape, not of shelf: a poolish or biga pizza sits with
+ * the preferments in the style picker but is still balled, baked in two
+ * minutes and eaten straight away.
+ */
+export const isPizzaStyle = (style: BreadStyle): boolean =>
+  style.category === 'pizza' || style.process.shapeKey === 'process.shape.balls';
 
 export const getStyleById = (id: string): BreadStyle | undefined =>
   BREAD_STYLES.find((style) => style.id === id);

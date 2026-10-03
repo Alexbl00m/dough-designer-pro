@@ -12,8 +12,12 @@
  * a slider that sets the dose can never disagree.
  *
  * Both directions speak one currency — "starter-equivalent percent", meaning
- * ripe 100%-hydration levain as a share of the flour it joins. Commercial yeast
- * converts into it, so a baker switching leavening keeps the same clock.
+ * ripe 100%-hydration levain as a share of the flour it joins.
+ *
+ * This is the levain's clock. Commercial yeast has its own, in `./yeast`: a
+ * pinch of instant yeast dosed for a whole schedule does not behave like a
+ * levain followed by a final proof, and running it on this curve is what used
+ * to pin short yeasted doughs at a ceiling and long ones at a floor.
  */
 
 import {
@@ -155,9 +159,12 @@ export function leavenPctForTotal(totalHours: number, p: ClockParams): number {
   return leavenPctFor(Math.max(0.1, totalHours - proof), p);
 }
 
-// ── Commercial yeast ───────────────────────────────────────────────────────
+// ── Comparing the two leavens ──────────────────────────────────────────────
 
-/** Fresh yeast % → the starter % that ferments at the same speed. */
+/**
+ * Fresh yeast % → the starter % with roughly the same leavening power. Only for
+ * putting a yeast dose in levain terms; the yeast clock itself is `./yeast`.
+ */
 export const freshYeastToStarterPct = (freshPct: number): number =>
   freshPct * FRESH_YEAST_TO_STARTER;
 

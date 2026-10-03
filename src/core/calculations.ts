@@ -11,14 +11,16 @@
  * differently is declared as data in `src/data/styles.ts`.
  */
 
-import type { BreadStyle, IngredientType } from '@/data/styles';
+import type { BreadStyle, IngredientType, PrefermentSpec } from '@/data/styles';
 import {
   DEFAULT_COLD_TEMP_C,
   FRICTION_FACTOR_C,
+  HYBRID_SHARE,
   INOCULATION_HIGH,
   LEVAIN_SEED_SHARE,
   WATER_TEMP_MAX_C,
   WATER_TEMP_MIN_C,
+  YEAST_CONVERSION,
   YEAST_DANGER_TEMP_C,
   clamp,
   round,
@@ -42,12 +44,30 @@ import {
 } from './growth';
 import { VERY_FAST_LEAVEN_PCT } from '@/data/fermentationTable';
 import { LEAVEN_PCT_MIN } from './growth';
-import { buildSchedule } from './schedule';
+import {
+  FRESH_YEAST_MAX_PCT,
+  FRESH_YEAST_MIN_PCT,
+  hoursForFreshYeast,
+  prefermentLeavening,
+  prefermentYeastFor,
+  yeastRoomEquivHours,
+} from './yeast';
+import type { YeastedPreferment } from './yeast';
+import type { YeastForm } from './constants';
+import {
+  buildSchedule,
+  ceilToQuarter,
+  daytimeShiftMinutes,
+  nightStepIndices,
+} from './schedule';
+import type { ScheduleAnchor } from './schedule';
 import type {
   CalculationInputs,
   CalculationResults,
   Ingredient,
   Note,
+  PlanResult,
+  PrefermentResult,
   RecipeSection,
 } from './types';
 
@@ -98,7 +118,38 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   const preferment = usePreferment ? style.preferment : undefined;
   const percentBasis = inputs.percentBasis ?? 'total';
 
-  // ── 2. Fermentation: the clock, run in whichever direction the baker holds ──
+  // ── 2. The preferment: built on its own clock, for the baker's own night ──
+  const build = preferment ? resolvePrefermentBuild(preferment, inputs, roomTemp, coldTemp) : undefined;
+  const prefShare = preferment ? clamp(preferment.flour_pct / 100, 0, 1) : 0;
+  const yeastedType: YeastedPreferment | undefined =
+    preferment && (preferment.type === 'poolish' || preferment.type === 'biga')
+      ? preferment.type
+      : undefined;
+
+  // The preferment's yeast is whatever ripens it in the time and temperature
+  // it is given — a fixed percentage is right for exactly one night.
+  const prefFreshRaw =
+    yeastedType && build
+      ? prefermentYeastFor(yeastedType, {
+          hours: build.hours,
+          tempC: build.tempC,
+          coldHours: build.coldHours,
+          coldTempC: build.coldTempC,
+        })
+      : 0;
+  const prefFresh = yeastedType ? clamp(prefFreshRaw, FRESH_YEAST_MIN_PCT, FRESH_YEAST_MAX_PCT) : 0;
+  if (yeastedType && build && prefFreshRaw > FRESH_YEAST_MAX_PCT) {
+    notes.push({
+      code: 'note.preferment_too_short',
+      severity: 'warn',
+      values: { hours: round(build.hours, 1) },
+    });
+  }
+  // A ripe preferment arrives full of active yeast, which the final dough
+  // does not have to be given again.
+  const prefLeavening = yeastedType ? prefermentLeavening(prefShare, prefFresh) : 0;
+
+  // ── 3. Fermentation: the clock, run in whichever direction the baker holds ──
   const driver = inputs.driver ?? 'time';
   const clock = {
     tempC: roomTemp,
@@ -109,21 +160,42 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   };
   const fermentFactor = style.fermentFactor ?? 1;
   const usesLevain = leavenType === 'sourdough' || leavenType === 'hybrid';
+  const yeastRecipe = {
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+    prefermentShare: prefShare,
+  };
+  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
+  const fixedYeast =
+    driver === 'dose' && leavenType === 'commercial' && inputs.yeastPct !== undefined
+      ? Math.max(FRESH_YEAST_MIN_PCT, inputs.yeastPct)
+      : undefined;
 
   // In dose mode the schedule follows from the dose; in time mode the dose
   // follows from the schedule. Both are the same equation, so the two agree.
   let requestedTotal: number;
-  let leavenOnFlour: number;
+  let leavenOnFlour = 0;
 
-  if (driver === 'dose') {
+  if (fixedYeast !== undefined) {
+    // The fridge hours stay where the baker put them; the warm time is what
+    // gives.
+    requestedTotal = round(
+      hoursForFreshYeast(
+        fixedYeast + prefLeavening,
+        { roomTempC: roomTemp, coldHours: requestedCold, coldTempC: coldTemp },
+        yeastRecipe,
+      ),
+      2,
+    );
+  } else if (driver === 'dose' && usesLevain) {
     leavenOnFlour = Math.max(0.2, inputs.leavenPct ?? style.defaultLevainPct ?? 20);
     requestedTotal = round(totalHoursFor(leavenOnFlour, clock) * fermentFactor, 2);
   } else {
     requestedTotal = totalTime;
-    leavenOnFlour = leavenPctForTotal(totalTime / fermentFactor, clock);
   }
 
-  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
   const coldHours = Math.min(requestedCold, requestedTotal);
 
   if (requestedCold > requestedTotal) {
@@ -134,21 +206,26 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     });
   }
 
-  const roomEquivHours = computeRoomEquivHours({
-    totalHours: requestedTotal,
-    coldHours,
-    roomTemp,
-    coldTemp,
-  });
-
   // Cold hours are worth less than clock hours, so the dose has to be set for
-  // the room-equivalent time, not the time on the wall.
-  if (driver === 'time') {
+  // the room-equivalent time, not the time on the wall. Each leaven counts the
+  // fridge on its own clock.
+  const roomEquivHours = usesLevain
+    ? computeRoomEquivHours({ totalHours: requestedTotal, coldHours, roomTemp, coldTemp })
+    : yeastRoomEquivHours({
+        totalHours: requestedTotal,
+        roomTempC: roomTemp,
+        coldHours,
+        coldTempC: coldTemp,
+      });
+
+  if (usesLevain && driver === 'time') {
     leavenOnFlour = leavenPctForTotal(roomEquivHours / fermentFactor, clock);
   }
 
   const dose = computeYeastDose({
-    effectiveHours: roomEquivHours,
+    totalHours: requestedTotal,
+    coldHours,
+    coldTemp,
     roomTemp,
     saltPct: salt,
     sugarPct: sugar,
@@ -156,9 +233,23 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     fatPct: fat,
     yeastForm,
     leavenType,
-    prefermentFlourPct: preferment?.flour_pct,
-    fermentFactor,
+    prefermentFlourPct: prefShare * 100,
+    prefermentLeaveningPct: prefLeavening,
+    fixedFreshPct: fixedYeast,
   });
+
+  // When the preferment alone carries more than the schedule needs, the dough
+  // will be ready early. Say how early, rather than pretend it will wait.
+  let prefermentReadyHours: number | undefined;
+  if (prefLeavening > 0 && leavenType !== 'sourdough' && dose.freshPct === 0) {
+    const share = leavenType === 'hybrid' ? HYBRID_SHARE : 1;
+    const hours = hoursForFreshYeast(
+      prefLeavening / share,
+      { roomTempC: roomTemp, coldHours, coldTempC: coldTemp },
+      yeastRecipe,
+    );
+    if (hours < requestedTotal * 0.85) prefermentReadyHours = round(hours, 1);
+  }
 
   const inoculationPct = usesLevain
     ? computeInoculationPct({
@@ -185,7 +276,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     fatPct: fat,
   });
 
-  // ── 3. Solve the flour weight so the finished dough hits the target ──
+  // ── 4. Solve the flour weight so the finished dough hits the target ──
   const extras = style.extras ?? [];
   const extrasPct = extras.reduce((sum, e) => sum + e.pct, 0);
   const prefermentExtrasPct = preferment
@@ -225,12 +316,16 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       : hydration / 100 - prefWaterFrac - levainWaterFrac;
   const totalWaterFrac = finalWaterFrac + prefWaterFrac + levainWaterFrac;
 
+  // Yeast in the preferment, in the chosen form, as % of the total flour.
+  const prefermentYeastPct = prefFlourFrac * prefFresh * YEAST_CONVERSION[yeastForm];
+
   // The levain and preferment add flour and water that are subtracted again
   // from the main dough, so they are weight-neutral. Yeast and extras add weight.
   const totalPct =
     100 +
     100 * (totalWaterFrac + saltFrac + sugarFrac + fatFrac + extrasFrac) +
     prefermentExtrasPct +
+    prefermentYeastPct +
     dose.pct;
 
   const pieces = Math.max(1, Math.round(inputs.ballCount || 1));
@@ -249,7 +344,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     totalFlour = targetDoughWeight / (totalPct / 100);
   }
 
-  // ── 4. Split the flour and water between preferment, levain and final dough ──
+  // ── 5. Split the flour and water between preferment, levain and final dough ──
   const totalWater = totalFlour * totalWaterFrac;
   const basisFlour = totalFlour * basisShare;
 
@@ -258,11 +353,11 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   const prefermentSalt = preferment?.salt_pct
     ? prefermentFlour * (preferment.salt_pct / 100)
     : 0;
-  const prefermentYeast = preferment?.yeast_fresh_pct
-    ? prefermentFlour *
-      (preferment.yeast_fresh_pct / 100) *
-      (yeastForm === 'fresh' ? 1 : yeastForm === 'instant' ? 0.33 : 0.4)
-    : 0;
+  const prefermentYeast = totalFlour * (prefermentYeastPct / 100);
+  // The honey in a pizza poolish feeds the yeast overnight; it belongs there,
+  // and only there.
+  const sugarInPreferment = Boolean(preferment?.carriesSugar) && sugar > 0;
+  const prefermentSugar = sugarInPreferment ? totalFlour * sugarFrac : 0;
 
   const levainFlour = totalFlour * levainFlourFrac;
   const levainWater = totalFlour * levainWaterFrac;
@@ -282,7 +377,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     });
   }
 
-  // ── 5. Build the ingredient sections ──
+  // ── 6. Build the ingredient sections ──
   const sections: RecipeSection[] = [];
   const pct = (grams: number) => (basisFlour > 0 ? round((grams / basisFlour) * 100, 2) : 0);
 
@@ -330,6 +425,14 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
         type: 'salt',
       });
     }
+    if (prefermentSugar > 0) {
+      prefIngredients.push({
+        key: style.defaultParams.sugarKey ?? 'ing.sugar',
+        grams: round(prefermentSugar, 1),
+        percentage: pct(prefermentSugar),
+        type: 'sugar',
+      });
+    }
     for (const extra of preferment.extras ?? []) {
       const grams = prefermentFlour * (extra.pct / 100);
       prefermentExtrasGrams += grams;
@@ -343,7 +446,13 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     sections.push({
       id: 'preferment',
       titleKey: `section.${preferment.type}`,
-      meta: { hours: preferment.hours, tempC: preferment.temp_c, type: preferment.type },
+      meta: {
+        hours: build!.hours,
+        tempC: build!.tempC,
+        type: preferment.type,
+        coldHours: build!.coldHours,
+        coldTempC: build!.coldTempC,
+      },
       ingredients: prefIngredients.filter((i) => i.grams > 0.004),
       totalGrams: round(
         prefIngredients.reduce((sum, i) => sum + i.grams, 0),
@@ -423,7 +532,12 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     // the whole weight so the final-dough total adds up, and the same weight
     // drives its percentage so grams and % never disagree.
     const prefermentTotal =
-      prefermentFlour + prefermentWater + prefermentYeast + prefermentSalt + prefermentExtrasGrams;
+      prefermentFlour +
+      prefermentWater +
+      prefermentYeast +
+      prefermentSalt +
+      prefermentSugar +
+      prefermentExtrasGrams;
     finalIngredients.push({
       key: `ing.${preferment.type}_all`,
       grams: round(prefermentTotal, 1),
@@ -433,7 +547,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     });
   }
 
-  if (sugar > 0) {
+  if (sugar > 0 && !sugarInPreferment) {
     const grams = totalFlour * sugarFrac;
     finalIngredients.push({
       key: style.defaultParams.sugarKey ?? 'ing.sugar',
@@ -478,20 +592,22 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     ),
   });
 
-  // ── 6. Water temperature ──
+  // ── 7. Water temperature ──
   const frictionC = FRICTION_FACTOR_C[mixing];
   const { rawTempC, factors } = computeWaterTemp({
     desiredDoughTempC: desiredDoughTemp,
     flourTempC: flourTemp,
     roomTempC: roomTemp,
     frictionC,
-    prefermentTempC: preferment ? preferment.temp_c : undefined,
+    // A poolish straight out of the fridge brings the fridge's temperature
+    // into the mix, and the water has to make up for it.
+    prefermentTempC: build?.mixTempC,
   });
   const waterTempC = clamp(rawTempC, WATER_TEMP_MIN_C, WATER_TEMP_MAX_C);
   const clampedWater = Math.abs(rawTempC - waterTempC) > 0.05;
   const iceGrams = computeIceSplit(finalWater, waterTempC);
 
-  // ── 7. Bulk / proof split ──
+  // ── 8. Bulk / proof split ──
   const ratioSum =
     style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
   let bulkHours = requestedTotal * (style.fermentation.bulk_ratio / ratioSum);
@@ -512,11 +628,15 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     bulkHours += surplus;
   }
 
-  // ── 8. Schedule ──
-  const startTime = inputs.startTime ?? new Date();
-  const { steps, readyAt } = buildSchedule({
+  // ── 9. Schedule, pinned where the baker wants it ──
+  const now = inputs.now ?? new Date();
+  const anchor: ScheduleAnchor = inputs.plan
+    ? { mode: inputs.plan.mode, at: inputs.plan.at }
+    : { mode: 'mix', at: inputs.startTime ?? now };
+
+  const schedule = buildSchedule({
     style,
-    startTime,
+    anchor,
     bulkHours,
     proofHours,
     coldHours,
@@ -525,15 +645,17 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     coldTempC: coldTemp,
     pieces,
     usePreferment: Boolean(preferment),
-    prefermentHours: preferment?.hours,
-    prefermentTempC: preferment?.temp_c,
+    prefermentHours: build?.hours,
+    prefermentTempC: build?.tempC,
+    prefermentColdHours: build?.coldHours,
     prefermentType: preferment?.type,
     usesLevain: usesLevain && levainTotal > 0,
     levainHours: levainPeakHours,
     levainTempC: roomTemp,
   });
+  const plan = analysePlan(schedule, anchor.mode, now, (build?.hours ?? 0) + requestedTotal);
 
-  // ── 9. Notes ──
+  // ── 10. Notes ──
   const doughWeight = sections
     .filter((s) => s.id === 'final')
     .reduce((sum, s) => sum + s.totalGrams, 0);
@@ -551,9 +673,11 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       clampedWater,
       iceGrams,
       dose,
+      yeastForm,
       inoculationPct,
       starterHydration,
       leavenType,
+      usesLevain,
       coldHours,
       coldPhase,
       roomEquivHours,
@@ -561,7 +685,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       roomTemp,
       coldTemp,
       driver,
-      starterEquivalentPct: usesLevain ? leavenOnFlour : dose.starterEquivalentPct,
+      starterEquivalentPct: leavenOnFlour,
       totalFlour,
       basisFlour,
       percentBasis,
@@ -569,10 +693,30 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
       levainPeakHours,
       preferment: Boolean(preferment),
+      prefermentLeaveningPct: prefLeavening,
+      prefermentReadyHours,
+      prefermentYeastGrams: prefermentYeast,
+      prefermentColdTempC: build && build.coldHours > 0 ? build.coldTempC : undefined,
     }),
   );
 
   const mergedIngredients = mergeIngredients(sections);
+
+  const prefermentResult: PrefermentResult | undefined =
+    preferment && build
+      ? {
+          type: preferment.type,
+          flourPct: round(prefShare * 100, 2),
+          hours: build.hours,
+          tempC: build.tempC,
+          coldHours: build.coldHours,
+          coldTempC: build.coldTempC,
+          mixTempC: build.mixTempC,
+          yeastPct: round(prefFresh * YEAST_CONVERSION[yeastForm], 4),
+          freshYeastPct: round(prefFresh, 4),
+          leaveningPct: round(prefLeavening, 3),
+        }
+      : undefined;
 
   return {
     sections,
@@ -605,7 +749,11 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       roomEquivHours: round(roomEquivHours, 2),
       totalHours: round(requestedTotal, 2),
       yeastPct: dose.pct,
+      freshYeastPct: dose.freshPct,
+      totalYeastPct: round(dose.pct + prefermentYeastPct, 4),
       yeastForm,
+      prefermentLeaveningPct: round(prefLeavening, 3),
+      prefermentReadyHours,
       inoculationPct,
       starterPct: round(inoculationPct * (1 + starterHydration / 100), 1),
       // Recipes quote the levain against the flour it joins, not against the
@@ -634,9 +782,66 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       percentBasis,
       basisFlour: round(basisFlour, 1),
     },
-    timeline: steps,
+    preferment: prefermentResult,
+    timeline: schedule.steps,
+    plan,
     notes,
-    readyAt,
+    readyAt: schedule.readyAt,
+  };
+}
+
+/**
+ * The preferment build the baker asked for, or the style's own: how long, how
+ * warm, and how much of it in the fridge.
+ */
+function resolvePrefermentBuild(
+  spec: PrefermentSpec,
+  inputs: CalculationInputs,
+  roomTemp: number,
+  coldTemp: number,
+) {
+  const hours = clamp(inputs.prefermentHours ?? spec.hours, 1, 96);
+  const tempC = clamp(inputs.prefermentTemp ?? spec.temp_c ?? roomTemp, 2, 32);
+  const coldHours = clamp(inputs.prefermentColdHours ?? spec.cold_hours ?? 0, 0, hours);
+  return {
+    hours,
+    tempC,
+    coldHours,
+    coldTempC: coldTemp,
+    mixTempC: coldHours > 0 ? coldTemp : tempC,
+  };
+}
+
+/**
+ * Where the plan sits on the clock, and what a baker would want to know about
+ * it: whether it can still be done, the soonest it could be, and whether it
+ * has them up in the night.
+ */
+function analysePlan(
+  schedule: ReturnType<typeof buildSchedule>,
+  mode: ScheduleAnchor['mode'],
+  now: Date,
+  fermentHours: number,
+): PlanResult {
+  const startMs = Date.parse(schedule.startsAt);
+  const spanMs = Date.parse(schedule.readyAt) - startMs;
+  const earliestStart = ceilToQuarter(now);
+  // A plan pinned to its start belongs to a baker who has started, or will;
+  // only a plan worked back from a deadline can fail to fit before it.
+  const startsInPast = mode === 'ready' && startMs < now.getTime() - 60_000;
+  const alreadyStarted = mode !== 'ready' && startMs < now.getTime() - 60_000;
+
+  return {
+    mode,
+    startsAt: schedule.startsAt,
+    mixAt: schedule.mixAt,
+    readyAt: schedule.readyAt,
+    spanHours: round(spanMs / 3_600_000, 2),
+    fermentHours: round(fermentHours, 2),
+    startsInPast,
+    earliestReadyAt: new Date(earliestStart.getTime() + spanMs).toISOString(),
+    nightSteps: nightStepIndices(schedule.steps),
+    daytimeShiftMin: alreadyStarted ? null : daytimeShiftMinutes(schedule.steps, earliestStart),
   };
 }
 
@@ -671,9 +876,11 @@ interface NoteContext {
   clampedWater: boolean;
   iceGrams: number;
   dose: ReturnType<typeof computeYeastDose>;
+  yeastForm: YeastForm;
   inoculationPct: number;
   starterHydration: number;
   leavenType: string;
+  usesLevain: boolean;
   coldHours: number;
   coldPhase: 'bulk' | 'proof';
   roomEquivHours: number;
@@ -689,6 +896,12 @@ interface NoteContext {
   levainOnFlourPct: number;
   levainPeakHours: number;
   preferment: boolean;
+  /** Leavening the ripe preferment carries in, fresh yeast % of total flour. */
+  prefermentLeaveningPct: number;
+  prefermentReadyHours?: number;
+  prefermentYeastGrams: number;
+  /** Set when the preferment comes into the mix straight from the fridge. */
+  prefermentColdTempC?: number;
 }
 
 function buildNotes(c: NoteContext): Note[] {
@@ -726,19 +939,70 @@ function buildNotes(c: NoteContext): Note[] {
     });
   }
 
-  if (c.dose.clamped && c.dose.pct > 0) {
+  const yeastGrams = c.totalFlour * (c.dose.pct / 100);
+  if (c.dose.limit === 'max') {
     notes.push({
       code: 'note.yeast_clamped',
       severity: 'warn',
-      values: { pct: c.dose.pct, grams: round(c.totalFlour * (c.dose.pct / 100), 2) },
+      values: { pct: c.dose.pct, grams: round(yeastGrams, 2) },
+    });
+  } else if (c.dose.limit === 'min') {
+    // The honest signal that no weighable dose stretches this room that far.
+    notes.push({
+      code: 'note.time_too_long',
+      severity: 'warn',
+      values: { hours: round(c.totalTime, 1), temp: round(c.roomTemp, 1) },
+    });
+  } else if (c.dose.freshPct >= 3) {
+    notes.push({
+      code: 'note.yeast_fast',
+      severity: 'warn',
+      values: { pct: c.dose.pct, hours: round(c.totalTime, 1) },
     });
   }
 
-  if (c.dose.pct > 0 && c.totalFlour * (c.dose.pct / 100) < 0.5) {
+  if (c.dose.pct > 0 && yeastGrams < 0.5) {
     notes.push({
       code: 'note.tiny_yeast',
       severity: 'tip',
-      values: { grams: round(c.totalFlour * (c.dose.pct / 100), 2) },
+      values: { grams: round(yeastGrams, 2) },
+    });
+  }
+  if (c.prefermentYeastGrams > 0 && c.prefermentYeastGrams < 0.5) {
+    notes.push({
+      code: 'note.tiny_yeast_preferment',
+      severity: 'tip',
+      values: { grams: round(c.prefermentYeastGrams, 2) },
+    });
+  }
+
+  if (c.prefermentLeaveningPct > 0 && c.leavenType !== 'sourdough') {
+    if (c.dose.freshPct === 0) {
+      notes.push({ code: 'note.preferment_enough', severity: 'tip' });
+    } else if (c.dose.neededFreshPct > c.dose.freshPct) {
+      const conversion = YEAST_CONVERSION[c.yeastForm];
+      notes.push({
+        code: 'note.preferment_carries',
+        severity: 'info',
+        values: {
+          grams: round(yeastGrams, 2),
+          straight: round(c.totalFlour * (c.dose.neededFreshPct / 100) * conversion, 2),
+        },
+      });
+    }
+  }
+  if (c.prefermentReadyHours !== undefined) {
+    notes.push({
+      code: 'note.preferment_strong',
+      severity: 'warn',
+      values: { hours: c.prefermentReadyHours, planned: round(c.totalTime, 1) },
+    });
+  }
+  if (c.prefermentColdTempC !== undefined && c.rawTempC > 40) {
+    notes.push({
+      code: 'note.cold_preferment',
+      severity: 'tip',
+      values: { temp: round(c.prefermentColdTempC, 1) },
     });
   }
 
@@ -762,14 +1026,14 @@ function buildNotes(c: NoteContext): Note[] {
   }
   // Near the floor the answer stops responding to the slider, which is the
   // honest signal that no weighable dose stretches this room that far.
-  if (c.driver === 'time' && c.starterEquivalentPct <= LEAVEN_PCT_MIN * 1.5) {
+  if (c.usesLevain && c.driver === 'time' && c.starterEquivalentPct <= LEAVEN_PCT_MIN * 1.5) {
     notes.push({
       code: 'note.time_too_long',
       severity: 'warn',
       values: { hours: round(c.totalTime, 1), temp: round(c.roomTemp, 1) },
     });
   }
-  if (c.starterEquivalentPct >= VERY_FAST_LEAVEN_PCT) {
+  if (c.usesLevain && c.starterEquivalentPct >= VERY_FAST_LEAVEN_PCT) {
     notes.push({
       code: 'note.very_fast',
       severity: 'warn',

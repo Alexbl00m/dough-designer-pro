@@ -12,10 +12,14 @@ import type { Translator } from '@/i18n';
 import type { Language } from '@/i18n';
 import {
   formatClock,
+  formatDateTime,
+  formatDayHeading,
   formatDuration,
   formatGrams,
   formatNumber,
   formatPercent,
+  formatSectionMeta,
+  localDayKey,
   resolveStepValues,
 } from '@/lib/format';
 
@@ -38,12 +42,25 @@ export function recipeToText(
   lines.push(
     `${t('recipe.totalFlour')}: ${formatGrams(results.totals.flour, lang)} g · ${t('field.hydration')}: ${formatNumber(results.params.hydration, lang)}%`,
   );
+  // The plan first: a bake sheet is read standing at the bench, and "when" is
+  // the first question.
+  lines.push(
+    `${t('plan.startsAt')}: ${formatDateTime(results.plan.startsAt, lang)} · ${t('plan.readyAt')}: ${formatDateTime(results.readyAt, lang)}`,
+  );
+  if (results.preferment) {
+    lines.push(
+      t('plan.fermentSplit', {
+        type: t(`section.${results.preferment.type}`),
+        pref: formatNumber(results.preferment.hours, lang),
+        dough: formatNumber(results.fermentation.totalHours, lang),
+        total: formatNumber(results.plan.fermentHours, lang),
+      }),
+    );
+  }
   lines.push('');
 
   for (const section of results.sections) {
-    const meta = section.meta
-      ? ` (${t('section.meta', { hours: section.meta.hours, temp: section.meta.tempC })})`
-      : '';
+    const meta = section.meta ? ` (${formatSectionMeta(section.meta, t)})` : '';
     lines.push(`${t(section.titleKey).toUpperCase()}${meta}`);
     for (const ing of section.ingredients) {
       const name = t(ing.key).padEnd(28, '.');
@@ -66,10 +83,16 @@ export function recipeToText(
   lines.push('');
 
   lines.push(t('recipe.timeline').toUpperCase());
+  let lastDay: string | null = null;
   for (const step of results.timeline) {
+    const day = localDayKey(step.at);
+    if (day !== lastDay) {
+      lines.push(`  ${formatDayHeading(step.at, lang)}`);
+      lastDay = day;
+    }
     const clock = formatClock(step.at, lang);
     const duration = step.durationMin > 0 ? ` (${formatDuration(step.durationMin, t)})` : '';
-    lines.push(`  ${clock}  ${t(step.key, resolveStepValues(step.values, t))}${duration}`);
+    lines.push(`    ${clock}  ${t(step.key, resolveStepValues(step.values, t))}${duration}`);
   }
   lines.push('');
 

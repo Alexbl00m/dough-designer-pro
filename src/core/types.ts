@@ -29,6 +29,19 @@ export type PercentBasis = 'total' | 'dough';
  */
 export type FermentDriver = 'time' | 'dose';
 
+/**
+ * Which moment of the plan the baker pins to the clock.
+ *
+ * 'ready' — "I want to eat at six": everything is laid out backwards from the
+ *           end of the bake, preferment included.
+ * 'start' — "I am starting now": the first step (preferment, levain or mix)
+ *           is pinned and everything follows from it.
+ * 'mix'   — the moment the dough is mixed. The engine's original anchor, kept
+ *           for callers that pass `startTime`.
+ */
+export type PlanAnchorMode = 'start' | 'mix' | 'ready';
+export type PlanMode = Exclude<PlanAnchorMode, 'mix'>;
+
 export interface CalculationInputs {
   style: BreadStyle;
   /** How the batch is sized: by pieces, by a flour weight you have, or by a total dough weight. */
@@ -44,10 +57,16 @@ export interface CalculationInputs {
   /** Fermentation time in hours (bulk + proof). Used when `driver` is 'time'. */
   totalTime: number;
   /**
-   * Leavening dose as ripe levain over dough flour — the convention recipes
-   * use. Commercial yeast is converted into it. Used when `driver` is 'dose'.
+   * Levain dose as ripe levain over dough flour — the convention recipes use.
+   * Used when `driver` is 'dose' and the dough is leavened with a starter.
    */
   leavenPct?: number;
+  /**
+   * Fresh yeast added to the final dough, % of total flour. Used when `driver`
+   * is 'dose' and the dough is leavened with commercial yeast; other forms are
+   * converted from it, so switching form never moves the schedule.
+   */
+  yeastPct?: number;
   roomTemp: number;
   coldTemp?: number;
   coldHours?: number;
@@ -74,8 +93,19 @@ export interface CalculationInputs {
   starterHydration?: number;
   /** Turn the style's preferment on or off. Defaults to on when the style has one. */
   usePreferment?: boolean;
-  /** Wall-clock start of the schedule, ISO or Date. Defaults to now. */
+  /** Preferment build time in hours, fridge included. Defaults to the style's own. */
+  prefermentHours?: number;
+  /** Temperature of the warm part of the preferment build. Defaults to the style's own. */
+  prefermentTemp?: number;
+  /** Hours at the end of the preferment build spent in the fridge. Defaults to the style's own. */
+  prefermentColdHours?: number;
+
+  /** Pin the plan to the clock: when it starts, or when the bake is done. */
+  plan?: { mode: PlanMode; at: Date };
+  /** When the dough is mixed. Used when no `plan` is given; defaults to now. */
   startTime?: Date;
+  /** The current time, for telling a plan that would have to start in the past. */
+  now?: Date;
 }
 
 export interface Ingredient {
@@ -93,8 +123,15 @@ export interface RecipeSection {
   id: 'preferment' | 'levain' | 'final';
   /** i18n key for the section heading. */
   titleKey: string;
-  /** Extra context, e.g. "16 h at 18 °C". */
-  meta?: { hours: number; tempC: number; type?: PrefermentType };
+  /** Extra context, e.g. "16 h at 18 °C", or "2 h at 20 °C, then 16 h in the fridge". */
+  meta?: {
+    hours: number;
+    tempC: number;
+    type?: PrefermentType;
+    /** Hours of `hours` spent in the fridge, at the end of the build. */
+    coldHours?: number;
+    coldTempC?: number;
+  };
   ingredients: Ingredient[];
   totalGrams: number;
 }
@@ -134,6 +171,51 @@ export interface TimelineStep {
   key: string;
   values?: Record<string, string | number>;
   tempC?: number;
+  /** Whether the baker has to do something at this moment. */
+  handsOn: boolean;
+}
+
+/** The preferment as built for this plan. */
+export interface PrefermentResult {
+  type: PrefermentType;
+  /** Share of the total flour that goes into it, %. */
+  flourPct: number;
+  /** Whole build, fridge included. */
+  hours: number;
+  /** Temperature of the warm part. */
+  tempC: number;
+  coldHours: number;
+  coldTempC: number;
+  /** Temperature it goes into the mix at — the fridge's, if it ends there. */
+  mixTempC: number;
+  /** Yeast in the preferment, in the chosen form, % of the preferment's own flour. */
+  yeastPct: number;
+  /** The same as fresh yeast. */
+  freshYeastPct: number;
+  /** Leavening it carries into the final dough, as fresh yeast on the total flour. */
+  leaveningPct: number;
+}
+
+/** Where the plan sits on the clock, and whether it can be lived with. */
+export interface PlanResult {
+  mode: PlanAnchorMode;
+  /** The first step: preferment or levain build, autolyse, or the mix. */
+  startsAt: string;
+  mixAt: string;
+  /** The bake is finished. */
+  readyAt: string;
+  /** First step to finished bake, hours. */
+  spanHours: number;
+  /** Preferment plus dough fermentation, hours: what a baker means by "24 h in total". */
+  fermentHours: number;
+  /** The plan would have to start before now. */
+  startsInPast: boolean;
+  /** The soonest the bake can be finished, starting at the next quarter hour. */
+  earliestReadyAt: string;
+  /** Indices into the timeline of hands-on steps that fall at night (23–06). */
+  nightSteps: number[];
+  /** The nearest shift of the whole plan, in minutes, that keeps every hands-on step in the day. */
+  daytimeShiftMin: number | null;
 }
 
 export interface CalculationResults {
@@ -170,8 +252,20 @@ export interface CalculationResults {
     coldPhase: 'bulk' | 'proof';
     roomEquivHours: number;
     totalHours: number;
+    /** Yeast added to the final dough, in the chosen form, % of total flour. */
     yeastPct: number;
+    /** The same as fresh yeast. */
+    freshYeastPct: number;
+    /** All the yeast in the recipe, preferment included, in the chosen form, % of total flour. */
+    totalYeastPct: number;
     yeastForm: YeastForm;
+    /** Leavening the ripe preferment carries into the final dough, as fresh yeast on total flour. */
+    prefermentLeaveningPct: number;
+    /**
+     * When the preferment alone would have the dough ready well before the
+     * planned time: how many hours it would take. Unset otherwise.
+     */
+    prefermentReadyHours?: number;
     /** Starter flour as a share of TOTAL flour — the engine's own convention. */
     inoculationPct: number;
     /** Ripe levain as a share of TOTAL flour. */
@@ -207,7 +301,9 @@ export interface CalculationResults {
     /** The flour weight the displayed percentages divide by. */
     basisFlour: number;
   };
+  preferment?: PrefermentResult;
   timeline: TimelineStep[];
+  plan: PlanResult;
   notes: Note[];
   readyAt: string;
 }
