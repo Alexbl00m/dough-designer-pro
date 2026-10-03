@@ -261,6 +261,7 @@ export const sv: Record<string, string> = {
   'ddt.formula': '{factors} × {ddt} − mjöl {flour} − rum {room} − friktion {friction}{preferment} = {result} °C',
   'ddt.prefermentTerm': ' − förjäsning {temp}',
   'ddt.ice': 'Byt {grams} g av vattnet mot is för att komma ner till {temp} °C.',
+  'ddt.lands': 'Med {water} °C vatten landar degen på ungefär {dough} °C i stället för {target} °C.',
   'ddt.explain':
     'Blandningen värmer degen och vatten är det enda du enkelt kan tempera, så det får bära hela korrigeringen. Att träffa degtemperaturen betyder mer än att följa klockan: 2 °C varmare deg jäser ungefär 15% snabbare.',
 
@@ -355,6 +356,8 @@ export const sv: Record<string, string> = {
   'process.preferment.levain.cold.body': 'Blanda och låt stå {hours} h vid {temp} °C. Ställ den sedan i kylen.',
   'process.preferment.fridge': 'In i kylen',
   'process.preferment.fridge.body': '{hours} h vid {temp} °C. Förjäsningen mognar långsamt vidare och går rakt in i degen när det är dags.',
+  'process.preferment.temper': 'Ta fram förjäsningen',
+  'process.preferment.temper.body': 'Ställ den framme {minutes} min innan du blandar så att kylan går ur den – direkt ur kylen skulle vattnet behöva vara alldeles för varmt.',
   'process.levain.build': 'Mata levainen',
   'process.levain.build.body':
     'Mata surdegen och låt den nå toppen – ungefär {hours} h vid {temp} °C. Tiden gäller ditt rum: vid 18 °C tar samma matning nästan dubbelt så lång tid som vid 26 °C.',
@@ -483,8 +486,8 @@ export const sv: Record<string, string> = {
   'note.cold_clamped': 'Kyltiden var längre än den totala tiden och har begränsats till {hours} h.',
   'note.water_clamped':
     'Beräknad vattentemperatur ({raw} °C) ligger utanför praktiskt intervall och har justerats till {used} °C. Degtemperaturen blir därmed inte exakt din målsättning.',
+  'note.water_too_hot': 'För att nå {target} °C skulle vattnet behöva vara {raw} °C – för varmt för jästen. Använd högst {used} °C; degen landar då på ungefär {dough} °C och kommer igång lite långsammare. För en varmare deg: ta fram förjäsningen tidigare eller blanda i ett varmare rum.',
   'note.use_ice': 'Byt {grams} g av vattnet mot is för att nå {temp} °C.',
-  'note.water_hot': 'Vattnet är över {limit} °C. Häll aldrig det direkt på jästen – blanda i mjölet först.',
   'note.cold_retard':
     'Kyljäsning: {cold} av {total} h ligger vid {coldTemp} °C ({phase}). Det motsvarar {equiv} h i rumstemperatur, och jästen är doserad för den siffran.',
   'note.yeast_clamped': 'Jästmängden nådde modellens gräns och stannar på {pct}% ({grams} g). Justera tid eller temperatur istället.',
@@ -496,7 +499,8 @@ export const sv: Record<string, string> = {
   'note.preferment_enough': 'Förjäsningen bär hela jäsningen – huvuddegen behöver ingen extra jäst.',
   'note.preferment_carries': 'Förjäsningen bär en stor del av jäsningen: huvuddegen får {grams} g jäst i stället för de {straight} g samma schema hade krävt utan den.',
   'note.preferment_strong': 'Förjäsningen ensam gör degen klar på ungefär {hours} h – kortare än planerade {planned} h. Korta degens tid, sänk degtemperaturen eller låt degen stå en del av tiden i kyl.',
-  'note.cold_preferment': 'Förjäsningen kommer kall ur kylen ({temp} °C), därför blir vattnet varmt. Ta gärna fram den en timme innan du blandar.',
+  'note.cold_preferment':
+    'Förjäsningen har bara hunnit bli ungefär {temp} °C när den går i degen, så vattnet behöver vara ljummet för att degen ska nå rätt temperatur.',
   'note.time_too_long':
     '{hours} h vid {temp} °C kräver mindre jäsmedel än du kan väga. Sänk temperaturen, lägg en del av tiden i kyl, eller korta jäsningen.',
   'note.very_fast':

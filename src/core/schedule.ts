@@ -43,6 +43,8 @@ export interface ScheduleInput {
   prefermentTempC?: number;
   /** Hours at the end of the preferment build spent in the fridge. */
   prefermentColdHours?: number;
+  /** Of those, the last hours on the bench to take the chill off before the mix. */
+  prefermentTemperHours?: number;
   prefermentType?: string;
   usesLevain: boolean;
   levainHours: number;
@@ -130,12 +132,19 @@ export function buildSchedule(input: ScheduleInput): Schedule {
       { hours: round1(warmMin / 60), temp: warmTemp, coldHours: round1(coldMin / 60) },
       warmTemp,
     );
+    const temperMin = Math.min(coldMin, Math.max(0, (input.prefermentTemperHours ?? 0) * 60));
     if (coldMin > 0) {
-      push(start + warmMin, coldMin, 'cold', 'process.preferment.fridge', {
-        hours: round1(coldMin / 60),
+      push(start + warmMin, coldMin - temperMin, 'cold', 'process.preferment.fridge', {
+        hours: round1((coldMin - temperMin) / 60),
         temp: input.coldTempC,
         type,
       }, input.coldTempC);
+    }
+    if (temperMin > 0) {
+      push(-(temperMin + autolyseMin), temperMin, 'preferment', 'process.preferment.temper', {
+        minutes: Math.round(temperMin),
+        type,
+      }, input.roomTempC);
     }
     push(-autolyseMin, 0, 'preferment', 'process.preferment.ready', { type });
   }

@@ -1194,6 +1194,7 @@ var sv = {
   "ddt.formula": "{factors} \xD7 {ddt} \u2212 mj\xF6l {flour} \u2212 rum {room} \u2212 friktion {friction}{preferment} = {result} \xB0C",
   "ddt.prefermentTerm": " \u2212 f\xF6rj\xE4sning {temp}",
   "ddt.ice": "Byt {grams} g av vattnet mot is f\xF6r att komma ner till {temp} \xB0C.",
+  "ddt.lands": "Med {water} \xB0C vatten landar degen p\xE5 ungef\xE4r {dough} \xB0C i st\xE4llet f\xF6r {target} \xB0C.",
   "ddt.explain": "Blandningen v\xE4rmer degen och vatten \xE4r det enda du enkelt kan tempera, s\xE5 det f\xE5r b\xE4ra hela korrigeringen. Att tr\xE4ffa degtemperaturen betyder mer \xE4n att f\xF6lja klockan: 2 \xB0C varmare deg j\xE4ser ungef\xE4r 15% snabbare.",
   // ── Sourdough panel ──
   "sd.title": "Surdeg",
@@ -1277,6 +1278,8 @@ var sv = {
   "process.preferment.levain.cold.body": "Blanda och l\xE5t st\xE5 {hours} h vid {temp} \xB0C. St\xE4ll den sedan i kylen.",
   "process.preferment.fridge": "In i kylen",
   "process.preferment.fridge.body": "{hours} h vid {temp} \xB0C. F\xF6rj\xE4sningen mognar l\xE5ngsamt vidare och g\xE5r rakt in i degen n\xE4r det \xE4r dags.",
+  "process.preferment.temper": "Ta fram f\xF6rj\xE4sningen",
+  "process.preferment.temper.body": "St\xE4ll den framme {minutes} min innan du blandar s\xE5 att kylan g\xE5r ur den \u2013 direkt ur kylen skulle vattnet beh\xF6va vara alldeles f\xF6r varmt.",
   "process.levain.build": "Mata levainen",
   "process.levain.build.body": "Mata surdegen och l\xE5t den n\xE5 toppen \u2013 ungef\xE4r {hours} h vid {temp} \xB0C. Tiden g\xE4ller ditt rum: vid 18 \xB0C tar samma matning n\xE4stan dubbelt s\xE5 l\xE5ng tid som vid 26 \xB0C.",
   "process.shape.balls": "Bolla",
@@ -1394,8 +1397,8 @@ var sv = {
   // ── Notes ──
   "note.cold_clamped": "Kyltiden var l\xE4ngre \xE4n den totala tiden och har begr\xE4nsats till {hours} h.",
   "note.water_clamped": "Ber\xE4knad vattentemperatur ({raw} \xB0C) ligger utanf\xF6r praktiskt intervall och har justerats till {used} \xB0C. Degtemperaturen blir d\xE4rmed inte exakt din m\xE5ls\xE4ttning.",
+  "note.water_too_hot": "F\xF6r att n\xE5 {target} \xB0C skulle vattnet beh\xF6va vara {raw} \xB0C \u2013 f\xF6r varmt f\xF6r j\xE4sten. Anv\xE4nd h\xF6gst {used} \xB0C; degen landar d\xE5 p\xE5 ungef\xE4r {dough} \xB0C och kommer ig\xE5ng lite l\xE5ngsammare. F\xF6r en varmare deg: ta fram f\xF6rj\xE4sningen tidigare eller blanda i ett varmare rum.",
   "note.use_ice": "Byt {grams} g av vattnet mot is f\xF6r att n\xE5 {temp} \xB0C.",
-  "note.water_hot": "Vattnet \xE4r \xF6ver {limit} \xB0C. H\xE4ll aldrig det direkt p\xE5 j\xE4sten \u2013 blanda i mj\xF6let f\xF6rst.",
   "note.cold_retard": "Kylj\xE4sning: {cold} av {total} h ligger vid {coldTemp} \xB0C ({phase}). Det motsvarar {equiv} h i rumstemperatur, och j\xE4sten \xE4r doserad f\xF6r den siffran.",
   "note.yeast_clamped": "J\xE4stm\xE4ngden n\xE5dde modellens gr\xE4ns och stannar p\xE5 {pct}% ({grams} g). Justera tid eller temperatur ist\xE4llet.",
   "note.tiny_yeast": "Bara {grams} g j\xE4st. V\xE4g p\xE5 en 0,01-v\xE5g, eller l\xF6s upp en st\xF6rre m\xE4ngd i vatten och anv\xE4nd en del av l\xF6sningen.",
@@ -1405,7 +1408,7 @@ var sv = {
   "note.preferment_enough": "F\xF6rj\xE4sningen b\xE4r hela j\xE4sningen \u2013 huvuddegen beh\xF6ver ingen extra j\xE4st.",
   "note.preferment_carries": "F\xF6rj\xE4sningen b\xE4r en stor del av j\xE4sningen: huvuddegen f\xE5r {grams} g j\xE4st i st\xE4llet f\xF6r de {straight} g samma schema hade kr\xE4vt utan den.",
   "note.preferment_strong": "F\xF6rj\xE4sningen ensam g\xF6r degen klar p\xE5 ungef\xE4r {hours} h \u2013 kortare \xE4n planerade {planned} h. Korta degens tid, s\xE4nk degtemperaturen eller l\xE5t degen st\xE5 en del av tiden i kyl.",
-  "note.cold_preferment": "F\xF6rj\xE4sningen kommer kall ur kylen ({temp} \xB0C), d\xE4rf\xF6r blir vattnet varmt. Ta g\xE4rna fram den en timme innan du blandar.",
+  "note.cold_preferment": "F\xF6rj\xE4sningen har bara hunnit bli ungef\xE4r {temp} \xB0C n\xE4r den g\xE5r i degen, s\xE5 vattnet beh\xF6ver vara ljummet f\xF6r att degen ska n\xE5 r\xE4tt temperatur.",
   "note.time_too_long": "{hours} h vid {temp} \xB0C kr\xE4ver mindre j\xE4smedel \xE4n du kan v\xE4ga. S\xE4nk temperaturen, l\xE4gg en del av tiden i kyl, eller korta j\xE4sningen.",
   "note.very_fast": "Mycket j\xE4smedel ({pct}% levainekvivalent). Degen g\xE5r fort \u2013 g\xE5 efter hur den ser ut och k\xE4nns, inte efter klockan.",
   "note.levain_ratio": "Surdegsratio: {onFlour}% mogen levain p\xE5 mj\xF6let i degen \u2013 den siffran de flesta recept menar med \u201Cinokulering\u201D. Det \xE4r {grams} g levain vid {hydration}% hydrering, vilket motsvarar {inoculation}% av det totala mj\xF6let r\xE4knat som surdegens mj\xF6l.",
@@ -1685,6 +1688,7 @@ var en = {
   "ddt.formula": "{factors} \xD7 {ddt} \u2212 flour {flour} \u2212 room {room} \u2212 friction {friction}{preferment} = {result} \xB0C",
   "ddt.prefermentTerm": " \u2212 preferment {temp}",
   "ddt.ice": "Swap {grams} g of the water for ice to reach {temp} \xB0C.",
+  "ddt.lands": "With {water} \xB0C water the dough lands at about {dough} \xB0C instead of {target} \xB0C.",
   "ddt.explain": "Mixing heats the dough, and water is the only ingredient you can easily temper, so it absorbs the whole correction. Hitting the dough temperature matters more than watching the clock: a dough 2 \xB0C warmer ferments about 15% faster.",
   // ── Sourdough panel ──
   "sd.title": "Sourdough",
@@ -1768,6 +1772,8 @@ var en = {
   "process.preferment.levain.cold.body": "Mix and leave {hours} h at {temp} \xB0C, then put it in the fridge.",
   "process.preferment.fridge": "Into the fridge",
   "process.preferment.fridge.body": "{hours} h at {temp} \xB0C. It keeps ripening slowly and goes straight into the dough when it is time.",
+  "process.preferment.temper": "Take the preferment out",
+  "process.preferment.temper.body": "Leave it out {minutes} min before mixing to take the chill off \u2013 straight from the fridge the water would have to be far too hot.",
   "process.levain.build": "Feed the levain",
   "process.levain.build.body": "Feed the starter and let it reach its peak \u2014 roughly {hours} h at {temp} \xB0C. That time is for your kitchen: at 18 \xB0C the same feed takes nearly twice as long as at 26 \xB0C.",
   "process.shape.balls": "Ball up",
@@ -1885,8 +1891,8 @@ var en = {
   // ── Notes ──
   "note.cold_clamped": "The cold time exceeded the total time and was capped at {hours} h.",
   "note.water_clamped": "The calculated water temperature ({raw} \xB0C) falls outside a practical range and was adjusted to {used} \xB0C, so the dough will not land exactly on your target.",
+  "note.water_too_hot": "To reach {target} \xB0C the water would have to be {raw} \xB0C \u2013 too hot for the yeast. Use at most {used} \xB0C; the dough then lands at about {dough} \xB0C and starts a little slower. For a warmer dough: take the preferment out earlier or mix somewhere warmer.",
   "note.use_ice": "Swap {grams} g of the water for ice to reach {temp} \xB0C.",
-  "note.water_hot": "The water is above {limit} \xB0C. Never pour it straight onto the yeast \u2014 mix it into the flour first.",
   "note.cold_retard": "Cold retard: {cold} of {total} h sit at {coldTemp} \xB0C ({phase}). That is worth about {equiv} h at room temperature, and the dose is set for that figure.",
   "note.yeast_clamped": "The dose hit the model's limit and stops at {pct}% ({grams} g). Adjust time or temperature instead.",
   "note.tiny_yeast": "Only {grams} g of yeast. Use a 0.01 g scale, or dissolve a larger amount in water and use part of the solution.",
@@ -1896,7 +1902,7 @@ var en = {
   "note.preferment_enough": "The preferment carries the whole rise \u2013 the final dough needs no extra yeast.",
   "note.preferment_carries": "The preferment carries much of the rise: the final dough gets {grams} g of yeast instead of the {straight} g the same schedule would need without it.",
   "note.preferment_strong": "The preferment alone has the dough ready in about {hours} h \u2013 sooner than the {planned} h planned. Shorten the dough's time, lower the dough temperature, or give the dough part of the time in the fridge.",
-  "note.cold_preferment": "The preferment comes cold out of the fridge ({temp} \xB0C), which is why the water is warm. Take it out an hour before mixing if you can.",
+  "note.cold_preferment": "The preferment has only warmed to about {temp} \xB0C when it goes into the dough, so the water needs to be lukewarm for the dough to reach its temperature.",
   "note.time_too_long": "{hours} h at {temp} \xB0C needs less leavening than you can weigh. Drop the temperature, move part of the time into the fridge, or shorten the ferment.",
   "note.very_fast": "A lot of leavening ({pct}% levain-equivalent). This dough moves fast \u2014 go by how it looks and feels, not by the clock.",
   "note.levain_ratio": "Starter ratio: {onFlour}% ripe levain on the dough flour \u2014 the figure most recipes mean by \u201Cinoculation\u201D. That is {grams} g of levain at {hydration}% hydration, which is {inoculation}% of the total flour counted as starter flour.",
@@ -2249,8 +2255,9 @@ var FRICTION_FACTOR_C = {
   spiral: 8
 };
 var WATER_TEMP_MIN_C = 1;
-var WATER_TEMP_MAX_C = 55;
-var YEAST_DANGER_TEMP_C = 50;
+var WATER_TEMP_MAX_C = 38;
+var PREFERMENT_TEMPER_HOURS = 1;
+var PREFERMENT_WARMUP_HOURS = 1.5;
 var INOCULATION_MIN = 0.1;
 var INOCULATION_MAX = 50;
 var INOCULATION_HIGH = 20;
@@ -2602,12 +2609,19 @@ function buildSchedule(input) {
       { hours: round1(warmMin / 60), temp: warmTemp, coldHours: round1(coldMin2 / 60) },
       warmTemp
     );
+    const temperMin = Math.min(coldMin2, Math.max(0, (input.prefermentTemperHours ?? 0) * 60));
     if (coldMin2 > 0) {
-      push(start + warmMin, coldMin2, "cold", "process.preferment.fridge", {
-        hours: round1(coldMin2 / 60),
+      push(start + warmMin, coldMin2 - temperMin, "cold", "process.preferment.fridge", {
+        hours: round1((coldMin2 - temperMin) / 60),
         temp: input.coldTempC,
         type
       }, input.coldTempC);
+    }
+    if (temperMin > 0) {
+      push(-(temperMin + autolyseMin), temperMin, "preferment", "process.preferment.temper", {
+        minutes: Math.round(temperMin),
+        type
+      }, input.roomTempC);
     }
     push(-autolyseMin, 0, "preferment", "process.preferment.ready", { type });
   }
@@ -3143,12 +3157,13 @@ function calculateRecipe(inputs) {
     flourTempC: flourTemp,
     roomTempC: roomTemp,
     frictionC,
-    // A poolish straight out of the fridge brings the fridge's temperature
-    // into the mix, and the water has to make up for it.
+    // A poolish from the fridge brings its chill into the mix even after an
+    // hour on the bench, and the water has to make up for it.
     prefermentTempC: build?.mixTempC
   });
   const waterTempC = clamp(rawTempC, WATER_TEMP_MIN_C, WATER_TEMP_MAX_C);
   const clampedWater = Math.abs(rawTempC - waterTempC) > 0.05;
+  const doughTempC = (waterTempC + flourTemp + roomTemp + frictionC + (build ? build.mixTempC : 0)) / factors;
   const iceGrams = computeIceSplit(finalWater, waterTempC);
   const ratioSum = style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
   let bulkHours = requestedTotal * (style.fermentation.bulk_ratio / ratioSum);
@@ -3177,6 +3192,7 @@ function calculateRecipe(inputs) {
     prefermentHours: build?.hours,
     prefermentTempC: build?.tempC,
     prefermentColdHours: build?.coldHours,
+    prefermentTemperHours: build?.temperHours,
     prefermentType: preferment?.type,
     usesLevain: usesLevain && levainTotal > 0,
     levainHours: levainPeakHours,
@@ -3220,7 +3236,9 @@ function calculateRecipe(inputs) {
       prefermentLeaveningPct: prefLeavening,
       prefermentReadyHours,
       prefermentYeastGrams: prefermentYeast,
-      prefermentColdTempC: build && build.coldHours > 0 ? build.coldTempC : void 0
+      prefermentColdTempC: build && build.coldHours > 0 ? build.mixTempC : void 0,
+      doughTempC,
+      desiredDoughTempC: desiredDoughTemp
     })
   );
   const mergedIngredients = mergeIngredients(sections);
@@ -3232,6 +3250,7 @@ function calculateRecipe(inputs) {
     coldHours: build.coldHours,
     coldTempC: build.coldTempC,
     mixTempC: build.mixTempC,
+    temperHours: build.temperHours,
     yeastPct: round(prefFresh * YEAST_CONVERSION[yeastForm], 4),
     freshYeastPct: round(prefFresh, 4),
     leaveningPct: round(prefLeavening, 3)
@@ -3253,6 +3272,7 @@ function calculateRecipe(inputs) {
       tempC: round(waterTempC, 1),
       rawTempC: round(rawTempC, 1),
       clamped: clampedWater,
+      doughTempC: round(doughTempC, 1),
       factors,
       frictionC,
       flourTempC: flourTemp,
@@ -3309,12 +3329,15 @@ function resolvePrefermentBuild(spec, inputs, roomTemp, coldTemp) {
   const hours = clamp(inputs.prefermentHours ?? spec.hours, 1, 96);
   const tempC = clamp(inputs.prefermentTemp ?? spec.temp_c ?? roomTemp, 2, 32);
   const coldHours = clamp(inputs.prefermentColdHours ?? spec.cold_hours ?? 0, 0, hours);
+  const temperHours = coldHours >= PREFERMENT_TEMPER_HOURS + 1 ? PREFERMENT_TEMPER_HOURS : 0;
+  const warmed = roomTemp - (roomTemp - coldTemp) * Math.exp(-temperHours / PREFERMENT_WARMUP_HOURS);
   return {
     hours,
     tempC,
     coldHours,
     coldTempC: coldTemp,
-    mixTempC: coldHours > 0 ? coldTemp : tempC
+    temperHours,
+    mixTempC: round(coldHours > 0 ? warmed : tempC, 1)
   };
 }
 function analysePlan(schedule, mode, now, fermentHours) {
@@ -3356,9 +3379,14 @@ function buildNotes(c) {
   const notes = [];
   if (c.clampedWater) {
     notes.push({
-      code: "note.water_clamped",
+      code: c.rawTempC > c.waterTempC ? "note.water_too_hot" : "note.water_clamped",
       severity: "warn",
-      values: { raw: round(c.rawTempC, 1), used: round(c.waterTempC, 1) }
+      values: {
+        raw: round(c.rawTempC, 0),
+        used: round(c.waterTempC, 0),
+        dough: round(c.doughTempC, 1),
+        target: round(c.desiredDoughTempC, 1)
+      }
     });
   }
   if (c.iceGrams > 0) {
@@ -3367,9 +3395,6 @@ function buildNotes(c) {
       severity: "tip",
       values: { grams: c.iceGrams, temp: round(c.waterTempC, 1) }
     });
-  }
-  if (c.waterTempC > YEAST_DANGER_TEMP_C) {
-    notes.push({ code: "note.water_hot", severity: "warn", values: { limit: YEAST_DANGER_TEMP_C } });
   }
   if (c.coldHours > 0) {
     notes.push({
@@ -3440,7 +3465,7 @@ function buildNotes(c) {
       values: { hours: c.prefermentReadyHours, planned: round(c.totalTime, 1) }
     });
   }
-  if (c.prefermentColdTempC !== void 0 && c.rawTempC > 40) {
+  if (c.prefermentColdTempC !== void 0 && c.rawTempC > 30) {
     notes.push({
       code: "note.cold_preferment",
       severity: "tip",

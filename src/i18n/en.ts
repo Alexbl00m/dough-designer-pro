@@ -261,6 +261,7 @@ export const en: Record<string, string> = {
   'ddt.formula': '{factors} × {ddt} − flour {flour} − room {room} − friction {friction}{preferment} = {result} °C',
   'ddt.prefermentTerm': ' − preferment {temp}',
   'ddt.ice': 'Swap {grams} g of the water for ice to reach {temp} °C.',
+  'ddt.lands': 'With {water} °C water the dough lands at about {dough} °C instead of {target} °C.',
   'ddt.explain':
     'Mixing heats the dough, and water is the only ingredient you can easily temper, so it absorbs the whole correction. Hitting the dough temperature matters more than watching the clock: a dough 2 °C warmer ferments about 15% faster.',
 
@@ -355,6 +356,8 @@ export const en: Record<string, string> = {
   'process.preferment.levain.cold.body': 'Mix and leave {hours} h at {temp} °C, then put it in the fridge.',
   'process.preferment.fridge': 'Into the fridge',
   'process.preferment.fridge.body': '{hours} h at {temp} °C. It keeps ripening slowly and goes straight into the dough when it is time.',
+  'process.preferment.temper': 'Take the preferment out',
+  'process.preferment.temper.body': 'Leave it out {minutes} min before mixing to take the chill off – straight from the fridge the water would have to be far too hot.',
   'process.levain.build': 'Feed the levain',
   'process.levain.build.body':
     'Feed the starter and let it reach its peak — roughly {hours} h at {temp} °C. That time is for your kitchen: at 18 °C the same feed takes nearly twice as long as at 26 °C.',
@@ -483,8 +486,8 @@ export const en: Record<string, string> = {
   'note.cold_clamped': 'The cold time exceeded the total time and was capped at {hours} h.',
   'note.water_clamped':
     'The calculated water temperature ({raw} °C) falls outside a practical range and was adjusted to {used} °C, so the dough will not land exactly on your target.',
+  'note.water_too_hot': 'To reach {target} °C the water would have to be {raw} °C – too hot for the yeast. Use at most {used} °C; the dough then lands at about {dough} °C and starts a little slower. For a warmer dough: take the preferment out earlier or mix somewhere warmer.',
   'note.use_ice': 'Swap {grams} g of the water for ice to reach {temp} °C.',
-  'note.water_hot': 'The water is above {limit} °C. Never pour it straight onto the yeast — mix it into the flour first.',
   'note.cold_retard':
     'Cold retard: {cold} of {total} h sit at {coldTemp} °C ({phase}). That is worth about {equiv} h at room temperature, and the dose is set for that figure.',
   'note.yeast_clamped': 'The dose hit the model\'s limit and stops at {pct}% ({grams} g). Adjust time or temperature instead.',
@@ -496,7 +499,8 @@ export const en: Record<string, string> = {
   'note.preferment_enough': 'The preferment carries the whole rise – the final dough needs no extra yeast.',
   'note.preferment_carries': 'The preferment carries much of the rise: the final dough gets {grams} g of yeast instead of the {straight} g the same schedule would need without it.',
   'note.preferment_strong': 'The preferment alone has the dough ready in about {hours} h – sooner than the {planned} h planned. Shorten the dough\'s time, lower the dough temperature, or give the dough part of the time in the fridge.',
-  'note.cold_preferment': 'The preferment comes cold out of the fridge ({temp} °C), which is why the water is warm. Take it out an hour before mixing if you can.',
+  'note.cold_preferment':
+    'The preferment has only warmed to about {temp} °C when it goes into the dough, so the water needs to be lukewarm for the dough to reach its temperature.',
   'note.time_too_long':
     '{hours} h at {temp} °C needs less leavening than you can weigh. Drop the temperature, move part of the time into the fridge, or shorten the ferment.',
   'note.very_fast':

@@ -86,12 +86,30 @@ export const FRICTION_FACTOR_C = {
 
 export type MixingMethod = keyof typeof FRICTION_FACTOR_C;
 
-/** Practical water temperature range: below 1 °C you are pouring ice, above 55 °C you kill yeast. */
+/**
+ * Practical water temperature range. Below 1 °C you are pouring ice. The top
+ * is body temperature: warmer water stresses the yeast it meets — the dry
+ * yeast in the mix and the live yeast in a preferment — and bakery recipes
+ * stop around here. When the dough-temperature rule asks for more, the water
+ * stays at the limit and the recipe says where the dough will land instead.
+ */
 export const WATER_TEMP_MIN_C = 1;
-export const WATER_TEMP_MAX_C = 55;
+export const WATER_TEMP_MAX_C = 38;
 
-/** Yeast starts dying around here; warn the baker before they scald it. */
-export const YEAST_DANGER_TEMP_C = 50;
+/**
+ * A preferment that spends the night in the fridge comes out this long before
+ * the mix. Straight from the fridge it is 4 °C and a third or more of the
+ * dough, and the water would have to be scalding to make up for it.
+ */
+export const PREFERMENT_TEMPER_HOURS = 1;
+
+/**
+ * How quickly a tub of preferment warms on the bench, as an e-folding time.
+ * An estimate for about a kilo of batter in a bowl: in the first hour it
+ * covers roughly half the gap to the room, from 4 °C to about 12 °C in a
+ * 20 °C kitchen.
+ */
+export const PREFERMENT_WARMUP_HOURS = 1.5;
 
 
 /**

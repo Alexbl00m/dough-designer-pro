@@ -143,16 +143,56 @@ describe('the water', () => {
     expect(three.water.tempC).toBe(six.water.tempC);
   });
 
+  it('takes the fridge poolish out an hour before the mix, and counts it at the temperature it has reached', () => {
+    const b = calculateRecipe(fromLink(LINK_B));
+    const temper = b.timeline.find((s) => s.key === 'process.preferment.temper')!;
+    const mix = b.timeline.find((s) => s.phase === 'mix')!;
+    expect(temper.handsOn).toBe(true);
+    expect((Date.parse(mix.at) - Date.parse(temper.at)) / 60_000).toBe(60);
+    // An hour on a 20 °C bench takes a 4 °C poolish to about 12 °C.
+    expect(b.preferment!.mixTempC).toBeGreaterThan(10);
+    expect(b.preferment!.mixTempC).toBeLessThan(14);
+  });
+
   it('follows the classic rule, with the poolish at the temperature it comes in at', () => {
-    // Link A: DDT 20, a 22 °C room and flour, a DLX (4 °C friction), and a
-    // poolish straight from a 4 °C fridge: 4 × 20 − 22 − 22 − 4 − 4 = 28.
+    // Link A: DDT 20, a 22 °C room and flour, a DLX (4 °C friction), and the
+    // poolish after an hour on the bench: 4 × 20 − 22 − 22 − 4 − poolish.
     const a = calculateRecipe(fromLink(LINK_A));
     expect(a.water.factors).toBe(4);
-    expect(a.water.rawTempC).toBeCloseTo(28, 6);
-    // Link B: DDT 24, a 20 °C room and flour, mixing by hand: 96 − 20 − 20 − 2 − 4 = 50.
+    expect(a.water.rawTempC).toBeCloseTo(80 - 22 - 22 - 4 - a.preferment!.mixTempC, 6);
+    expect(a.water.clamped).toBe(false);
+  });
+
+  it('never asks for water hotter than 38 °C, and says where the dough lands instead', () => {
+    // Link B: DDT 24 in a 20 °C room by hand would take about 42 °C water.
     const b = calculateRecipe(fromLink(LINK_B));
-    expect(b.water.rawTempC).toBeCloseTo(50, 6);
-    expect(b.notes.some((n) => n.code === 'note.cold_preferment')).toBe(true);
+    expect(b.water.rawTempC).toBeGreaterThan(38);
+    expect(b.water.tempC).toBe(38);
+    expect(b.water.doughTempC).toBeGreaterThan(22);
+    expect(b.water.doughTempC).toBeLessThan(24);
+    expect(b.notes.some((n) => n.code === 'note.water_too_hot')).toBe(true);
+  });
+
+  it('keeps every style below 38 °C water, whatever the kitchen', async () => {
+    const { BREAD_STYLES } = await import('@/data/styles');
+    for (const style of BREAD_STYLES) {
+      for (const roomTemp of [14, 18, 22]) {
+        const r = calculateRecipe({
+          style,
+          ballWeight: style.defaults.ballWeight,
+          ballCount: style.defaults.ballCount,
+          totalTime: style.defaults.totalTime,
+          roomTemp,
+          coldHours: style.defaults.coldHours,
+          leavenType: style.defaults.leavenType,
+          yeastForm: 'instant',
+          mixing: 'hand',
+          desiredDoughTemp: style.defaults.doughTemp,
+          now,
+        });
+        expect(r.water.tempC, `${style.id} @ ${roomTemp} °C`).toBeLessThanOrEqual(38);
+      }
+    }
   });
 });
 

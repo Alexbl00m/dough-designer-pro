@@ -59,6 +59,16 @@ export function DoughTempCard({
         })}
       </p>
 
+      {water.clamped && (
+        <p className="mt-3 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm leading-relaxed">
+          {t('ddt.lands', {
+            water: n(water.tempC),
+            dough: n(water.doughTempC),
+            target: n(water.desiredDoughTempC),
+          })}
+        </p>
+      )}
+
       <p className="mt-3 flex gap-2 text-sm leading-relaxed text-muted-foreground">
         <Droplets className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
         <span>{t('ddt.explain')}</span>

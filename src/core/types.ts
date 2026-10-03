@@ -186,8 +186,10 @@ export interface PrefermentResult {
   tempC: number;
   coldHours: number;
   coldTempC: number;
-  /** Temperature it goes into the mix at — the fridge's, if it ends there. */
+  /** Temperature it goes into the mix at: after an hour on the bench, if it spent the night in the fridge. */
   mixTempC: number;
+  /** Hours out of the fridge before the mix, inside `coldHours`. */
+  temperHours: number;
   /** Yeast in the preferment, in the chosen form, % of the preferment's own flour. */
   yeastPct: number;
   /** The same as fresh yeast. */
@@ -242,6 +244,8 @@ export interface CalculationResults {
     flourTempC: number;
     /** The DDT the water temperature was solved for. */
     desiredDoughTempC: number;
+    /** Where the dough really lands with this water — off target only when the water was limited. */
+    doughTempC: number;
     /** Grams of ice to swap for water when the target is below fridge-cold tap water. */
     iceGrams: number;
   };

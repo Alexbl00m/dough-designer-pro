@@ -444,7 +444,9 @@ describe('calculateRecipe — guardrails', () => {
   it('warns when the water temperature had to be clamped', () => {
     const r = calculateRecipe(baseInputs({ roomTemp: 4, desiredDoughTemp: 35 }));
     if (r.water.clamped) {
-      expect(r.notes.some((n) => n.code === 'note.water_clamped')).toBe(true);
+      expect(
+        r.notes.some((n) => n.code === 'note.water_clamped' || n.code === 'note.water_too_hot'),
+      ).toBe(true);
     }
   });
 

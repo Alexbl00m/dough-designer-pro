@@ -18,10 +18,11 @@ import {
   HYBRID_SHARE,
   INOCULATION_HIGH,
   LEVAIN_SEED_SHARE,
+  PREFERMENT_TEMPER_HOURS,
+  PREFERMENT_WARMUP_HOURS,
   WATER_TEMP_MAX_C,
   WATER_TEMP_MIN_C,
   YEAST_CONVERSION,
-  YEAST_DANGER_TEMP_C,
   clamp,
   round,
 } from './constants';
@@ -599,12 +600,16 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     flourTempC: flourTemp,
     roomTempC: roomTemp,
     frictionC,
-    // A poolish straight out of the fridge brings the fridge's temperature
-    // into the mix, and the water has to make up for it.
+    // A poolish from the fridge brings its chill into the mix even after an
+    // hour on the bench, and the water has to make up for it.
     prefermentTempC: build?.mixTempC,
   });
   const waterTempC = clamp(rawTempC, WATER_TEMP_MIN_C, WATER_TEMP_MAX_C);
   const clampedWater = Math.abs(rawTempC - waterTempC) > 0.05;
+  // Where the dough really lands with the water it is given: the same rule,
+  // solved for the dough instead of the water.
+  const doughTempC =
+    (waterTempC + flourTemp + roomTemp + frictionC + (build ? build.mixTempC : 0)) / factors;
   const iceGrams = computeIceSplit(finalWater, waterTempC);
 
   // ── 8. Bulk / proof split ──
@@ -648,6 +653,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     prefermentHours: build?.hours,
     prefermentTempC: build?.tempC,
     prefermentColdHours: build?.coldHours,
+    prefermentTemperHours: build?.temperHours,
     prefermentType: preferment?.type,
     usesLevain: usesLevain && levainTotal > 0,
     levainHours: levainPeakHours,
@@ -696,7 +702,9 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       prefermentLeaveningPct: prefLeavening,
       prefermentReadyHours,
       prefermentYeastGrams: prefermentYeast,
-      prefermentColdTempC: build && build.coldHours > 0 ? build.coldTempC : undefined,
+      prefermentColdTempC: build && build.coldHours > 0 ? build.mixTempC : undefined,
+      doughTempC,
+      desiredDoughTempC: desiredDoughTemp,
     }),
   );
 
@@ -712,6 +720,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
           coldHours: build.coldHours,
           coldTempC: build.coldTempC,
           mixTempC: build.mixTempC,
+          temperHours: build.temperHours,
           yeastPct: round(prefFresh * YEAST_CONVERSION[yeastForm], 4),
           freshYeastPct: round(prefFresh, 4),
           leaveningPct: round(prefLeavening, 3),
@@ -735,6 +744,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       tempC: round(waterTempC, 1),
       rawTempC: round(rawTempC, 1),
       clamped: clampedWater,
+      doughTempC: round(doughTempC, 1),
       factors,
       frictionC,
       flourTempC: flourTemp,
@@ -803,12 +813,20 @@ function resolvePrefermentBuild(
   const hours = clamp(inputs.prefermentHours ?? spec.hours, 1, 96);
   const tempC = clamp(inputs.prefermentTemp ?? spec.temp_c ?? roomTemp, 2, 32);
   const coldHours = clamp(inputs.prefermentColdHours ?? spec.cold_hours ?? 0, 0, hours);
+  // A night in the fridge ends with an hour on the bench, which is how bakers
+  // do it: straight from the fridge the water would have to be far too hot.
+  // That hour stays inside the fridge time for the yeast — the tub is still
+  // cold for most of it, and the difference is a couple of percent of a dose.
+  const temperHours = coldHours >= PREFERMENT_TEMPER_HOURS + 1 ? PREFERMENT_TEMPER_HOURS : 0;
+  const warmed =
+    roomTemp - (roomTemp - coldTemp) * Math.exp(-temperHours / PREFERMENT_WARMUP_HOURS);
   return {
     hours,
     tempC,
     coldHours,
     coldTempC: coldTemp,
-    mixTempC: coldHours > 0 ? coldTemp : tempC,
+    temperHours,
+    mixTempC: round(coldHours > 0 ? warmed : tempC, 1),
   };
 }
 
@@ -900,18 +918,27 @@ interface NoteContext {
   prefermentLeaveningPct: number;
   prefermentReadyHours?: number;
   prefermentYeastGrams: number;
-  /** Set when the preferment comes into the mix straight from the fridge. */
+  /** Set when the preferment comes into the mix from the fridge: its temperature then. */
   prefermentColdTempC?: number;
+  doughTempC: number;
+  desiredDoughTempC: number;
 }
 
 function buildNotes(c: NoteContext): Note[] {
   const notes: Note[] = [];
 
   if (c.clampedWater) {
+    // Too hot is the case that bites: say where the dough lands with water a
+    // baker can actually use, and how to get closer to the target.
     notes.push({
-      code: 'note.water_clamped',
+      code: c.rawTempC > c.waterTempC ? 'note.water_too_hot' : 'note.water_clamped',
       severity: 'warn',
-      values: { raw: round(c.rawTempC, 1), used: round(c.waterTempC, 1) },
+      values: {
+        raw: round(c.rawTempC, 0),
+        used: round(c.waterTempC, 0),
+        dough: round(c.doughTempC, 1),
+        target: round(c.desiredDoughTempC, 1),
+      },
     });
   }
   if (c.iceGrams > 0) {
@@ -920,9 +947,6 @@ function buildNotes(c: NoteContext): Note[] {
       severity: 'tip',
       values: { grams: c.iceGrams, temp: round(c.waterTempC, 1) },
     });
-  }
-  if (c.waterTempC > YEAST_DANGER_TEMP_C) {
-    notes.push({ code: 'note.water_hot', severity: 'warn', values: { limit: YEAST_DANGER_TEMP_C } });
   }
 
   if (c.coldHours > 0) {
@@ -998,7 +1022,7 @@ function buildNotes(c: NoteContext): Note[] {
       values: { hours: c.prefermentReadyHours, planned: round(c.totalTime, 1) },
     });
   }
-  if (c.prefermentColdTempC !== undefined && c.rawTempC > 40) {
+  if (c.prefermentColdTempC !== undefined && c.rawTempC > 30) {
     notes.push({
       code: 'note.cold_preferment',
       severity: 'tip',

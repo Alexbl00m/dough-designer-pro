@@ -63,10 +63,13 @@ describe('a plan worked back from "ready by"', () => {
     expect(r.plan.startsInPast).toBe(false);
   });
 
-  it('puts an overnight poolish in the fridge as a step of its own', () => {
+  it('puts an overnight poolish in the fridge, and takes it out an hour before the mix', () => {
     const fridge = r.timeline.find((s) => s.key === 'process.preferment.fridge')!;
-    expect(fridge.durationMin / 60).toBeCloseTo(r.preferment!.coldHours, 1);
+    const temper = r.timeline.find((s) => s.key === 'process.preferment.temper')!;
     expect(fridge.handsOn).toBe(true);
+    expect(temper.handsOn).toBe(true);
+    expect(temper.durationMin).toBe(60);
+    expect((fridge.durationMin + temper.durationMin) / 60).toBeCloseTo(r.preferment!.coldHours, 1);
   });
 });
 
