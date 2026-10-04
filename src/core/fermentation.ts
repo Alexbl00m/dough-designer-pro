@@ -1,38 +1,42 @@
 /**
  * The fermentation model.
  *
- * Two ideas carry everything here:
+ * Two clocks, one per kind of leavening:
  *
- *  1. Fermentation *rate* follows a Q10 law — every 10 °C roughly doubles it.
- *  2. Total gas produced is rate × time. So to keep a dough "ready" at a
- *     different time or temperature, you scale the leavening dose by the
- *     inverse of the change in rate × time.
+ *  - A levain runs on the measured sourdough curve in `./growth`, with cold
+ *    hours converted by a dough Q10 validated against Full Proof Baking.
+ *  - Commercial yeast runs on TXCraig1's yeast model in `./yeast`, temperature
+ *    from Gänzle's growth-rate curve, fridge included.
  *
- * Everything else — cold retards, salt, sugar, hydration, fat — is a correction
- * on top of those two.
+ * Both answer the same two questions — how much for this time, how long for
+ * this much — and both are monotone: more leavening is less time, warmer is
+ * less time. Salt, sugar, hydration and fat are corrections on top.
  */
 
 import {
-  CORRECTION_CLAMP,
-  CORRECTION_SLOPE,
   DEFAULT_COLD_TEMP_C,
   FRIDGE_COOLDOWN_HOURS,
+  HYBRID_SHARE,
   INOCULATION_MAX,
   INOCULATION_MIN,
   Q10,
   Q10_STARTER,
   STARTER_PEAK_REF_HOURS,
   STARTER_PEAK_REF_TEMP_C,
-  YEAST_CONVERSION,
-  YEAST_PCT_MAX,
-  YEAST_PCT_MIN,
   clamp,
   rateRatio,
   round,
 } from './constants';
 import type { YeastForm } from './constants';
 import type { LeavenType } from './types';
-import { leavenPctForTotal, starterToFreshYeastPct } from './growth';
+import { freshYeastToStarterPct, leavenPctForTotal } from './growth';
+import {
+  FRESH_YEAST_MAX_PCT,
+  FRESH_YEAST_MIN_PCT,
+  RIPE_PREFERMENT_POTENCY_PCT,
+  freshToForm,
+  freshYeastFor,
+} from './yeast';
 
 export interface RoomEquivInput {
   totalHours: number;
@@ -78,8 +82,11 @@ export function coldSlowdownFactor(roomTemp: number, coldTemp = DEFAULT_COLD_TEM
 }
 
 export interface YeastDoseInput {
-  /** Room-equivalent hours the dough will actually ferment, bulk plus proof. */
-  effectiveHours: number;
+  /** Hours from mix to bake, fridge included. */
+  totalHours: number;
+  /** Hours of the total spent in the fridge. */
+  coldHours?: number;
+  coldTemp?: number;
   roomTemp: number;
   saltPct: number;
   sugarPct: number;
@@ -87,64 +94,79 @@ export interface YeastDoseInput {
   fatPct: number;
   yeastForm: YeastForm;
   leavenType: LeavenType;
-  /** A preferment already carries part of the leavening; discount the final dose. */
+  /** Share of the total flour that arrives in a ripe preferment, %. */
   prefermentFlourPct?: number;
-  /** Scales the whole clock for this style. See `BreadStyle.fermentFactor`. */
-  fermentFactor?: number;
+  /**
+   * Leavening the ripe preferment carries in, as fresh yeast on the total
+   * flour. Defaults to what a just-ripe preferment of that size carries.
+   */
+  prefermentLeaveningPct?: number;
+  /** A final-dough dose the baker has fixed, as fresh yeast; overrides the clock. */
+  fixedFreshPct?: number;
 }
 
 export interface YeastDose {
-  /** Final dose in the requested yeast form, % of total flour. */
+  /** Yeast added to the final dough, in the requested form, % of total flour. */
   pct: number;
+  /** The same as fresh yeast. */
   freshPct: number;
-  /** What this dose is worth as ripe starter — the currency both leavens share. */
+  /** What the schedule needs from commercial yeast before the preferment's share, fresh. */
+  neededFreshPct: number;
+  /** The fresh dose expressed as ripe starter, for comparing the two leavens. */
   starterEquivalentPct: number;
   clamped: boolean;
+  /** Which practical limit the dose ran into: too short a schedule, or too long. */
+  limit?: 'max' | 'min';
 }
 
 /**
- * Commercial yeast dose for a target time, in the requested form.
+ * Commercial yeast for the final dough, in the requested form.
  *
- * Runs the same growth curve as sourdough and converts at the end, so the two
- * leavening sliders always tell the same story: more leavening is less time,
- * warmer is less time, and switching from starter to yeast does not silently
- * change the schedule.
+ * Runs the yeast clock (`./yeast`) for the whole schedule from mix to bake,
+ * then takes off whatever a ripe preferment already brings. In hybrid mode
+ * the levain carries the other half of the leavening.
  */
 export function computeYeastDose(input: YeastDoseInput): YeastDose {
   if (input.leavenType === 'sourdough') {
-    return { pct: 0, freshPct: 0, starterEquivalentPct: 0, clamped: false };
+    return { pct: 0, freshPct: 0, neededFreshPct: 0, starterEquivalentPct: 0, clamped: false };
   }
 
-  const clock = {
-    tempC: input.roomTemp,
-    saltPct: input.saltPct,
-    sugarPct: input.sugarPct,
-    hydrationPct: input.hydrationPct,
-    fatPct: input.fatPct,
-  };
+  const share = clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
+  const needed =
+    freshYeastFor(
+      {
+        totalHours: input.totalHours,
+        roomTempC: input.roomTemp,
+        coldHours: input.coldHours,
+        coldTempC: input.coldTemp,
+      },
+      {
+        saltPct: input.saltPct,
+        sugarPct: input.sugarPct,
+        hydrationPct: input.hydrationPct,
+        fatPct: input.fatPct,
+        prefermentShare: share,
+      },
+    ) * (input.leavenType === 'hybrid' ? HYBRID_SHARE : 1);
 
-  const hours = input.effectiveHours / (input.fermentFactor ?? 1);
-  let starterEquivalent = leavenPctForTotal(hours, clock);
+  const carried = input.prefermentLeaveningPct ?? share * RIPE_PREFERMENT_POTENCY_PCT;
+  const raw = input.fixedFreshPct ?? needed - carried;
 
-  // A preferment arrives already full of active yeast, so the final dough needs
-  // less. In a logarithmic world that is a subtraction of leavening power, not
-  // a multiplier on the dose.
-  const prefermentShare = clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
-  starterEquivalent *= 1 - 0.6 * prefermentShare;
+  // A preferment that already carries the whole load needs nothing added.
+  if (raw <= 0) {
+    return { pct: 0, freshPct: 0, neededFreshPct: needed, starterEquivalentPct: 0, clamped: false };
+  }
 
-  // In hybrid mode the levain supplies half the leavening power; cell counts
-  // add, so each side carries half the starter-equivalent dose.
-  if (input.leavenType === 'hybrid') starterEquivalent *= 0.5;
-
-  const freshRaw = starterToFreshYeastPct(starterEquivalent);
-  const dosed = freshRaw * YEAST_CONVERSION[input.yeastForm];
-  const pct = clamp(dosed, YEAST_PCT_MIN, YEAST_PCT_MAX);
+  const fresh = clamp(raw, FRESH_YEAST_MIN_PCT, FRESH_YEAST_MAX_PCT);
+  const limit = raw > FRESH_YEAST_MAX_PCT ? 'max' : raw < FRESH_YEAST_MIN_PCT ? 'min' : undefined;
 
   return {
-    pct: round(pct, 4),
-    freshPct: round(freshRaw, 4),
-    starterEquivalentPct: round(starterEquivalent, 2),
-    clamped: Math.abs(pct - dosed) > 1e-9,
+    pct: round(freshToForm(fresh, input.yeastForm), 4),
+    freshPct: round(fresh, 4),
+    neededFreshPct: needed,
+    starterEquivalentPct: round(freshYeastToStarterPct(fresh), 2),
+    clamped: limit !== undefined,
+    limit,
   };
 }
 

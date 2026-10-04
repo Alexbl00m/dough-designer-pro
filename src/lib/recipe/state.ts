@@ -36,6 +36,17 @@ export interface RecipeParams {
   mixing: MixingMethod;
   starterHydration: number;
   usePreferment: boolean;
+  /** Preferment build, fridge included, in hours. */
+  prefermentHours: number;
+  /** Warm part of the preferment build, °C; null follows the style (or the room). */
+  prefermentTemp: number | null;
+  /** Hours at the end of the preferment build spent in the fridge. */
+  prefermentColdHours: number;
+  /**
+   * Fresh yeast added to the final dough, % of total flour, when the dose is
+   * what the baker holds. Null until they take hold of it.
+   */
+  yeastPct: number | null;
   percentBasis: PercentBasis;
 }
 
@@ -68,6 +79,10 @@ export function paramsForStyle(style: BreadStyle): RecipeParams {
     mixing: 'hand',
     starterHydration: 100,
     usePreferment: true,
+    prefermentHours: style.preferment?.hours ?? 0,
+    prefermentTemp: null,
+    prefermentColdHours: style.preferment?.cold_hours ?? 0,
+    yeastPct: null,
     percentBasis: 'total',
   };
 }
@@ -97,6 +112,10 @@ const KEYS: Record<keyof RecipeParams, string> = {
   mixing: 'm',
   starterHydration: 'sh',
   usePreferment: 'pf',
+  prefermentHours: 'ph',
+  prefermentTemp: 'pt',
+  prefermentColdHours: 'pc',
+  yeastPct: 'yp',
   percentBasis: 'pb',
 };
 
@@ -133,7 +152,12 @@ const NUMERIC: (keyof RecipeParams)[] = [
   'coldTemp',
   'doughTemp',
   'starterHydration',
+  'prefermentHours',
+  'prefermentColdHours',
 ];
+
+/** Numbers that may also be unset, meaning "follow the default". */
+const NULLABLE: (keyof RecipeParams)[] = ['flourTemp', 'prefermentTemp', 'yeastPct'];
 
 const ENUMS: Partial<Record<keyof RecipeParams, readonly string[]>> = {
   scaleMode: ['pieces', 'flour', 'dough'],
@@ -166,10 +190,11 @@ export function queryToParams(query: string): RecipeParams | null {
     if (Number.isFinite(value)) (params[field] as number) = value;
   }
 
-  const flourTemp = search.get(KEYS.flourTemp);
-  if (flourTemp !== null) {
-    const value = Number(flourTemp);
-    params.flourTemp = Number.isFinite(value) ? value : null;
+  for (const field of NULLABLE) {
+    const raw = search.get(KEYS[field]);
+    if (raw === null) continue;
+    const value = Number(raw);
+    (params[field] as number | null) = Number.isFinite(value) ? value : null;
   }
 
   for (const [field, allowed] of Object.entries(ENUMS) as [keyof RecipeParams, readonly string[]][]) {

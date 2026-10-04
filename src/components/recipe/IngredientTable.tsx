@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import type { IngredientType } from '@/data/styles';
 import type { RecipeSection } from '@/core/types';
 import { useI18n } from '@/i18n';
-import { formatGrams, formatPercent } from '@/lib/format';
+import { formatGrams, formatPercent, formatSectionMeta } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 /**
@@ -46,7 +46,7 @@ export function IngredientTable({ section, subdued, percentBasis }: IngredientTa
         <div className="flex items-center gap-2">
           {section.meta && (
             <Badge variant="outline" className="text-xs font-normal tabular">
-              {t('section.meta', { hours: section.meta.hours, temp: section.meta.tempC })}
+              {formatSectionMeta(section.meta, t)}
             </Badge>
           )}
           <span className="text-sm tabular text-muted-foreground">

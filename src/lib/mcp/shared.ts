@@ -47,7 +47,23 @@ export const recipeInputSchema = {
     .number()
     .positive()
     .optional()
-    .describe("Fermentation hours for the final dough. Defaults to the style's own."),
+    .describe(
+      "Fermentation hours for the final dough, mix to bake, not counting any preferment. Defaults to the style's own.",
+    ),
+  preferment_hours: z
+    .number()
+    .positive()
+    .optional()
+    .describe("Preferment build in hours, fridge time included. Defaults to the style's own."),
+  preferment_temp: z
+    .number()
+    .optional()
+    .describe('Temperature of the warm part of the preferment build, °C. Defaults to the style (or the room).'),
+  preferment_cold_hours: z
+    .number()
+    .min(0)
+    .optional()
+    .describe("Hours at the end of the preferment build spent in the fridge. Defaults to the style's own."),
   room_temp: z.number().optional().describe("Room temperature in °C. Defaults to the style's own."),
   cold_hours: z.number().min(0).optional().describe('Hours of the total spent in the fridge.'),
   cold_temp: z.number().optional().describe('Fridge temperature in °C. Default 4.'),
@@ -81,7 +97,15 @@ export const recipeInputSchema = {
   start_time: z
     .string()
     .optional()
-    .describe('ISO timestamp for the start of the schedule. Defaults to now.'),
+    .describe(
+      'ISO timestamp when the plan starts — the first step, preferment or levain build included. Defaults to now.',
+    ),
+  ready_at: z
+    .string()
+    .optional()
+    .describe(
+      'ISO timestamp when the bake should be finished. The whole plan is laid out backwards from it. Takes precedence over start_time.',
+    ),
   language: languageSchema,
 };
 
@@ -106,9 +130,14 @@ export function resolveRecipe(input: RecipeToolInput): ResolvedRecipe | { error:
   const lang: Language = input.language ?? 'en';
   const d = style.defaults;
 
-  const startTime = input.start_time ? new Date(input.start_time) : new Date();
+  const now = new Date();
+  const startTime = input.start_time ? new Date(input.start_time) : now;
   if (Number.isNaN(startTime.getTime())) {
     return { error: `Invalid start_time: ${input.start_time}. Use an ISO timestamp.` };
+  }
+  const readyAt = input.ready_at ? new Date(input.ready_at) : undefined;
+  if (readyAt && Number.isNaN(readyAt.getTime())) {
+    return { error: `Invalid ready_at: ${input.ready_at}. Use an ISO timestamp.` };
   }
 
   const scaleMode = input.target_flour ? 'flour' : input.target_dough ? 'dough' : 'pieces';
@@ -136,7 +165,11 @@ export function resolveRecipe(input: RecipeToolInput): ResolvedRecipe | { error:
     flourTemp: input.flour_temp,
     starterHydration: input.starter_hydration,
     usePreferment: input.use_preferment,
-    startTime,
+    prefermentHours: input.preferment_hours,
+    prefermentTemp: input.preferment_temp,
+    prefermentColdHours: input.preferment_cold_hours,
+    plan: readyAt ? { mode: 'ready', at: readyAt } : { mode: 'start', at: startTime },
+    now,
   });
 
   return { style, results, t: createTranslator(lang), lang };
@@ -155,6 +188,7 @@ export function toReadable({ style, results, t }: ResolvedRecipe) {
     totals: results.totals,
     water: results.water,
     fermentation: results.fermentation,
+    preferment: results.preferment,
     params: results.params,
     sections: results.sections.map((section) => ({
       id: section.id,
@@ -181,6 +215,20 @@ export function toReadable({ style, results, t }: ResolvedRecipe) {
       text: t(note.code, note.values),
     })),
     ready_at: results.readyAt,
+    plan: {
+      starts_at: results.plan.startsAt,
+      mix_at: results.plan.mixAt,
+      ready_at: results.plan.readyAt,
+      span_hours: results.plan.spanHours,
+      ferment_hours: results.plan.fermentHours,
+      starts_in_past: results.plan.startsInPast,
+      earliest_ready_at: results.plan.earliestReadyAt,
+      night_steps: results.plan.nightSteps.map((i) => {
+        const step = results.timeline[i];
+        return { at: step.at, title: t(step.key, resolveTechnique(step.values, t)) };
+      }),
+      daytime_shift_minutes: results.plan.daytimeShiftMin,
+    },
   };
 }
 

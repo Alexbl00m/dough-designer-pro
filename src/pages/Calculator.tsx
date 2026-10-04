@@ -10,14 +10,16 @@ import { StyleSelector } from '@/components/StyleSelector';
 import { CalculatorInputs } from '@/components/CalculatorInputs';
 import { RecipeResults } from '@/components/RecipeResults';
 import { getStyleById } from '@/data/styles';
-import { calculateRecipe } from '@/core/calculations';
-import type { CalculationResults } from '@/core/types';
+import { round } from '@/core/constants';
+import type { CalculationResults, FermentDriver } from '@/core/types';
 import {
   paramsForStyle,
   paramsToQuery,
   queryToParams,
 } from '@/lib/recipe/state';
 import type { RecipeParams } from '@/lib/recipe/state';
+import { DEFAULT_PLAN, calculateWithPlan } from '@/lib/recipe/plan';
+import type { PlanState } from '@/lib/recipe/plan';
 import { saveBake } from '@/lib/recipe/storage';
 import { useT } from '@/i18n';
 import { useToast } from '@/hooks/use-toast';
@@ -37,9 +39,15 @@ export default function Calculator() {
     queryToParams(searchParams.toString()) ? 'recipe' : 'styles',
   );
 
-  // The schedule needs a concrete start; "now" is picked once so the timeline
-  // does not shift under the baker on every keystroke.
-  const [startTime, setStartTime] = useState(() => roundToNextQuarter(new Date()));
+  // The plan is pinned to a moment the baker chooses — by default the first
+  // six o'clock the recipe can still make. "Now" ticks once a minute, so a
+  // page left open never offers a start that has already passed.
+  const [plan, setPlan] = useState<PlanState>(DEFAULT_PLAN);
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
   const [savedId, setSavedId] = useState<string | null>(null);
   const mainRef = useRef<HTMLElement>(null);
 
@@ -72,6 +80,9 @@ export default function Calculator() {
         const next = { ...current, [key]: value };
         // Cold time can never outlast the ferment it sits inside.
         if (next.coldHours > next.totalTime) next.coldHours = next.totalTime;
+        if (next.prefermentColdHours > next.prefermentHours) {
+          next.prefermentColdHours = next.prefermentHours;
+        }
         return next;
       });
       setSavedId(null);
@@ -89,7 +100,7 @@ export default function Calculator() {
   const results: CalculationResults | null = useMemo(() => {
     if (!style || !params) return null;
     try {
-      return calculateRecipe({
+      return calculateWithPlan({
         style,
         scaleMode: params.scaleMode,
         ballWeight: params.ballWeight,
@@ -115,13 +126,39 @@ export default function Calculator() {
         starterHydration: params.starterHydration,
         percentBasis: params.percentBasis,
         usePreferment: params.usePreferment,
-        startTime,
-      });
+        prefermentHours: params.prefermentHours || undefined,
+        prefermentTemp: params.prefermentTemp ?? undefined,
+        prefermentColdHours: params.prefermentColdHours,
+        yeastPct: params.yeastPct ?? undefined,
+      }, plan, now);
     } catch (error) {
       console.error('Recipe calculation failed', error);
       return null;
     }
-  }, [style, params, startTime]);
+  }, [style, params, plan, now]);
+
+  // Switching which end of the clock the baker holds must not move the recipe:
+  // the new driving value starts where the old one had put it.
+  const handleDriverChange = useCallback(
+    (driver: FermentDriver) => {
+      setParams((current) => {
+        if (!current) return current;
+        const next = { ...current, driver };
+        if (results) {
+          const f = results.fermentation;
+          if (driver === 'dose') {
+            if (current.leavenType === 'commercial') next.yeastPct = round(f.freshYeastPct, 4);
+            else next.leavenPct = round(f.starterEquivalentPct, 1);
+          } else {
+            next.totalTime = Math.max(1, Math.round(f.totalHours * 2) / 2);
+          }
+        }
+        return next;
+      });
+      setSavedId(null);
+    },
+    [results],
+  );
 
   const shareUrl = useMemo(() => {
     if (!params) return '';
@@ -193,14 +230,12 @@ export default function Calculator() {
                   <CalculatorInputs
                     style={style}
                     params={params}
-                    computed={{
-                      totalHours: results?.fermentation.totalHours ?? params.totalTime,
-                      leavenPct: results?.fermentation.starterEquivalentPct ?? params.leavenPct,
-                    }}
+                    results={results}
                     onChange={handleParamChange}
+                    onDriverChange={handleDriverChange}
                     onReset={handleReset}
-                    startTime={startTime}
-                    onStartTimeChange={setStartTime}
+                    plan={plan}
+                    onPlanChange={setPlan}
                   />
 
                   <div className="no-print mt-6 flex flex-wrap gap-3">
@@ -232,7 +267,7 @@ export default function Calculator() {
                   <RecipeResults
                     style={style}
                     results={results}
-                    startIso={startTime.toISOString()}
+                    onPlanChange={setPlan}
                     shareUrl={shareUrl}
                     onSave={handleSave}
                     saved={savedId !== null}
@@ -266,12 +301,4 @@ export default function Calculator() {
       </div>
     </SidebarProvider>
   );
-}
-
-/** Bakers think in quarter hours, not in "14:37". */
-function roundToNextQuarter(date: Date): Date {
-  const rounded = new Date(date);
-  rounded.setSeconds(0, 0);
-  rounded.setMinutes(Math.ceil(rounded.getMinutes() / 15) * 15);
-  return rounded;
 }

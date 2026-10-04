@@ -230,14 +230,16 @@ var BREAD_STYLES = [
       bulk_ratio: 0.35,
       proof_ratio: 0.65
     },
+    // The home baker's poolish: mixed in the evening, two hours on the bench
+    // to wake the yeast, then the night in the fridge. With six hours for the
+    // dough that is the 24 h most pizza-with-poolish recipes are built around.
     preferment: {
       type: "poolish",
       flour_pct: 35,
       hydration_pct: 100,
-      hours: 16,
-      temp_c: 18,
-      yeast_fresh_pct: 0.6,
-      extras: [{ key: "ing.honey", pct: 1.7, type: "sugar" }]
+      hours: 18,
+      cold_hours: 16,
+      carriesSugar: true
     },
     process: {
       mixMin: 12,
@@ -277,8 +279,7 @@ var BREAD_STYLES = [
       flour_pct: 100,
       hydration_pct: 47,
       hours: 18,
-      temp_c: 16,
-      yeast_fresh_pct: 0.25
+      temp_c: 16
     },
     process: {
       mixMin: 18,
@@ -320,8 +321,7 @@ var BREAD_STYLES = [
       flour_pct: 50,
       hydration_pct: 100,
       hours: 14,
-      temp_c: 19,
-      yeast_fresh_pct: 0.3
+      temp_c: 19
     },
     process: {
       autolyseMin: 30,
@@ -367,8 +367,7 @@ var BREAD_STYLES = [
       flour_pct: 60,
       hydration_pct: 45,
       hours: 16,
-      temp_c: 18,
-      yeast_fresh_pct: 0.2
+      temp_c: 18
     },
     process: {
       mixMin: 12,
@@ -413,8 +412,7 @@ var BREAD_STYLES = [
       flour_pct: 40,
       hydration_pct: 100,
       hours: 14,
-      temp_c: 19,
-      yeast_fresh_pct: 0.3
+      temp_c: 19
     },
     process: {
       autolyseMin: 40,
@@ -457,8 +455,7 @@ var BREAD_STYLES = [
       flour_pct: 50,
       hydration_pct: 45,
       hours: 16,
-      temp_c: 18,
-      yeast_fresh_pct: 0.2
+      temp_c: 18
     },
     process: {
       mixMin: 12,
@@ -957,6 +954,7 @@ var BREAD_STYLES = [
     characteristicCount: 4
   }
 ];
+var isPizzaStyle = (style) => style.category === "pizza" || style.process.shapeKey === "process.shape.balls";
 var getStyleById = (id) => BREAD_STYLES.find((style) => style.id === id);
 
 // src/i18n/sv.ts
@@ -982,10 +980,10 @@ var sv = {
   "hero.scroll": "L\xE4s mer",
   "feature.title": "Precision m\xF6ter hantverk",
   "feature.lead": "Fr\xE5n napolitansk pizza till r\xE5gsurdeg \u2013 samma modell, olika f\xF6ruts\xE4ttningar.",
-  "feature.q10.title": "Q10-modellerad j\xE4st",
-  "feature.q10.body": "J\xE4stm\xE4ngden skalas mot verklig tid och temperatur. Kylj\xE4sning r\xE4knas om till rumsekvivalent tid, inklusive de timmar degen fortfarande \xE4r ljummen p\xE5 v\xE4g ner.",
-  "feature.timing.title": "Schema med klockslag",
-  "feature.timing.body": "Ange n\xE4r du vill s\xE4tta degen s\xE5 f\xE5r du varje moment p\xE5 klockslag \u2013 autolys, vikningar, kyl, formning och gr\xE4ddning.",
+  "feature.q10.title": "J\xE4st och surdeg p\xE5 var sin kurva",
+  "feature.q10.body": "J\xE4sten f\xF6ljer TXCraig1:s modell med G\xE4nzles temperaturkurva, surdegen en m\xE4tt j\xE4sningstabell. Kyltid r\xE4knas om p\xE5 varje kurva, inklusive timmarna degen \xE4r ljummen p\xE5 v\xE4g ner.",
+  "feature.timing.title": "Klar n\xE4r du vill",
+  "feature.timing.body": "S\xE4g n\xE4r du vill vara klar s\xE5 r\xE4knas hela planen bakl\xE4nges \u2013 f\xF6rj\xE4sning, vikningar, kyl, formning och gr\xE4ddning \u2013 och du varnas f\xF6r moment mitt i natten.",
   "feature.styles.title": "{n} stilar",
   "feature.styles.body": "Pizza, br\xF6d, rika degar och f\xF6rj\xE4sningar. Poolish, biga och levain r\xE4knas av fr\xE5n huvuddegen automatiskt.",
   "feature.ddt.title": "DDT-vattentemperatur",
@@ -1042,8 +1040,15 @@ var sv = {
   "clock.bulk": "{hours} h bulk",
   "clock.slower": "Salt, socker, vatten och fett i det h\xE4r receptet drar ut klockan med {pct}%.",
   "clock.faster": "Salt, socker, vatten och fett i det h\xE4r receptet kortar klockan med {pct}%.",
-  "clock.yeastEquivalent": "{yeast}% {form} ({grams} g) motsvarar {starter}% mogen surdeg i j\xE4skraft. J\xE4st och surdeg g\xE5r p\xE5 samma klocka \u2013 byter du j\xE4smedel \xE4ndras inte schemat.",
   "clock.source": "Kurvan \xE4r interpolerad ur en m\xE4tt tabell \xF6ver bulktider vid \xE5tta temperaturer och \xE5tta surdegsm\xE4ngder. Temperaturberoendet \xE4r inte ett enda Q10: brant i kylan, omkring 3 vid rumstemperatur, och planar ut n\xE4ra j\xE4stens optimum runt 29 \xB0C.",
+  "yeastClock.title": "J\xE4stklockan",
+  "yeastClock.lead": "J\xE4st f\xF6ljer inte surdegens kurva. Dubblar du j\xE4sten g\xE5r det ungef\xE4r en tredjedel fortare; halverar du den tar det ungef\xE4r h\xE4lften till. Varmare g\xE5r fortare \u2013 i kylen n\xE4stan tio g\xE5nger l\xE5ngsammare \xE4n vid 21 \xB0C.",
+  "yeastClock.dose": "{pct}% {form}",
+  "yeastClock.hours": "{hours} h",
+  "yeastClock.table": "J\xE4st f\xF6r tid och temperatur",
+  "yeastClock.tableLead": "{form} i % av mj\xF6let f\xF6r en direktdeg med det h\xE4r receptets salt, socker, vatten och fett, hela tiden i rumstemperatur. Ditt l\xE4ge \xE4r markerat.",
+  "yeastClock.carried": "F\xF6rj\xE4sningen b\xE4r motsvarande {pct}% f\xE4rsk j\xE4st r\xE4knat p\xE5 allt mj\xF6l.",
+  "yeastClock.source": "Modell: TXCraig1:s j\xE4stmodell (pizzamaking.com) med G\xE4nzles temperaturkurva. Ankare: 0,048% instant \xE4r klar p\xE5 12 h vid 21 \xB0C. Poolish kalibrerad mot tumregeln 0,1% f\xF6r 12\u201315 h och 1,5% f\xF6r 3 h, biga mot Giorillis 1% f\xF6r 18 h vid 18 \xB0C.",
   "field.driver": "Vad styr du?",
   "field.driver.time": "Jag v\xE4ljer tiden",
   "field.driver.dose": "Jag v\xE4ljer m\xE4ngden",
@@ -1051,6 +1056,42 @@ var sv = {
   "field.leavenPct": "M\xE4ngd j\xE4smedel",
   "field.leavenPct.help": "Mogen levain i procent av degens mj\xF6l \u2013 siffran recept menar med \u201Cinokulering\u201D. J\xE4st r\xE4knas om till samma skala.",
   "field.computedTime": "Ber\xE4knad j\xE4sningstid",
+  "params.plan": "Planering",
+  "plan.mode.ready": "Klar till",
+  "plan.mode.start": "B\xF6rja",
+  "plan.when.ready": "N\xE4r ska det vara klart?",
+  "plan.when.start": "N\xE4r b\xF6rjar du?",
+  "plan.auto.ready": "F\xF6rslag: f\xF6rsta klockan 18 som receptet hinner till. V\xE4lj en egen tid s\xE5 ligger den fast.",
+  "plan.auto.start": "F\xF6rslag: nu. V\xE4lj en egen tid s\xE5 ligger den fast.",
+  "plan.reset": "Tillbaka till f\xF6rslaget",
+  "plan.startsAt": "B\xF6rja",
+  "plan.mixAt": "Blanda degen",
+  "plan.readyAt": "Klart",
+  "plan.span": "Hela processen",
+  "plan.fermentSplit": "{type} {pref} h + deg {dough} h = {total} h j\xE4sning",
+  "plan.past": "Hinner inte: f\xF6r att vara klar {ready} skulle du ha beh\xF6vt b\xF6rja {start}.",
+  "plan.past.fix": "Klar tidigast {time}",
+  "plan.night": "{count} moment hamnar mellan 23 och 06 \u2013 f\xF6rst {time}: {step}.",
+  "plan.night.fixReady": "Klar {time} i st\xE4llet",
+  "plan.night.fixStart": "B\xF6rja {time} i st\xE4llet",
+  "plan.night.none": "Ingen tid inom ett dygn h\xE5ller alla moment p\xE5 dagen. Korta j\xE4sningen eller l\xE4gg en del av den i kylen.",
+  "field.preferment.title": "{type}",
+  "field.prefermentHours": "Tid f\xF6r {type}",
+  "field.prefermentHours.help": "Hela f\xF6rj\xE4sningen, fr\xE5n blandning tills den g\xE5r in i degen \u2013 kyltiden inr\xE4knad.",
+  "field.prefermentTemp": "Temperatur",
+  "field.prefermentTemp.help": "D\xE4r den st\xE5r innan den eventuellt g\xE5r in i kylen. F\xF6ljer rumstemperaturen tills du \xE4ndrar den.",
+  "field.prefermentTemp.room": "Rumstemperatur: {value}",
+  "field.prefermentColdHours": "Varav i kyl",
+  "field.prefermentColdHours.help": "De sista timmarna st\xE5r den i kylen, som en poolish \xF6ver natten hemma. J\xE4sten r\xE4knas om efter det.",
+  "field.prefermentYeast": "J\xE4st i {type}: {pct}% {form} \xB7 {grams} g",
+  "field.prefermentYeast.help": "R\xE4knas ut s\xE5 att den \xE4r mogen precis n\xE4r degen ska blandas. Kortare eller kallare kr\xE4ver mer j\xE4st.",
+  "field.totalTime.dough": "Degens j\xE4sningstid",
+  "field.totalTime.dough.help": "Fr\xE5n blandning till gr\xE4ddning \u2013 efter f\xF6rj\xE4sningen, som r\xE4knas f\xF6r sig ovan.",
+  "field.yeastPct": "J\xE4st i huvuddegen",
+  "field.yeastPct.help": "I den j\xE4stform du valt, r\xE4knat p\xE5 totalt mj\xF6l. Tiden r\xE4knas ut fr\xE5n den.",
+  "field.computedYeast": "J\xE4st i huvuddegen",
+  "field.computedYeast.help": "Det som beh\xF6vs f\xF6r din tid och temperatur, efter det f\xF6rj\xE4sningen redan b\xE4r.",
+  "field.computedYeast.none": "Ingen \u2013 f\xF6rj\xE4sningen r\xE4cker",
   "field.hydration": "Hydrering",
   "field.hydration.help": "Vatten i procent av mj\xF6lvikten.",
   "field.salt": "Salt",
@@ -1088,8 +1129,6 @@ var sv = {
   "field.starterHydration.help": "100% = lika delar mj\xF6l och vatten. Stiv levain ligger p\xE5 50\u201360%.",
   "field.usePreferment": "Anv\xE4nd {type}",
   "field.usePreferment.help": "St\xE4ng av f\xF6r att g\xF6ra samma stil som direktdeg.",
-  "field.startTime": "Starttid",
-  "field.startTime.help": "N\xE4r du blandar degen. Schemat r\xE4knas ut fr\xE5n den tiden.",
   "field.recommended": "Rekommenderat: {value}",
   "field.styleDefault": "Stilens standard: {value}",
   "unit.ball": "boll",
@@ -1135,6 +1174,7 @@ var sv = {
   "recipe.proof": "Slutj\xE4sning",
   "recipe.coldRetard": "Kylj\xE4sning",
   "recipe.yeast": "J\xE4st",
+  "recipe.yeastTotal": "J\xE4st totalt",
   "recipe.inoculation": "Inokulering",
   "recipe.roomEquiv": "Rumsekvivalent tid",
   "recipe.readyAt": "Klart {time}",
@@ -1148,11 +1188,13 @@ var sv = {
   "section.biga": "Biga",
   "section.levain": "Levain (surdeg)",
   "section.meta": "{hours} h vid {temp} \xB0C",
+  "section.metaCold": "{warm} h vid {temp} \xB0C + {cold} h i kyl",
   // ── DDT card ──
   "ddt.title": "Vattentemperatur",
   "ddt.formula": "{factors} \xD7 {ddt} \u2212 mj\xF6l {flour} \u2212 rum {room} \u2212 friktion {friction}{preferment} = {result} \xB0C",
   "ddt.prefermentTerm": " \u2212 f\xF6rj\xE4sning {temp}",
   "ddt.ice": "Byt {grams} g av vattnet mot is f\xF6r att komma ner till {temp} \xB0C.",
+  "ddt.lands": "Med {water} \xB0C vatten landar degen p\xE5 ungef\xE4r {dough} \xB0C i st\xE4llet f\xF6r {target} \xB0C.",
   "ddt.explain": "Blandningen v\xE4rmer degen och vatten \xE4r det enda du enkelt kan tempera, s\xE5 det f\xE5r b\xE4ra hela korrigeringen. Att tr\xE4ffa degtemperaturen betyder mer \xE4n att f\xF6lja klockan: 2 \xB0C varmare deg j\xE4ser ungef\xE4r 15% snabbare.",
   // ── Sourdough panel ──
   "sd.title": "Surdeg",
@@ -1189,9 +1231,7 @@ var sv = {
   "yeast.factor": "\xD7{value}",
   // ── Timeline ──
   "timeline.now": "Nu",
-  "timeline.day": "Dag {n}",
   "timeline.duration": "{value}",
-  "timeline.dayBefore": "Dagen innan",
   "timeline.relative": "T{sign}{time}",
   "process.autolyse": "Autolys",
   "process.autolyse.body": "Blanda bara mj\xF6l och vatten och l\xE5t vila {minutes} min. Glutenet b\xF6rjar bygga sig sj\xE4lv utan kn\xE5dning.",
@@ -1220,6 +1260,8 @@ var sv = {
   "process.preheat.body": "F\xF6rv\xE4rm till {temp} \xB0C i minst {minutes} min, med sten eller gryta i ugnen.",
   "process.done": "Klart",
   "process.done.body": "L\xE5t svalna {minutes} min innan du sk\xE4r \u2013 krumman s\xE4tter sig medan br\xF6det kyler, och surdegsbr\xF6d som sk\xE4rs varmt blir degigt.",
+  "process.done.pizza": "Klart",
+  "process.done.pizza.body": "L\xE5t pizzan vila {minutes} min s\xE5 att osten s\xE4tter sig \u2013 sedan \xE4r det bara att sk\xE4ra och \xE4ta.",
   "process.preferment.poolish": "G\xF6r poolish",
   "process.preferment.poolish.body": "Blanda och l\xE5t st\xE5 {hours} h vid {temp} \xB0C tills den \xE4r bubblig och just b\xF6rjat sjunka.",
   "process.preferment.biga": "G\xF6r biga",
@@ -1228,6 +1270,16 @@ var sv = {
   "process.preferment.levain.body": "Blanda och l\xE5t st\xE5 {hours} h vid {temp} \xB0C.",
   "process.preferment.ready": "F\xF6rj\xE4sningen \xE4r klar",
   "process.preferment.ready.body": "Kupolen ska ha n\xE5tt toppen och doften vara syrlig och n\xF6tig.",
+  "process.preferment.poolish.cold": "G\xF6r poolish",
+  "process.preferment.poolish.cold.body": "Blanda och l\xE5t st\xE5 {hours} h vid {temp} \xB0C s\xE5 att j\xE4sten kommer ig\xE5ng. St\xE4ll den sedan i kylen.",
+  "process.preferment.biga.cold": "G\xF6r biga",
+  "process.preferment.biga.cold.body": "Blanda till en grov, torr deg och l\xE5t st\xE5 {hours} h vid {temp} \xB0C. St\xE4ll den sedan i kylen.",
+  "process.preferment.levain.cold": "G\xF6r levain",
+  "process.preferment.levain.cold.body": "Blanda och l\xE5t st\xE5 {hours} h vid {temp} \xB0C. St\xE4ll den sedan i kylen.",
+  "process.preferment.fridge": "In i kylen",
+  "process.preferment.fridge.body": "{hours} h vid {temp} \xB0C. F\xF6rj\xE4sningen mognar l\xE5ngsamt vidare och g\xE5r rakt in i degen n\xE4r det \xE4r dags.",
+  "process.preferment.temper": "Ta fram f\xF6rj\xE4sningen",
+  "process.preferment.temper.body": "St\xE4ll den framme {minutes} min innan du blandar s\xE5 att kylan g\xE5r ur den \u2013 direkt ur kylen skulle vattnet beh\xF6va vara alldeles f\xF6r varmt.",
   "process.levain.build": "Mata levainen",
   "process.levain.build.body": "Mata surdegen och l\xE5t den n\xE5 toppen \u2013 ungef\xE4r {hours} h vid {temp} \xB0C. Tiden g\xE4ller ditt rum: vid 18 \xB0C tar samma matning n\xE4stan dubbelt s\xE5 l\xE5ng tid som vid 26 \xB0C.",
   "process.shape.balls": "Bolla",
@@ -1345,11 +1397,18 @@ var sv = {
   // ── Notes ──
   "note.cold_clamped": "Kyltiden var l\xE4ngre \xE4n den totala tiden och har begr\xE4nsats till {hours} h.",
   "note.water_clamped": "Ber\xE4knad vattentemperatur ({raw} \xB0C) ligger utanf\xF6r praktiskt intervall och har justerats till {used} \xB0C. Degtemperaturen blir d\xE4rmed inte exakt din m\xE5ls\xE4ttning.",
+  "note.water_too_hot": "F\xF6r att n\xE5 {target} \xB0C skulle vattnet beh\xF6va vara {raw} \xB0C \u2013 f\xF6r varmt f\xF6r j\xE4sten. Anv\xE4nd h\xF6gst {used} \xB0C; degen landar d\xE5 p\xE5 ungef\xE4r {dough} \xB0C och kommer ig\xE5ng lite l\xE5ngsammare. F\xF6r en varmare deg: ta fram f\xF6rj\xE4sningen tidigare eller blanda i ett varmare rum.",
   "note.use_ice": "Byt {grams} g av vattnet mot is f\xF6r att n\xE5 {temp} \xB0C.",
-  "note.water_hot": "Vattnet \xE4r \xF6ver {limit} \xB0C. H\xE4ll aldrig det direkt p\xE5 j\xE4sten \u2013 blanda i mj\xF6let f\xF6rst.",
   "note.cold_retard": "Kylj\xE4sning: {cold} av {total} h ligger vid {coldTemp} \xB0C ({phase}). Det motsvarar {equiv} h i rumstemperatur, och j\xE4sten \xE4r doserad f\xF6r den siffran.",
   "note.yeast_clamped": "J\xE4stm\xE4ngden n\xE5dde modellens gr\xE4ns och stannar p\xE5 {pct}% ({grams} g). Justera tid eller temperatur ist\xE4llet.",
   "note.tiny_yeast": "Bara {grams} g j\xE4st. V\xE4g p\xE5 en 0,01-v\xE5g, eller l\xF6s upp en st\xF6rre m\xE4ngd i vatten och anv\xE4nd en del av l\xF6sningen.",
+  "note.yeast_fast": "Mycket j\xE4st \u2013 {pct}% f\xF6r {hours} h. Degen g\xE5r fort; g\xE5 efter hur den ser ut och k\xE4nns, inte efter klockan.",
+  "note.tiny_yeast_preferment": "Bara {grams} g j\xE4st i f\xF6rj\xE4sningen. V\xE4g p\xE5 en 0,01-v\xE5g, eller l\xF6s upp en st\xF6rre m\xE4ngd i vatten och anv\xE4nd en del av l\xF6sningen.",
+  "note.preferment_too_short": "F\xF6rj\xE4sningen hinner inte mogna p\xE5 {hours} h vid den h\xE4r temperaturen, inte ens med modellens st\xF6rsta j\xE4stm\xE4ngd. Ge den l\xE4ngre tid eller varmare.",
+  "note.preferment_enough": "F\xF6rj\xE4sningen b\xE4r hela j\xE4sningen \u2013 huvuddegen beh\xF6ver ingen extra j\xE4st.",
+  "note.preferment_carries": "F\xF6rj\xE4sningen b\xE4r en stor del av j\xE4sningen: huvuddegen f\xE5r {grams} g j\xE4st i st\xE4llet f\xF6r de {straight} g samma schema hade kr\xE4vt utan den.",
+  "note.preferment_strong": "F\xF6rj\xE4sningen ensam g\xF6r degen klar p\xE5 ungef\xE4r {hours} h \u2013 kortare \xE4n planerade {planned} h. Korta degens tid, s\xE4nk degtemperaturen eller l\xE5t degen st\xE5 en del av tiden i kyl.",
+  "note.cold_preferment": "F\xF6rj\xE4sningen har bara hunnit bli ungef\xE4r {temp} \xB0C n\xE4r den g\xE5r i degen, s\xE5 vattnet beh\xF6ver vara ljummet f\xF6r att degen ska n\xE5 r\xE4tt temperatur.",
   "note.time_too_long": "{hours} h vid {temp} \xB0C kr\xE4ver mindre j\xE4smedel \xE4n du kan v\xE4ga. S\xE4nk temperaturen, l\xE4gg en del av tiden i kyl, eller korta j\xE4sningen.",
   "note.very_fast": "Mycket j\xE4smedel ({pct}% levainekvivalent). Degen g\xE5r fort \u2013 g\xE5 efter hur den ser ut och k\xE4nns, inte efter klockan.",
   "note.levain_ratio": "Surdegsratio: {onFlour}% mogen levain p\xE5 mj\xF6let i degen \u2013 den siffran de flesta recept menar med \u201Cinokulering\u201D. Det \xE4r {grams} g levain vid {hydration}% hydrering, vilket motsvarar {inoculation}% av det totala mj\xF6let r\xE4knat som surdegens mj\xF6l.",
@@ -1415,10 +1474,10 @@ var en = {
   "hero.scroll": "Read on",
   "feature.title": "Precision meets craft",
   "feature.lead": "From Neapolitan pizza to rye sourdough \u2014 one model, different conditions.",
-  "feature.q10.title": "Q10-modelled yeast",
-  "feature.q10.body": "The dose scales to real time and temperature. Cold retards convert to room-equivalent hours, including the time the dough is still warm on its way down.",
-  "feature.timing.title": "A schedule with clock times",
-  "feature.timing.body": "Tell it when you start mixing and every step lands on the clock \u2014 autolyse, folds, fridge, shaping and bake.",
+  "feature.q10.title": "Yeast and sourdough, each on its own curve",
+  "feature.q10.body": "Yeast follows TXCraig1's model with G\xE4nzle's temperature curve; sourdough a measured fermentation table. Fridge time is converted on each curve, including the hours the dough is still warm on its way down.",
+  "feature.timing.title": "Ready when you want",
+  "feature.timing.body": "Say when you want to be done and the whole plan is worked backwards \u2014 preferment, folds, fridge, shaping and bake \u2014 with a warning for any step in the middle of the night.",
   "feature.styles.title": "{n} styles",
   "feature.styles.body": "Pizza, bread, enriched doughs and preferments. Poolish, biga and levain are subtracted from the final dough automatically.",
   "feature.ddt.title": "DDT water temperature",
@@ -1475,8 +1534,15 @@ var en = {
   "clock.bulk": "{hours} h bulk",
   "clock.slower": "This recipe's salt, sugar, water and fat stretch the clock by {pct}%.",
   "clock.faster": "This recipe's salt, sugar, water and fat compress the clock by {pct}%.",
-  "clock.yeastEquivalent": "{yeast}% {form} ({grams} g) is worth {starter}% ripe starter in leavening power. Yeast and sourdough ride the same clock, so switching leavening does not change the schedule.",
   "clock.source": "The curve is interpolated from a measured table of bulk times across eight temperatures and eight starter doses. The temperature dependence is not a single Q10: steep in the cold, around 3 at room temperature, flattening near the yeast optimum around 29 \xB0C.",
+  "yeastClock.title": "The yeast clock",
+  "yeastClock.lead": "Yeast does not follow the sourdough curve. Double it and the dough is about a third faster; halve it and it takes about half as long again. Warmer is faster \u2013 the fridge is nearly ten times slower than 21 \xB0C.",
+  "yeastClock.dose": "{pct}% {form}",
+  "yeastClock.hours": "{hours} h",
+  "yeastClock.table": "Yeast for time and temperature",
+  "yeastClock.tableLead": "{form} as % of flour for a straight dough with this recipe's salt, sugar, water and fat, at room temperature throughout. Your setting is highlighted.",
+  "yeastClock.carried": "The preferment carries the equivalent of {pct}% fresh yeast on all the flour.",
+  "yeastClock.source": "Model: TXCraig1's yeast model (pizzamaking.com) with G\xE4nzle's temperature curve. Anchor: 0.048% instant is ready in 12 h at 21 \xB0C. Poolish calibrated on the rule of thumb \u2013 0.1% for 12\u201315 h, 1.5% for 3 h \u2013 and biga on Giorilli's 1% for 18 h at 18 \xB0C.",
   "field.driver": "What are you holding?",
   "field.driver.time": "I choose the time",
   "field.driver.dose": "I choose the amount",
@@ -1484,6 +1550,42 @@ var en = {
   "field.leavenPct": "Leavening amount",
   "field.leavenPct.help": 'Ripe levain as a percentage of the dough flour \u2014 the figure recipes mean by "inoculation". Yeast is converted to the same scale.',
   "field.computedTime": "Calculated fermentation time",
+  "params.plan": "Plan",
+  "plan.mode.ready": "Ready by",
+  "plan.mode.start": "Start at",
+  "plan.when.ready": "When should it be ready?",
+  "plan.when.start": "When do you start?",
+  "plan.auto.ready": "Suggested: the first 6 pm the recipe can make. Pick your own time and it stays put.",
+  "plan.auto.start": "Suggested: now. Pick your own time and it stays put.",
+  "plan.reset": "Back to the suggestion",
+  "plan.startsAt": "Start",
+  "plan.mixAt": "Mix the dough",
+  "plan.readyAt": "Ready",
+  "plan.span": "Whole process",
+  "plan.fermentSplit": "{type} {pref} h + dough {dough} h = {total} h of fermentation",
+  "plan.past": "Not enough time: to be ready {ready} you would have had to start {start}.",
+  "plan.past.fix": "Earliest ready {time}",
+  "plan.night": "{count} steps fall between 11 pm and 6 am \u2013 the first at {time}: {step}.",
+  "plan.night.fixReady": "Ready {time} instead",
+  "plan.night.fixStart": "Start {time} instead",
+  "plan.night.none": "No time within a day keeps every step in daylight hours. Shorten the ferment or move part of it into the fridge.",
+  "field.preferment.title": "{type}",
+  "field.prefermentHours": "{type} time",
+  "field.prefermentHours.help": "The whole preferment, from mixing it until it goes into the dough \u2013 fridge time included.",
+  "field.prefermentTemp": "Temperature",
+  "field.prefermentTemp.help": "Where it stands before it goes into the fridge, if it does. Follows the room until you change it.",
+  "field.prefermentTemp.room": "Room temperature: {value}",
+  "field.prefermentColdHours": "Of which in the fridge",
+  "field.prefermentColdHours.help": "The last hours are spent in the fridge, like an overnight poolish at home. The yeast is worked out for it.",
+  "field.prefermentYeast": "Yeast in the {type}: {pct}% {form} \xB7 {grams} g",
+  "field.prefermentYeast.help": "Worked out so it is ripe just as the dough is mixed. Shorter or colder takes more yeast.",
+  "field.totalTime.dough": "The dough's fermentation",
+  "field.totalTime.dough.help": "From mixing to baking \u2013 after the preferment, which is counted on its own above.",
+  "field.yeastPct": "Yeast in the final dough",
+  "field.yeastPct.help": "In the yeast form you chose, on total flour. The time is worked out from it.",
+  "field.computedYeast": "Yeast in the final dough",
+  "field.computedYeast.help": "What your time and temperature need, after what the preferment already carries.",
+  "field.computedYeast.none": "None \u2013 the preferment is enough",
   "field.hydration": "Hydration",
   "field.hydration.help": "Water as a percentage of flour weight.",
   "field.salt": "Salt",
@@ -1521,8 +1623,6 @@ var en = {
   "field.starterHydration.help": "100% means equal flour and water. A stiff levain sits at 50\u201360%.",
   "field.usePreferment": "Use {type}",
   "field.usePreferment.help": "Turn off to make the same style as a straight dough.",
-  "field.startTime": "Start time",
-  "field.startTime.help": "When you mix the dough. The schedule is built from that moment.",
   "field.recommended": "Recommended: {value}",
   "field.styleDefault": "Style default: {value}",
   "unit.ball": "ball",
@@ -1568,6 +1668,7 @@ var en = {
   "recipe.proof": "Final proof",
   "recipe.coldRetard": "Cold retard",
   "recipe.yeast": "Yeast",
+  "recipe.yeastTotal": "Total yeast",
   "recipe.inoculation": "Inoculation",
   "recipe.roomEquiv": "Room-equivalent time",
   "recipe.readyAt": "Ready {time}",
@@ -1581,11 +1682,13 @@ var en = {
   "section.biga": "Biga",
   "section.levain": "Levain",
   "section.meta": "{hours} h at {temp} \xB0C",
+  "section.metaCold": "{warm} h at {temp} \xB0C + {cold} h in the fridge",
   // ── DDT card ──
   "ddt.title": "Water temperature",
   "ddt.formula": "{factors} \xD7 {ddt} \u2212 flour {flour} \u2212 room {room} \u2212 friction {friction}{preferment} = {result} \xB0C",
   "ddt.prefermentTerm": " \u2212 preferment {temp}",
   "ddt.ice": "Swap {grams} g of the water for ice to reach {temp} \xB0C.",
+  "ddt.lands": "With {water} \xB0C water the dough lands at about {dough} \xB0C instead of {target} \xB0C.",
   "ddt.explain": "Mixing heats the dough, and water is the only ingredient you can easily temper, so it absorbs the whole correction. Hitting the dough temperature matters more than watching the clock: a dough 2 \xB0C warmer ferments about 15% faster.",
   // ── Sourdough panel ──
   "sd.title": "Sourdough",
@@ -1622,9 +1725,7 @@ var en = {
   "yeast.factor": "\xD7{value}",
   // ── Timeline ──
   "timeline.now": "Now",
-  "timeline.day": "Day {n}",
   "timeline.duration": "{value}",
-  "timeline.dayBefore": "The day before",
   "timeline.relative": "T{sign}{time}",
   "process.autolyse": "Autolyse",
   "process.autolyse.body": "Mix flour and water only, then rest {minutes} min. Gluten starts building itself without kneading.",
@@ -1653,6 +1754,8 @@ var en = {
   "process.preheat.body": "Preheat to {temp} \xB0C for at least {minutes} min, with the stone or pot inside.",
   "process.done": "Done",
   "process.done.body": "Cool {minutes} min before slicing \u2014 the crumb sets as the loaf cools, and sourdough cut warm turns gummy.",
+  "process.done.pizza": "Ready",
+  "process.done.pizza.body": "Let the pizza rest {minutes} min so the cheese sets \u2013 then slice and eat.",
   "process.preferment.poolish": "Build the poolish",
   "process.preferment.poolish.body": "Mix and leave {hours} h at {temp} \xB0C until bubbly and just starting to fall.",
   "process.preferment.biga": "Build the biga",
@@ -1661,6 +1764,16 @@ var en = {
   "process.preferment.levain.body": "Mix and leave {hours} h at {temp} \xB0C.",
   "process.preferment.ready": "Preferment ready",
   "process.preferment.ready.body": "The dome should have peaked and the smell be tangy and nutty.",
+  "process.preferment.poolish.cold": "Build the poolish",
+  "process.preferment.poolish.cold.body": "Mix and leave {hours} h at {temp} \xB0C to get the yeast going, then put it in the fridge.",
+  "process.preferment.biga.cold": "Build the biga",
+  "process.preferment.biga.cold.body": "Mix to a shaggy, dry dough and leave {hours} h at {temp} \xB0C, then put it in the fridge.",
+  "process.preferment.levain.cold": "Build the levain",
+  "process.preferment.levain.cold.body": "Mix and leave {hours} h at {temp} \xB0C, then put it in the fridge.",
+  "process.preferment.fridge": "Into the fridge",
+  "process.preferment.fridge.body": "{hours} h at {temp} \xB0C. It keeps ripening slowly and goes straight into the dough when it is time.",
+  "process.preferment.temper": "Take the preferment out",
+  "process.preferment.temper.body": "Leave it out {minutes} min before mixing to take the chill off \u2013 straight from the fridge the water would have to be far too hot.",
   "process.levain.build": "Feed the levain",
   "process.levain.build.body": "Feed the starter and let it reach its peak \u2014 roughly {hours} h at {temp} \xB0C. That time is for your kitchen: at 18 \xB0C the same feed takes nearly twice as long as at 26 \xB0C.",
   "process.shape.balls": "Ball up",
@@ -1778,11 +1891,18 @@ var en = {
   // ── Notes ──
   "note.cold_clamped": "The cold time exceeded the total time and was capped at {hours} h.",
   "note.water_clamped": "The calculated water temperature ({raw} \xB0C) falls outside a practical range and was adjusted to {used} \xB0C, so the dough will not land exactly on your target.",
+  "note.water_too_hot": "To reach {target} \xB0C the water would have to be {raw} \xB0C \u2013 too hot for the yeast. Use at most {used} \xB0C; the dough then lands at about {dough} \xB0C and starts a little slower. For a warmer dough: take the preferment out earlier or mix somewhere warmer.",
   "note.use_ice": "Swap {grams} g of the water for ice to reach {temp} \xB0C.",
-  "note.water_hot": "The water is above {limit} \xB0C. Never pour it straight onto the yeast \u2014 mix it into the flour first.",
   "note.cold_retard": "Cold retard: {cold} of {total} h sit at {coldTemp} \xB0C ({phase}). That is worth about {equiv} h at room temperature, and the dose is set for that figure.",
   "note.yeast_clamped": "The dose hit the model's limit and stops at {pct}% ({grams} g). Adjust time or temperature instead.",
   "note.tiny_yeast": "Only {grams} g of yeast. Use a 0.01 g scale, or dissolve a larger amount in water and use part of the solution.",
+  "note.yeast_fast": "A lot of yeast \u2013 {pct}% for {hours} h. The dough will move fast; go by how it looks and feels, not by the clock.",
+  "note.tiny_yeast_preferment": "Only {grams} g of yeast in the preferment. Use a 0.01 g scale, or dissolve a larger amount in water and use part of the solution.",
+  "note.preferment_too_short": "The preferment cannot ripen in {hours} h at this temperature, even with the most yeast the model allows. Give it longer or somewhere warmer.",
+  "note.preferment_enough": "The preferment carries the whole rise \u2013 the final dough needs no extra yeast.",
+  "note.preferment_carries": "The preferment carries much of the rise: the final dough gets {grams} g of yeast instead of the {straight} g the same schedule would need without it.",
+  "note.preferment_strong": "The preferment alone has the dough ready in about {hours} h \u2013 sooner than the {planned} h planned. Shorten the dough's time, lower the dough temperature, or give the dough part of the time in the fridge.",
+  "note.cold_preferment": "The preferment has only warmed to about {temp} \xB0C when it goes into the dough, so the water needs to be lukewarm for the dough to reach its temperature.",
   "note.time_too_long": "{hours} h at {temp} \xB0C needs less leavening than you can weigh. Drop the temperature, move part of the time into the fridge, or shorten the ferment.",
   "note.very_fast": "A lot of leavening ({pct}% levain-equivalent). This dough moves fast \u2014 go by how it looks and feels, not by the clock.",
   "note.levain_ratio": "Starter ratio: {onFlour}% ripe levain on the dough flour \u2014 the figure most recipes mean by \u201Cinoculation\u201D. That is {grams} g of levain at {hydration}% hydration, which is {inoculation}% of the total flour counted as starter flour.",
@@ -2090,22 +2210,26 @@ var DICTIONARIES = {
   sv: { ...sv, ...stylesSv },
   en: { ...en, ...stylesEn }
 };
-function interpolate(template, values) {
+function interpolate(template, values, locale) {
   if (!values) return template;
-  return template.replace(
-    /\{(\w+)\}/g,
-    (match, name) => name in values ? String(values[name]) : match
-  );
+  const format = locale ? new Intl.NumberFormat(locale, { maximumFractionDigits: 4 }).format : String;
+  return template.replace(/\{(\w+)\}/g, (match, name) => {
+    if (!(name in values)) return match;
+    const value = values[name];
+    return typeof value === "number" ? format(value) : String(value);
+  });
 }
 function createTranslator(lang) {
   const primary = DICTIONARIES[lang];
   const fallback = DICTIONARIES[lang === "sv" ? "en" : "sv"];
+  const locale = localeOf(lang);
   return (key, values) => {
     const template = primary[key] ?? fallback[key];
     if (template === void 0) return key;
-    return interpolate(template, values);
+    return interpolate(template, values, locale);
   };
 }
+var localeOf = (lang) => lang === "sv" ? "sv-SE" : "en-GB";
 
 // src/lib/mcp/shared.ts
 import { z } from "npm:zod@^3.25.76";
@@ -2131,13 +2255,13 @@ var FRICTION_FACTOR_C = {
   spiral: 8
 };
 var WATER_TEMP_MIN_C = 1;
-var WATER_TEMP_MAX_C = 55;
-var YEAST_DANGER_TEMP_C = 50;
-var YEAST_PCT_MIN = 5e-3;
-var YEAST_PCT_MAX = 4;
+var WATER_TEMP_MAX_C = 38;
+var PREFERMENT_TEMPER_HOURS = 1;
+var PREFERMENT_WARMUP_HOURS = 1.5;
 var INOCULATION_MIN = 0.1;
 var INOCULATION_MAX = 50;
 var INOCULATION_HIGH = 20;
+var HYBRID_SHARE = 0.5;
 var CORRECTION_CLAMP = {
   salt: [0.75, 1.5],
   sugar: [0.8, 1.6],
@@ -2238,7 +2362,105 @@ function leavenPctForTotal(totalHours, p) {
   const proof = proofHoursAt(p.tempC) * correctionFor(p);
   return leavenPctFor(Math.max(0.1, totalHours - proof), p);
 }
-var starterToFreshYeastPct = (starterPct) => starterPct / FRESH_YEAST_TO_STARTER;
+var freshYeastToStarterPct = (freshPct) => freshPct * FRESH_YEAST_TO_STARTER;
+
+// src/core/yeast.ts
+var GANZLE = {
+  a: 0.02645608,
+  b: 2.037020784,
+  c: -0.198964236,
+  maxTempC: 45
+};
+var YEAST_OPTIMUM_C = GANZLE.maxTempC + GANZLE.b / GANZLE.c;
+function yeastRate(tempC) {
+  const t = clamp(tempC, -2, YEAST_OPTIMUM_C);
+  const x = GANZLE.maxTempC - t;
+  return GANZLE.a * x ** GANZLE.b * Math.exp(GANZLE.c * x);
+}
+var yeastRateRatio = (tempC, referenceC) => yeastRate(tempC) / yeastRate(referenceC);
+var YEAST_ANCHOR = {
+  instantPct: 0.048,
+  hours: 12,
+  tempC: 21.1,
+  hydrationPct: 60,
+  saltPct: 2.8
+};
+var YEAST_ANCHOR_FRESH_PCT = YEAST_ANCHOR.instantPct / YEAST_CONVERSION.instant;
+var YEAST_TIME_EXPONENT = 1.6;
+var SHORT_FERMENT = { amplitude: 4.5, hours: 2 };
+var FRESH_YEAST_MIN_PCT = 3e-3;
+var FRESH_YEAST_MAX_PCT = 8;
+function yeastAnchorHours(s) {
+  const total = Math.max(0, s.totalHours);
+  const cold = clamp(s.coldHours ?? 0, 0, total);
+  const warm = total - cold;
+  const coldTemp = s.coldTempC ?? DEFAULT_COLD_TEMP_C;
+  const lag = Math.min(cold, FRIDGE_COOLDOWN_HOURS);
+  const settled = cold - lag;
+  const ratio = (t) => yeastRateRatio(t, YEAST_ANCHOR.tempC);
+  return warm * ratio(s.roomTempC) + lag * ratio((s.roomTempC + coldTemp) / 2) + settled * ratio(coldTemp);
+}
+function yeastRoomEquivHours(s) {
+  return Math.max(0.25, yeastAnchorHours(s) / yeastRateRatio(s.roomTempC, YEAST_ANCHOR.tempC));
+}
+function yeastRecipeCorrection(r) {
+  const recipe = timeCorrection({
+    saltPct: r.saltPct ?? YEAST_ANCHOR.saltPct,
+    sugarPct: r.sugarPct ?? 0,
+    hydrationPct: r.hydrationPct ?? YEAST_ANCHOR.hydrationPct,
+    fatPct: r.fatPct ?? 0
+  });
+  const anchor = timeCorrection({
+    saltPct: YEAST_ANCHOR.saltPct,
+    sugarPct: 0,
+    hydrationPct: YEAST_ANCHOR.hydrationPct,
+    fatPct: 0
+  });
+  return recipe / anchor;
+}
+function shortFermentFactor(totalHours, prefermentShare = 0) {
+  const excess = SHORT_FERMENT.amplitude * Math.exp(-Math.max(0, totalHours) / SHORT_FERMENT.hours);
+  return 1 + excess * (1 - clamp(prefermentShare, 0, 1));
+}
+var powerLaw = (anchorHours, levelPct) => levelPct * (Math.max(0.05, anchorHours) / YEAST_ANCHOR.hours) ** -YEAST_TIME_EXPONENT;
+function freshYeastFor(schedule, recipe = {}) {
+  const hours = yeastAnchorHours(schedule) / yeastRecipeCorrection(recipe);
+  return powerLaw(hours, YEAST_ANCHOR_FRESH_PCT) * shortFermentFactor(schedule.totalHours, recipe.prefermentShare);
+}
+function hoursForFreshYeast(freshPct, schedule, recipe = {}) {
+  const cold = Math.max(0, schedule.coldHours ?? 0);
+  const need = (total) => freshYeastFor({ ...schedule, totalHours: total }, recipe);
+  const dose = Math.max(FRESH_YEAST_MIN_PCT / 10, freshPct);
+  let lo = cold;
+  let hi = cold + 1e3;
+  if (need(lo) <= dose) return lo;
+  if (need(hi) >= dose) return hi;
+  for (let i = 0; i < 80; i += 1) {
+    const mid = (lo + hi) / 2;
+    if (need(mid) > dose) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+var PREFERMENT_LEVEL_PCT = {
+  poolish: 0.139,
+  biga: 1.06
+};
+function prefermentYeastFor(type, s) {
+  const hours = yeastAnchorHours({
+    totalHours: s.hours,
+    roomTempC: s.tempC,
+    coldHours: s.coldHours,
+    coldTempC: s.coldTempC
+  });
+  return powerLaw(hours, PREFERMENT_LEVEL_PCT[type]);
+}
+var RIPE_PREFERMENT_POTENCY_PCT = 1;
+function prefermentLeavening(shareOfTotalFlour, yeastFreshPct) {
+  const share = clamp(shareOfTotalFlour, 0, 1);
+  return share * Math.max(RIPE_PREFERMENT_POTENCY_PCT, yeastFreshPct);
+}
+var freshToForm = (freshPct, form) => freshPct * YEAST_CONVERSION[form];
 
 // src/core/fermentation.ts
 function computeRoomEquivHours({
@@ -2258,28 +2480,38 @@ function computeRoomEquivHours({
 }
 function computeYeastDose(input) {
   if (input.leavenType === "sourdough") {
-    return { pct: 0, freshPct: 0, starterEquivalentPct: 0, clamped: false };
+    return { pct: 0, freshPct: 0, neededFreshPct: 0, starterEquivalentPct: 0, clamped: false };
   }
-  const clock = {
-    tempC: input.roomTemp,
-    saltPct: input.saltPct,
-    sugarPct: input.sugarPct,
-    hydrationPct: input.hydrationPct,
-    fatPct: input.fatPct
-  };
-  const hours = input.effectiveHours / (input.fermentFactor ?? 1);
-  let starterEquivalent = leavenPctForTotal(hours, clock);
-  const prefermentShare = clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
-  starterEquivalent *= 1 - 0.6 * prefermentShare;
-  if (input.leavenType === "hybrid") starterEquivalent *= 0.5;
-  const freshRaw = starterToFreshYeastPct(starterEquivalent);
-  const dosed = freshRaw * YEAST_CONVERSION[input.yeastForm];
-  const pct = clamp(dosed, YEAST_PCT_MIN, YEAST_PCT_MAX);
+  const share = clamp((input.prefermentFlourPct ?? 0) / 100, 0, 1);
+  const needed = freshYeastFor(
+    {
+      totalHours: input.totalHours,
+      roomTempC: input.roomTemp,
+      coldHours: input.coldHours,
+      coldTempC: input.coldTemp
+    },
+    {
+      saltPct: input.saltPct,
+      sugarPct: input.sugarPct,
+      hydrationPct: input.hydrationPct,
+      fatPct: input.fatPct,
+      prefermentShare: share
+    }
+  ) * (input.leavenType === "hybrid" ? HYBRID_SHARE : 1);
+  const carried = input.prefermentLeaveningPct ?? share * RIPE_PREFERMENT_POTENCY_PCT;
+  const raw = input.fixedFreshPct ?? needed - carried;
+  if (raw <= 0) {
+    return { pct: 0, freshPct: 0, neededFreshPct: needed, starterEquivalentPct: 0, clamped: false };
+  }
+  const fresh = clamp(raw, FRESH_YEAST_MIN_PCT, FRESH_YEAST_MAX_PCT);
+  const limit = raw > FRESH_YEAST_MAX_PCT ? "max" : raw < FRESH_YEAST_MIN_PCT ? "min" : void 0;
   return {
-    pct: round(pct, 4),
-    freshPct: round(freshRaw, 4),
-    starterEquivalentPct: round(starterEquivalent, 2),
-    clamped: Math.abs(pct - dosed) > 1e-9
+    pct: round(freshToForm(fresh, input.yeastForm), 4),
+    freshPct: round(fresh, 4),
+    neededFreshPct: needed,
+    starterEquivalentPct: round(freshYeastToStarterPct(fresh), 2),
+    clamped: limit !== void 0,
+    limit
   };
 }
 function computeInoculationPct(input) {
@@ -2329,32 +2561,69 @@ function starterPeakHours(tempC) {
 
 // src/core/schedule.ts
 var MIN = 6e4;
-var at = (start, offsetMin) => new Date(start.getTime() + offsetMin * MIN).toISOString();
+var at = (origin, offsetMin) => new Date(origin + offsetMin * MIN).toISOString();
+var HANDS_ON = /* @__PURE__ */ new Set([
+  "preferment",
+  "levain",
+  "autolyse",
+  "mix",
+  "fold",
+  "divide",
+  "shape",
+  "cold",
+  "bake"
+]);
+var PASSIVE_KEYS = /* @__PURE__ */ new Set([
+  "process.preferment.ready",
+  "process.done",
+  "process.done.pizza"
+]);
 function buildSchedule(input) {
-  const { style, startTime } = input;
+  const { style } = input;
   const p = style.process;
   const steps = [];
   const push = (offsetMin, durationMin, phase, key, values, tempC) => {
     steps.push({
       offsetMin: Math.round(offsetMin),
-      at: at(startTime, offsetMin),
       durationMin: Math.round(durationMin),
       phase,
       key,
       values,
-      tempC
+      tempC,
+      handsOn: HANDS_ON.has(phase) && !PASSIVE_KEYS.has(key)
     });
   };
   const autolyseMin = p.autolyseMin ?? 0;
   if (input.usePreferment && input.prefermentHours) {
-    const offset = -(input.prefermentHours * 60 + autolyseMin);
-    push(offset, input.prefermentHours * 60, "preferment", `process.preferment.${input.prefermentType}`, {
-      hours: input.prefermentHours,
-      temp: input.prefermentTempC ?? input.roomTempC
-    }, input.prefermentTempC);
-    push(-autolyseMin, 0, "preferment", "process.preferment.ready", {
-      type: input.prefermentType ?? "poolish"
-    });
+    const totalMin = input.prefermentHours * 60;
+    const coldMin2 = Math.min(totalMin, Math.max(0, (input.prefermentColdHours ?? 0) * 60));
+    const warmMin = totalMin - coldMin2;
+    const start = -(totalMin + autolyseMin);
+    const type = input.prefermentType ?? "poolish";
+    const warmTemp = input.prefermentTempC ?? input.roomTempC;
+    push(
+      start,
+      warmMin,
+      "preferment",
+      coldMin2 > 0 ? `process.preferment.${type}.cold` : `process.preferment.${type}`,
+      { hours: round1(warmMin / 60), temp: warmTemp, coldHours: round1(coldMin2 / 60) },
+      warmTemp
+    );
+    const temperMin = Math.min(coldMin2, Math.max(0, (input.prefermentTemperHours ?? 0) * 60));
+    if (coldMin2 > 0) {
+      push(start + warmMin, coldMin2 - temperMin, "cold", "process.preferment.fridge", {
+        hours: round1((coldMin2 - temperMin) / 60),
+        temp: input.coldTempC,
+        type
+      }, input.coldTempC);
+    }
+    if (temperMin > 0) {
+      push(-(temperMin + autolyseMin), temperMin, "preferment", "process.preferment.temper", {
+        minutes: Math.round(temperMin),
+        type
+      }, input.roomTempC);
+    }
+    push(-autolyseMin, 0, "preferment", "process.preferment.ready", { type });
   }
   if (input.usesLevain) {
     const offset = -(input.levainHours * 60 + autolyseMin);
@@ -2449,14 +2718,55 @@ function buildSchedule(input) {
     pieces: input.pieces
   }, p.bakeTempC);
   cursor += p.bakeMinutes;
-  push(cursor, 0, "done", "process.done", { minutes: coolingMinutes(style) });
+  const readyOffset = cursor;
+  push(cursor, 0, "done", isPizzaStyle(style) ? "process.done.pizza" : "process.done", {
+    minutes: coolingMinutes(style)
+  });
   steps.sort((a, b) => a.offsetMin - b.offsetMin);
-  return { steps, readyAt: at(startTime, cursor) };
+  const firstOffset = steps.length ? steps[0].offsetMin : 0;
+  const anchorMs = input.anchor.at.getTime();
+  const origin = input.anchor.mode === "ready" ? anchorMs - readyOffset * MIN : input.anchor.mode === "start" ? anchorMs - firstOffset * MIN : anchorMs;
+  return {
+    steps: steps.map((s) => ({ ...s, at: at(origin, s.offsetMin) })),
+    startsAt: at(origin, firstOffset),
+    mixAt: at(origin, 0),
+    readyAt: at(origin, readyOffset)
+  };
 }
 function coolingMinutes(style) {
-  if (style.category === "pizza") return 2;
+  if (isPizzaStyle(style)) return 2;
   if (style.category === "enriched") return 45;
   return 60;
+}
+var NIGHT = { fromHour: 23, toHour: 6 };
+function isNight(iso) {
+  const d = new Date(iso);
+  const hour = d.getHours() + d.getMinutes() / 60;
+  return hour >= NIGHT.fromHour || hour < NIGHT.toHour;
+}
+function nightStepIndices(steps) {
+  return steps.flatMap((s, i) => s.handsOn && isNight(s.at) ? [i] : []);
+}
+function daytimeShiftMinutes(steps, notBefore) {
+  const handsOn = steps.filter((s) => s.handsOn).map((s) => new Date(s.at).getTime());
+  if (!handsOn.length) return null;
+  const clear = (shift) => handsOn.every((t) => !isNight(new Date(t + shift * MIN).toISOString()));
+  if (clear(0)) return null;
+  const first = new Date(steps[0].at).getTime();
+  const allowed = (shift) => !notBefore || first + shift * MIN >= notBefore.getTime();
+  for (let k = 1; k <= 96; k += 1) {
+    for (const shift of [k * 15, -k * 15]) {
+      if (allowed(shift) && clear(shift)) return shift;
+    }
+  }
+  return null;
+}
+function ceilToQuarter(date) {
+  const d = new Date(date);
+  d.setSeconds(0, 0);
+  d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15);
+  if (d.getTime() < date.getTime()) d.setMinutes(d.getMinutes() + 15);
+  return d;
 }
 var round1 = (v) => Math.round(v * 10) / 10;
 
@@ -2487,6 +2797,24 @@ function calculateRecipe(inputs) {
   const usePreferment = (inputs.usePreferment ?? true) && Boolean(style.preferment);
   const preferment = usePreferment ? style.preferment : void 0;
   const percentBasis = inputs.percentBasis ?? "total";
+  const build = preferment ? resolvePrefermentBuild(preferment, inputs, roomTemp, coldTemp) : void 0;
+  const prefShare = preferment ? clamp(preferment.flour_pct / 100, 0, 1) : 0;
+  const yeastedType = preferment && (preferment.type === "poolish" || preferment.type === "biga") ? preferment.type : void 0;
+  const prefFreshRaw = yeastedType && build ? prefermentYeastFor(yeastedType, {
+    hours: build.hours,
+    tempC: build.tempC,
+    coldHours: build.coldHours,
+    coldTempC: build.coldTempC
+  }) : 0;
+  const prefFresh = yeastedType ? clamp(prefFreshRaw, FRESH_YEAST_MIN_PCT, FRESH_YEAST_MAX_PCT) : 0;
+  if (yeastedType && build && prefFreshRaw > FRESH_YEAST_MAX_PCT) {
+    notes.push({
+      code: "note.preferment_too_short",
+      severity: "warn",
+      values: { hours: round(build.hours, 1) }
+    });
+  }
+  const prefLeavening = yeastedType ? prefermentLeavening(prefShare, prefFresh) : 0;
   const driver = inputs.driver ?? "time";
   const clock = {
     tempC: roomTemp,
@@ -2497,16 +2825,32 @@ function calculateRecipe(inputs) {
   };
   const fermentFactor = style.fermentFactor ?? 1;
   const usesLevain = leavenType === "sourdough" || leavenType === "hybrid";
+  const yeastRecipe = {
+    saltPct: salt,
+    sugarPct: sugar,
+    hydrationPct: hydration,
+    fatPct: fat,
+    prefermentShare: prefShare
+  };
+  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
+  const fixedYeast = driver === "dose" && leavenType === "commercial" && inputs.yeastPct !== void 0 ? Math.max(FRESH_YEAST_MIN_PCT, inputs.yeastPct) : void 0;
   let requestedTotal;
-  let leavenOnFlour;
-  if (driver === "dose") {
+  let leavenOnFlour = 0;
+  if (fixedYeast !== void 0) {
+    requestedTotal = round(
+      hoursForFreshYeast(
+        fixedYeast + prefLeavening,
+        { roomTempC: roomTemp, coldHours: requestedCold, coldTempC: coldTemp },
+        yeastRecipe
+      ),
+      2
+    );
+  } else if (driver === "dose" && usesLevain) {
     leavenOnFlour = Math.max(0.2, inputs.leavenPct ?? style.defaultLevainPct ?? 20);
     requestedTotal = round(totalHoursFor(leavenOnFlour, clock) * fermentFactor, 2);
   } else {
     requestedTotal = totalTime;
-    leavenOnFlour = leavenPctForTotal(totalTime / fermentFactor, clock);
   }
-  const requestedCold = Math.max(0, inputs.coldHours ?? 0);
   const coldHours = Math.min(requestedCold, requestedTotal);
   if (requestedCold > requestedTotal) {
     notes.push({
@@ -2515,17 +2859,19 @@ function calculateRecipe(inputs) {
       values: { hours: round(coldHours, 1) }
     });
   }
-  const roomEquivHours = computeRoomEquivHours({
+  const roomEquivHours = usesLevain ? computeRoomEquivHours({ totalHours: requestedTotal, coldHours, roomTemp, coldTemp }) : yeastRoomEquivHours({
     totalHours: requestedTotal,
+    roomTempC: roomTemp,
     coldHours,
-    roomTemp,
-    coldTemp
+    coldTempC: coldTemp
   });
-  if (driver === "time") {
+  if (usesLevain && driver === "time") {
     leavenOnFlour = leavenPctForTotal(roomEquivHours / fermentFactor, clock);
   }
   const dose = computeYeastDose({
-    effectiveHours: roomEquivHours,
+    totalHours: requestedTotal,
+    coldHours,
+    coldTemp,
     roomTemp,
     saltPct: salt,
     sugarPct: sugar,
@@ -2533,9 +2879,20 @@ function calculateRecipe(inputs) {
     fatPct: fat,
     yeastForm,
     leavenType,
-    prefermentFlourPct: preferment?.flour_pct,
-    fermentFactor
+    prefermentFlourPct: prefShare * 100,
+    prefermentLeaveningPct: prefLeavening,
+    fixedFreshPct: fixedYeast
   });
+  let prefermentReadyHours;
+  if (prefLeavening > 0 && leavenType !== "sourdough" && dose.freshPct === 0) {
+    const share = leavenType === "hybrid" ? HYBRID_SHARE : 1;
+    const hours = hoursForFreshYeast(
+      prefLeavening / share,
+      { roomTempC: roomTemp, coldHours, coldTempC: coldTemp },
+      yeastRecipe
+    );
+    if (hours < requestedTotal * 0.85) prefermentReadyHours = round(hours, 1);
+  }
   const inoculationPct = usesLevain ? computeInoculationPct({
     effectiveHours: roomEquivHours,
     roomTemp,
@@ -2571,7 +2928,8 @@ function calculateRecipe(inputs) {
   const extrasFrac = basisShare * (extrasPct / 100);
   const finalWaterFrac = percentBasis === "dough" ? basisShare * (hydration / 100) : hydration / 100 - prefWaterFrac - levainWaterFrac;
   const totalWaterFrac = finalWaterFrac + prefWaterFrac + levainWaterFrac;
-  const totalPct = 100 + 100 * (totalWaterFrac + saltFrac + sugarFrac + fatFrac + extrasFrac) + prefermentExtrasPct + dose.pct;
+  const prefermentYeastPct = prefFlourFrac * prefFresh * YEAST_CONVERSION[yeastForm];
+  const totalPct = 100 + 100 * (totalWaterFrac + saltFrac + sugarFrac + fatFrac + extrasFrac) + prefermentExtrasPct + prefermentYeastPct + dose.pct;
   const pieces = Math.max(1, Math.round(inputs.ballCount || 1));
   const scaleMode = inputs.scaleMode ?? "pieces";
   let totalFlour;
@@ -2591,7 +2949,9 @@ function calculateRecipe(inputs) {
   const prefermentFlour = totalFlour * prefFlourFrac;
   const prefermentWater = totalFlour * prefWaterFrac;
   const prefermentSalt = preferment?.salt_pct ? prefermentFlour * (preferment.salt_pct / 100) : 0;
-  const prefermentYeast = preferment?.yeast_fresh_pct ? prefermentFlour * (preferment.yeast_fresh_pct / 100) * (yeastForm === "fresh" ? 1 : yeastForm === "instant" ? 0.33 : 0.4) : 0;
+  const prefermentYeast = totalFlour * (prefermentYeastPct / 100);
+  const sugarInPreferment = Boolean(preferment?.carriesSugar) && sugar > 0;
+  const prefermentSugar = sugarInPreferment ? totalFlour * sugarFrac : 0;
   const levainFlour = totalFlour * levainFlourFrac;
   const levainWater = totalFlour * levainWaterFrac;
   const levainTotal = levainFlour + levainWater;
@@ -2652,6 +3012,14 @@ function calculateRecipe(inputs) {
         type: "salt"
       });
     }
+    if (prefermentSugar > 0) {
+      prefIngredients.push({
+        key: style.defaultParams.sugarKey ?? "ing.sugar",
+        grams: round(prefermentSugar, 1),
+        percentage: pct(prefermentSugar),
+        type: "sugar"
+      });
+    }
     for (const extra of preferment.extras ?? []) {
       const grams = prefermentFlour * (extra.pct / 100);
       prefermentExtrasGrams += grams;
@@ -2665,7 +3033,13 @@ function calculateRecipe(inputs) {
     sections.push({
       id: "preferment",
       titleKey: `section.${preferment.type}`,
-      meta: { hours: preferment.hours, tempC: preferment.temp_c, type: preferment.type },
+      meta: {
+        hours: build.hours,
+        tempC: build.tempC,
+        type: preferment.type,
+        coldHours: build.coldHours,
+        coldTempC: build.coldTempC
+      },
       ingredients: prefIngredients.filter((i) => i.grams > 4e-3),
       totalGrams: round(
         prefIngredients.reduce((sum, i) => sum + i.grams, 0),
@@ -2730,7 +3104,7 @@ function calculateRecipe(inputs) {
     });
   }
   if (preferment) {
-    const prefermentTotal = prefermentFlour + prefermentWater + prefermentYeast + prefermentSalt + prefermentExtrasGrams;
+    const prefermentTotal = prefermentFlour + prefermentWater + prefermentYeast + prefermentSalt + prefermentSugar + prefermentExtrasGrams;
     finalIngredients.push({
       key: `ing.${preferment.type}_all`,
       grams: round(prefermentTotal, 1),
@@ -2739,7 +3113,7 @@ function calculateRecipe(inputs) {
       note: "note.from_section"
     });
   }
-  if (sugar > 0) {
+  if (sugar > 0 && !sugarInPreferment) {
     const grams = totalFlour * sugarFrac;
     finalIngredients.push({
       key: style.defaultParams.sugarKey ?? "ing.sugar",
@@ -2783,10 +3157,13 @@ function calculateRecipe(inputs) {
     flourTempC: flourTemp,
     roomTempC: roomTemp,
     frictionC,
-    prefermentTempC: preferment ? preferment.temp_c : void 0
+    // A poolish from the fridge brings its chill into the mix even after an
+    // hour on the bench, and the water has to make up for it.
+    prefermentTempC: build?.mixTempC
   });
   const waterTempC = clamp(rawTempC, WATER_TEMP_MIN_C, WATER_TEMP_MAX_C);
   const clampedWater = Math.abs(rawTempC - waterTempC) > 0.05;
+  const doughTempC = (waterTempC + flourTemp + roomTemp + frictionC + (build ? build.mixTempC : 0)) / factors;
   const iceGrams = computeIceSplit(finalWater, waterTempC);
   const ratioSum = style.fermentation.bulk_ratio + style.fermentation.proof_ratio || 1;
   let bulkHours = requestedTotal * (style.fermentation.bulk_ratio / ratioSum);
@@ -2799,10 +3176,11 @@ function calculateRecipe(inputs) {
     proofHours -= surplus;
     bulkHours += surplus;
   }
-  const startTime = inputs.startTime ?? /* @__PURE__ */ new Date();
-  const { steps, readyAt } = buildSchedule({
+  const now = inputs.now ?? /* @__PURE__ */ new Date();
+  const anchor = inputs.plan ? { mode: inputs.plan.mode, at: inputs.plan.at } : { mode: "mix", at: inputs.startTime ?? now };
+  const schedule = buildSchedule({
     style,
-    startTime,
+    anchor,
     bulkHours,
     proofHours,
     coldHours,
@@ -2811,13 +3189,16 @@ function calculateRecipe(inputs) {
     coldTempC: coldTemp,
     pieces,
     usePreferment: Boolean(preferment),
-    prefermentHours: preferment?.hours,
-    prefermentTempC: preferment?.temp_c,
+    prefermentHours: build?.hours,
+    prefermentTempC: build?.tempC,
+    prefermentColdHours: build?.coldHours,
+    prefermentTemperHours: build?.temperHours,
     prefermentType: preferment?.type,
     usesLevain: usesLevain && levainTotal > 0,
     levainHours: levainPeakHours,
     levainTempC: roomTemp
   });
+  const plan = analysePlan(schedule, anchor.mode, now, (build?.hours ?? 0) + requestedTotal);
   const doughWeight = sections.filter((s) => s.id === "final").reduce((sum, s) => sum + s.totalGrams, 0);
   const trueHydrationPct = totalFlour > 0 ? round(trueWater / totalFlour * 100, 1) : 0;
   notes.push(
@@ -2832,9 +3213,11 @@ function calculateRecipe(inputs) {
       clampedWater,
       iceGrams,
       dose,
+      yeastForm,
       inoculationPct,
       starterHydration,
       leavenType,
+      usesLevain,
       coldHours,
       coldPhase,
       roomEquivHours,
@@ -2842,17 +3225,36 @@ function calculateRecipe(inputs) {
       roomTemp,
       coldTemp,
       driver,
-      starterEquivalentPct: usesLevain ? leavenOnFlour : dose.starterEquivalentPct,
+      starterEquivalentPct: leavenOnFlour,
       totalFlour,
       basisFlour,
       percentBasis,
       levainTotal,
       levainOnFlourPct: levainOnFlourPct(inoculationPct, starterHydration),
       levainPeakHours,
-      preferment: Boolean(preferment)
+      preferment: Boolean(preferment),
+      prefermentLeaveningPct: prefLeavening,
+      prefermentReadyHours,
+      prefermentYeastGrams: prefermentYeast,
+      prefermentColdTempC: build && build.coldHours > 0 ? build.mixTempC : void 0,
+      doughTempC,
+      desiredDoughTempC: desiredDoughTemp
     })
   );
   const mergedIngredients = mergeIngredients(sections);
+  const prefermentResult = preferment && build ? {
+    type: preferment.type,
+    flourPct: round(prefShare * 100, 2),
+    hours: build.hours,
+    tempC: build.tempC,
+    coldHours: build.coldHours,
+    coldTempC: build.coldTempC,
+    mixTempC: build.mixTempC,
+    temperHours: build.temperHours,
+    yeastPct: round(prefFresh * YEAST_CONVERSION[yeastForm], 4),
+    freshYeastPct: round(prefFresh, 4),
+    leaveningPct: round(prefLeavening, 3)
+  } : void 0;
   return {
     sections,
     ingredients: mergedIngredients,
@@ -2870,6 +3272,7 @@ function calculateRecipe(inputs) {
       tempC: round(waterTempC, 1),
       rawTempC: round(rawTempC, 1),
       clamped: clampedWater,
+      doughTempC: round(doughTempC, 1),
       factors,
       frictionC,
       flourTempC: flourTemp,
@@ -2884,7 +3287,11 @@ function calculateRecipe(inputs) {
       roomEquivHours: round(roomEquivHours, 2),
       totalHours: round(requestedTotal, 2),
       yeastPct: dose.pct,
+      freshYeastPct: dose.freshPct,
+      totalYeastPct: round(dose.pct + prefermentYeastPct, 4),
       yeastForm,
+      prefermentLeaveningPct: round(prefLeavening, 3),
+      prefermentReadyHours,
       inoculationPct,
       starterPct: round(inoculationPct * (1 + starterHydration / 100), 1),
       // Recipes quote the levain against the flour it joins, not against the
@@ -2911,9 +3318,45 @@ function calculateRecipe(inputs) {
       percentBasis,
       basisFlour: round(basisFlour, 1)
     },
-    timeline: steps,
+    preferment: prefermentResult,
+    timeline: schedule.steps,
+    plan,
     notes,
-    readyAt
+    readyAt: schedule.readyAt
+  };
+}
+function resolvePrefermentBuild(spec, inputs, roomTemp, coldTemp) {
+  const hours = clamp(inputs.prefermentHours ?? spec.hours, 1, 96);
+  const tempC = clamp(inputs.prefermentTemp ?? spec.temp_c ?? roomTemp, 2, 32);
+  const coldHours = clamp(inputs.prefermentColdHours ?? spec.cold_hours ?? 0, 0, hours);
+  const temperHours = coldHours >= PREFERMENT_TEMPER_HOURS + 1 ? PREFERMENT_TEMPER_HOURS : 0;
+  const warmed = roomTemp - (roomTemp - coldTemp) * Math.exp(-temperHours / PREFERMENT_WARMUP_HOURS);
+  return {
+    hours,
+    tempC,
+    coldHours,
+    coldTempC: coldTemp,
+    temperHours,
+    mixTempC: round(coldHours > 0 ? warmed : tempC, 1)
+  };
+}
+function analysePlan(schedule, mode, now, fermentHours) {
+  const startMs = Date.parse(schedule.startsAt);
+  const spanMs = Date.parse(schedule.readyAt) - startMs;
+  const earliestStart = ceilToQuarter(now);
+  const startsInPast = mode === "ready" && startMs < now.getTime() - 6e4;
+  const alreadyStarted = mode !== "ready" && startMs < now.getTime() - 6e4;
+  return {
+    mode,
+    startsAt: schedule.startsAt,
+    mixAt: schedule.mixAt,
+    readyAt: schedule.readyAt,
+    spanHours: round(spanMs / 36e5, 2),
+    fermentHours: round(fermentHours, 2),
+    startsInPast,
+    earliestReadyAt: new Date(earliestStart.getTime() + spanMs).toISOString(),
+    nightSteps: nightStepIndices(schedule.steps),
+    daytimeShiftMin: alreadyStarted ? null : daytimeShiftMinutes(schedule.steps, earliestStart)
   };
 }
 function mergeIngredients(sections) {
@@ -2936,9 +3379,14 @@ function buildNotes(c) {
   const notes = [];
   if (c.clampedWater) {
     notes.push({
-      code: "note.water_clamped",
+      code: c.rawTempC > c.waterTempC ? "note.water_too_hot" : "note.water_clamped",
       severity: "warn",
-      values: { raw: round(c.rawTempC, 1), used: round(c.waterTempC, 1) }
+      values: {
+        raw: round(c.rawTempC, 0),
+        used: round(c.waterTempC, 0),
+        dough: round(c.doughTempC, 1),
+        target: round(c.desiredDoughTempC, 1)
+      }
     });
   }
   if (c.iceGrams > 0) {
@@ -2947,9 +3395,6 @@ function buildNotes(c) {
       severity: "tip",
       values: { grams: c.iceGrams, temp: round(c.waterTempC, 1) }
     });
-  }
-  if (c.waterTempC > YEAST_DANGER_TEMP_C) {
-    notes.push({ code: "note.water_hot", severity: "warn", values: { limit: YEAST_DANGER_TEMP_C } });
   }
   if (c.coldHours > 0) {
     notes.push({
@@ -2964,18 +3409,67 @@ function buildNotes(c) {
       }
     });
   }
-  if (c.dose.clamped && c.dose.pct > 0) {
+  const yeastGrams = c.totalFlour * (c.dose.pct / 100);
+  if (c.dose.limit === "max") {
     notes.push({
       code: "note.yeast_clamped",
       severity: "warn",
-      values: { pct: c.dose.pct, grams: round(c.totalFlour * (c.dose.pct / 100), 2) }
+      values: { pct: c.dose.pct, grams: round(yeastGrams, 2) }
+    });
+  } else if (c.dose.limit === "min") {
+    notes.push({
+      code: "note.time_too_long",
+      severity: "warn",
+      values: { hours: round(c.totalTime, 1), temp: round(c.roomTemp, 1) }
+    });
+  } else if (c.dose.freshPct >= 3) {
+    notes.push({
+      code: "note.yeast_fast",
+      severity: "warn",
+      values: { pct: c.dose.pct, hours: round(c.totalTime, 1) }
     });
   }
-  if (c.dose.pct > 0 && c.totalFlour * (c.dose.pct / 100) < 0.5) {
+  if (c.dose.pct > 0 && yeastGrams < 0.5) {
     notes.push({
       code: "note.tiny_yeast",
       severity: "tip",
-      values: { grams: round(c.totalFlour * (c.dose.pct / 100), 2) }
+      values: { grams: round(yeastGrams, 2) }
+    });
+  }
+  if (c.prefermentYeastGrams > 0 && c.prefermentYeastGrams < 0.5) {
+    notes.push({
+      code: "note.tiny_yeast_preferment",
+      severity: "tip",
+      values: { grams: round(c.prefermentYeastGrams, 2) }
+    });
+  }
+  if (c.prefermentLeaveningPct > 0 && c.leavenType !== "sourdough") {
+    if (c.dose.freshPct === 0) {
+      notes.push({ code: "note.preferment_enough", severity: "tip" });
+    } else if (c.dose.neededFreshPct > c.dose.freshPct) {
+      const conversion = YEAST_CONVERSION[c.yeastForm];
+      notes.push({
+        code: "note.preferment_carries",
+        severity: "info",
+        values: {
+          grams: round(yeastGrams, 2),
+          straight: round(c.totalFlour * (c.dose.neededFreshPct / 100) * conversion, 2)
+        }
+      });
+    }
+  }
+  if (c.prefermentReadyHours !== void 0) {
+    notes.push({
+      code: "note.preferment_strong",
+      severity: "warn",
+      values: { hours: c.prefermentReadyHours, planned: round(c.totalTime, 1) }
+    });
+  }
+  if (c.prefermentColdTempC !== void 0 && c.rawTempC > 30) {
+    notes.push({
+      code: "note.cold_preferment",
+      severity: "tip",
+      values: { temp: round(c.prefermentColdTempC, 1) }
     });
   }
   if (c.inoculationPct > 0) {
@@ -2996,14 +3490,14 @@ function buildNotes(c) {
       values: { hours: c.levainPeakHours, temp: round(c.roomTemp, 1) }
     });
   }
-  if (c.driver === "time" && c.starterEquivalentPct <= LEAVEN_PCT_MIN * 1.5) {
+  if (c.usesLevain && c.driver === "time" && c.starterEquivalentPct <= LEAVEN_PCT_MIN * 1.5) {
     notes.push({
       code: "note.time_too_long",
       severity: "warn",
       values: { hours: round(c.totalTime, 1), temp: round(c.roomTemp, 1) }
     });
   }
-  if (c.starterEquivalentPct >= VERY_FAST_LEAVEN_PCT) {
+  if (c.usesLevain && c.starterEquivalentPct >= VERY_FAST_LEAVEN_PCT) {
     notes.push({
       code: "note.very_fast",
       severity: "warn",
@@ -3051,7 +3545,12 @@ var recipeInputSchema = {
   ball_count: z.number().int().positive().optional().describe("Number of balls or loaves. Defaults to the style's own."),
   target_flour: z.number().positive().optional().describe("Scale by a total flour weight in grams instead of by pieces."),
   target_dough: z.number().positive().optional().describe("Scale by a total dough weight in grams instead of by pieces."),
-  total_time: z.number().positive().optional().describe("Fermentation hours for the final dough. Defaults to the style's own."),
+  total_time: z.number().positive().optional().describe(
+    "Fermentation hours for the final dough, mix to bake, not counting any preferment. Defaults to the style's own."
+  ),
+  preferment_hours: z.number().positive().optional().describe("Preferment build in hours, fridge time included. Defaults to the style's own."),
+  preferment_temp: z.number().optional().describe("Temperature of the warm part of the preferment build, \xB0C. Defaults to the style (or the room)."),
+  preferment_cold_hours: z.number().min(0).optional().describe("Hours at the end of the preferment build spent in the fridge. Defaults to the style's own."),
   room_temp: z.number().optional().describe("Room temperature in \xB0C. Defaults to the style's own."),
   cold_hours: z.number().min(0).optional().describe("Hours of the total spent in the fridge."),
   cold_temp: z.number().optional().describe("Fridge temperature in \xB0C. Default 4."),
@@ -3067,7 +3566,12 @@ var recipeInputSchema = {
   flour_temp: z.number().optional().describe("Flour temperature in \xB0C. Defaults to room temp."),
   starter_hydration: z.number().optional().describe("Levain hydration in %. Default 100."),
   use_preferment: z.boolean().optional().describe("Whether to use the style's preferment. Default true."),
-  start_time: z.string().optional().describe("ISO timestamp for the start of the schedule. Defaults to now."),
+  start_time: z.string().optional().describe(
+    "ISO timestamp when the plan starts \u2014 the first step, preferment or levain build included. Defaults to now."
+  ),
+  ready_at: z.string().optional().describe(
+    "ISO timestamp when the bake should be finished. The whole plan is laid out backwards from it. Takes precedence over start_time."
+  ),
   language: languageSchema
 };
 function resolveRecipe(input) {
@@ -3077,9 +3581,14 @@ function resolveRecipe(input) {
   }
   const lang = input.language ?? "en";
   const d = style.defaults;
-  const startTime = input.start_time ? new Date(input.start_time) : /* @__PURE__ */ new Date();
+  const now = /* @__PURE__ */ new Date();
+  const startTime = input.start_time ? new Date(input.start_time) : now;
   if (Number.isNaN(startTime.getTime())) {
     return { error: `Invalid start_time: ${input.start_time}. Use an ISO timestamp.` };
+  }
+  const readyAt = input.ready_at ? new Date(input.ready_at) : void 0;
+  if (readyAt && Number.isNaN(readyAt.getTime())) {
+    return { error: `Invalid ready_at: ${input.ready_at}. Use an ISO timestamp.` };
   }
   const scaleMode = input.target_flour ? "flour" : input.target_dough ? "dough" : "pieces";
   const results = calculateRecipe({
@@ -3105,7 +3614,11 @@ function resolveRecipe(input) {
     flourTemp: input.flour_temp,
     starterHydration: input.starter_hydration,
     usePreferment: input.use_preferment,
-    startTime
+    prefermentHours: input.preferment_hours,
+    prefermentTemp: input.preferment_temp,
+    prefermentColdHours: input.preferment_cold_hours,
+    plan: readyAt ? { mode: "ready", at: readyAt } : { mode: "start", at: startTime },
+    now
   });
   return { style, results, t: createTranslator(lang), lang };
 }
@@ -3121,6 +3634,7 @@ function toReadable({ style, results, t }) {
     totals: results.totals,
     water: results.water,
     fermentation: results.fermentation,
+    preferment: results.preferment,
     params: results.params,
     sections: results.sections.map((section) => ({
       id: section.id,
@@ -3146,7 +3660,21 @@ function toReadable({ style, results, t }) {
       severity: note.severity,
       text: t(note.code, note.values)
     })),
-    ready_at: results.readyAt
+    ready_at: results.readyAt,
+    plan: {
+      starts_at: results.plan.startsAt,
+      mix_at: results.plan.mixAt,
+      ready_at: results.plan.readyAt,
+      span_hours: results.plan.spanHours,
+      ferment_hours: results.plan.fermentHours,
+      starts_in_past: results.plan.startsInPast,
+      earliest_ready_at: results.plan.earliestReadyAt,
+      night_steps: results.plan.nightSteps.map((i) => {
+        const step = results.timeline[i];
+        return { at: step.at, title: t(step.key, resolveTechnique(step.values, t)) };
+      }),
+      daytime_shift_minutes: results.plan.daytimeShiftMin
+    }
   };
 }
 function resolveTechnique(values, t) {
@@ -3246,7 +3774,7 @@ import { defineTool as defineTool4, ToolError as ToolError3 } from "npm:@lovable
 var explain_recipe_default = defineTool4({
   name: "explain_recipe",
   title: "Explain dough recipe",
-  description: "Calculate a recipe and return a plain-language walkthrough of the reasoning behind every number: how the yeast or levain dose was scaled for time and temperature (Q10), what each correction did, how cold hours convert to room-equivalent time, why the water is at that temperature, how a preferment is subtracted from the final dough, and how bulk and proof were split.",
+  description: "Calculate a recipe and return a plain-language walkthrough of the reasoning behind every number: how the yeast or levain dose was scaled for time and temperature, what each correction did, how cold hours convert to room-equivalent time, why the water is at that temperature, how a preferment is built and what it carries into the final dough, how bulk and proof were split, and when every step happens.",
   inputSchema: recipeInputSchema,
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: (input) => {
@@ -3262,7 +3790,8 @@ var explain_recipe_default = defineTool4({
 ${t(`style.${style.id}.desc`)} (${t(style.regionKey)})`
     );
     const ingredientLines = r.sections.map((section) => {
-      const meta = section.meta ? ` \u2014 ${section.meta.hours} h at ${section.meta.tempC} \xB0C` : "";
+      const cold = section.meta?.coldHours ?? 0;
+      const meta = section.meta ? cold > 0 ? ` \u2014 ${num(section.meta.hours - cold, 1)} h at ${section.meta.tempC} \xB0C, then ${num(cold, 1)} h in the fridge` : ` \u2014 ${section.meta.hours} h at ${section.meta.tempC} \xB0C` : "";
       const rows = section.ingredients.map((i) => `  - ${t(i.key)}: ${formatGrams(i.grams)} g (${i.percentage.toFixed(2)}%)`).join("\n");
       return `### ${t(section.titleKey)}${meta}
 ${rows}
@@ -3274,8 +3803,17 @@ ${ingredientLines}
 
 Why these weights: everything is a percentage of the **total** flour (${formatGrams(r.totals.flour)} g), including the flour inside any preferment or starter. The flour weight itself is solved backwards from the dough weight you asked for \u2014 target \xF7 (100% flour + ${num(p.hydration, 1)}% water + ${num(p.salt, 1)}% salt` + (p.sugar ? ` + ${num(p.sugar, 1)}% sugar` : "") + (p.oil ? ` + ${num(p.oil, 1)}% fat` : "") + `) \u2014 so the finished dough lands on ${formatGrams(r.totals.doughWeight)} g rather than overshooting it.`
     );
-    const timeExplain = f.coldHours > 0 ? `You asked for ${num(f.totalHours, 1)} h in total, with ${num(f.coldHours, 1)} h at ${num(f.coldTempC, 1)} \xB0C. Fermentation follows a Q10 law \u2014 every 10 \xB0C roughly multiplies the rate by ${Q10} \u2014 so fridge hours are worth far less than room hours. The model also credits the first 1.5 h in the fridge at the midpoint temperature, because a tub of dough takes hours to actually cool down and ferments briskly on the way. Net effect: this schedule behaves like a **${num(f.roomEquivHours, 1)} h** ferment at ${num(f.roomTempC, 1)} \xB0C, and the leavening is dosed for that number, not for the ${num(f.totalHours, 1)} h on the clock.` : `The whole ${num(f.totalHours, 1)} h runs at ${num(f.roomTempC, 1)} \xB0C, so clock time and effective fermentation time are the same.`;
-    const doseLine = f.leavenType === "sourdough" ? `**${num(f.levainOnFlourPct, 1)}% ripe levain on the dough flour** (${num(f.inoculationPct, 1)}% of the total flour counted as starter flour)` : f.leavenType === "hybrid" ? `**${num(f.levainOnFlourPct, 1)}% levain plus ${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}**, each carrying half the leavening power` : `**${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g, worth ${num(f.starterEquivalentPct, 1)}% ripe starter`;
+    const coldLaw = f.leavenType === "commercial" ? `Yeast activity follows G\xE4nzle's growth-rate curve, which is steep in the cold \u2014 the fridge runs roughly ten times slower than 21 \xB0C \u2014 so fridge hours are worth far less than room hours. ` : `Fermentation follows a Q10 law \u2014 every 10 \xB0C roughly multiplies the rate by ${Q10} \u2014 so fridge hours are worth far less than room hours. `;
+    const timeExplain = f.coldHours > 0 ? `You asked for ${num(f.totalHours, 1)} h in total, with ${num(f.coldHours, 1)} h at ${num(f.coldTempC, 1)} \xB0C. ` + coldLaw + `The model also credits the first 1.5 h in the fridge at the midpoint temperature, because a tub of dough takes hours to actually cool down and ferments briskly on the way. Net effect: this schedule behaves like a **${num(f.roomEquivHours, 1)} h** ferment at ${num(f.roomTempC, 1)} \xB0C, and the leavening is dosed for that number, not for the ${num(f.totalHours, 1)} h on the clock.` : `The whole ${num(f.totalHours, 1)} h runs at ${num(f.roomTempC, 1)} \xB0C, so clock time and effective fermentation time are the same.`;
+    const doseLine = f.leavenType === "sourdough" ? `**${num(f.levainOnFlourPct, 1)}% ripe levain on the dough flour** (${num(f.inoculationPct, 1)}% of the total flour counted as starter flour)` : f.leavenType === "hybrid" ? `**${num(f.levainOnFlourPct, 1)}% levain plus ${num(f.yeastPct, 3)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}**, each carrying half the leavening power` : `**${num(f.yeastPct, 4)}% ${t(`field.yeast.${f.yeastForm}`).toLowerCase()}** in the final dough = ${formatGrams(r.totals.flour * (f.yeastPct / 100))} g`;
+    const yeastExplain = `Leavening: ${doseLine}.
+
+Why that number \u2014 the yeast clock:
+- Commercial yeast runs on TXCraig1's yeast-prediction model (pizzamaking.com): ${YEAST_ANCHOR.instantPct}% instant yeast is ready in ${YEAST_ANCHOR.hours} h at ${YEAST_ANCHOR.tempC} \xB0C, and the dose scales as time to the power \u2212${YEAST_TIME_EXPONENT}, so doubling the yeast takes about a third off the time.
+- Temperature follows G\xE4nzle et al. (1998): this schedule is worth ${num(f.roomEquivHours, 1)} h at ${num(f.roomTempC, 1)} \xB0C.
+- A very short schedule gets more yeast than the curve alone gives, because a dough needs a few hours to develop and proof however much yeast it carries.
+` + (r.preferment ? `- The ${t(`section.${r.preferment.type}`).toLowerCase()} is built ${num(r.preferment.hours, 1)} h` + (r.preferment.coldHours > 0 ? ` (${num(r.preferment.hours - r.preferment.coldHours, 1)} h at ${num(r.preferment.tempC, 1)} \xB0C, then ${num(r.preferment.coldHours, 1)} h in the fridge)` : ` at ${num(r.preferment.tempC, 1)} \xB0C`) + ` with ${num(r.preferment.yeastPct, 4)}% yeast on its own flour, worked out so it is ripe as the dough is mixed. Ripe, it carries the equivalent of ${num(r.preferment.leaveningPct, 3)}% fresh yeast on all the flour, which the final dough does not need again.
+` : "");
     const leavenExplain = `Leavening: ${doseLine}.
 
 Why that number \u2014 the fermentation clock:
@@ -3283,19 +3821,20 @@ Why that number \u2014 the fermentation clock:
 - Fermentation time is **logarithmic** in the dose, not inversely proportional to it: every doubling of the leavening saves exactly ${num(f.doublingHours, 2)} h, whatever the dose already is. Fifty times the starter is roughly 3.7\xD7 the speed, not fifty times \u2014 because the yeast grows during the ferment, so the starting population only buys a fixed number of doublings.
 - The temperature curve is not a single Q10. It is steep when cold (about 5 between 10 and 13 \xB0C), around 3 near room temperature, and flattens approaching the yeast optimum near 29 \xB0C.
 ` + (f.timeCorrection !== 1 ? `- Salt at ${num(p.salt, 1)}%, hydration at ${num(p.hydration, 1)}%${p.sugar ? `, sugar at ${num(p.sugar, 1)}%` : ""}${p.oil ? `, fat at ${num(p.oil, 1)}%` : ""} together ${f.timeCorrection > 1 ? "stretch" : "compress"} the clock by ${num(Math.abs(f.timeCorrection - 1) * 100, 0)}%.
-` : "") + (p.prefermentFlourPct > 0 ? `- ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented in the preferment, so the final dough needs less.
-` : "") + (f.yeastForm !== "fresh" && f.yeastPct > 0 ? `- Commercial yeast rides the same curve and is converted at the end, so switching leavening does not silently change the schedule.
+` : "") + (p.prefermentFlourPct > 0 ? `- ${num(p.prefermentFlourPct, 0)}% of the flour arrives already fermented in the preferment.
 ` : "");
-    sections.push(`## Fermentation
+    sections.push(
+      `## Fermentation
 ${timeExplain}
 
-${leavenExplain}`);
+${f.leavenType === "commercial" ? yeastExplain : leavenExplain}`
+    );
     const prefermentTerm = r.sections.find((s) => s.id === "preferment")?.meta;
     sections.push(
       `## Water temperature \u2014 ${num(r.water.tempC, 1)} \xB0C
 Target dough temperature is ${num(r.water.desiredDoughTempC, 1)} \xB0C. The bakery rule multiplies that target by the number of temperature factors in the mix and subtracts everything you cannot control:
 
-\`${r.water.factors} \xD7 ${num(r.water.desiredDoughTempC, 1)} \u2212 flour ${num(r.water.flourTempC, 1)} \u2212 room ${num(f.roomTempC, 1)} \u2212 friction ${r.water.frictionC}` + (prefermentTerm ? ` \u2212 preferment ${num(prefermentTerm.tempC, 1)}` : "") + ` = ${num(r.water.rawTempC, 1)} \xB0C\`
+\`${r.water.factors} \xD7 ${num(r.water.desiredDoughTempC, 1)} \u2212 flour ${num(r.water.flourTempC, 1)} \u2212 room ${num(f.roomTempC, 1)} \u2212 friction ${r.water.frictionC}` + (prefermentTerm ? ` \u2212 preferment ${num(r.preferment?.mixTempC ?? prefermentTerm.tempC, 1)}` : "") + ` = ${num(r.water.rawTempC, 1)} \xB0C\`
 
 Why: mixing itself heats the dough, and the more powerful the mixer the more it adds. Water is the only ingredient you can easily temper, so it absorbs the whole correction. ` + (prefermentTerm ? `Because a preferment goes into this mix, it counts as a fourth temperature factor rather than three.
 
@@ -3328,7 +3867,7 @@ ${r.timeline.map((step) => {
         return `- ${clock} \u2014 **${t(step.key, values)}**${duration}: ${t(`${step.key}.body`, values)}`;
       }).join("\n")}
 
-Ready at ${new Date(r.readyAt).toISOString().slice(0, 16).replace("T", " ")} UTC.`
+Starts ${new Date(r.plan.startsAt).toISOString().slice(0, 16).replace("T", " ")} UTC, ready ${new Date(r.readyAt).toISOString().slice(0, 16).replace("T", " ")} UTC.` + (r.plan.startsInPast ? ` That start is already past: the earliest the bake can be finished is ${new Date(r.plan.earliestReadyAt).toISOString().slice(0, 16).replace("T", " ")} UTC.` : "")
     );
     const explanation = sections.join("\n\n");
     return {

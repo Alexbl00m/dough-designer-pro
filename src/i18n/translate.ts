@@ -20,15 +20,25 @@ export const DICTIONARIES: Record<Language, Record<string, string>> = {
 
 export type Translator = (key: string, values?: Record<string, string | number>) => string;
 
-/** Fill `{placeholders}`, leaving unknown ones visible so gaps are obvious. */
+/**
+ * Fill `{placeholders}`, leaving unknown ones visible so gaps are obvious.
+ * Numbers are written the way the language writes them — "2,1 h" in Swedish,
+ * not "2.1 h" — when a locale is given.
+ */
 export function interpolate(
   template: string,
   values?: Record<string, string | number>,
+  locale?: string,
 ): string {
   if (!values) return template;
-  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
-    name in values ? String(values[name]) : match,
-  );
+  const format = locale
+    ? new Intl.NumberFormat(locale, { maximumFractionDigits: 4 }).format
+    : String;
+  return template.replace(/\{(\w+)\}/g, (match, name: string) => {
+    if (!(name in values)) return match;
+    const value = values[name];
+    return typeof value === 'number' ? format(value) : String(value);
+  });
 }
 
 /**
@@ -38,10 +48,11 @@ export function interpolate(
 export function createTranslator(lang: Language): Translator {
   const primary = DICTIONARIES[lang];
   const fallback = DICTIONARIES[lang === 'sv' ? 'en' : 'sv'];
+  const locale = localeOf(lang);
   return (key, values) => {
     const template = primary[key] ?? fallback[key];
     if (template === undefined) return key;
-    return interpolate(template, values);
+    return interpolate(template, values, locale);
   };
 }
 

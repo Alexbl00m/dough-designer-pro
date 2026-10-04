@@ -2,7 +2,6 @@ import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import {
   Accordion,
@@ -14,39 +13,53 @@ import { SliderField } from '@/components/inputs/SliderField';
 import { SelectField } from '@/components/inputs/SelectField';
 import { NumberField } from '@/components/inputs/NumberField';
 import type { BreadStyle } from '@/data/styles';
+import { isPizzaStyle } from '@/data/styles';
 import type { RecipeParams } from '@/lib/recipe/state';
 import { FRICTION_FACTOR_C } from '@/core/constants';
 import type { MixingMethod, YeastForm } from '@/core/constants';
 import type { FermentDriver, LeavenType, PercentBasis, ScaleMode } from '@/core/types';
+import { PlanCard } from '@/components/PlanCard';
+import type { PlanState } from '@/lib/recipe/plan';
+import type { CalculationResults } from '@/core/types';
+import { YEAST_CONVERSION, clamp, round } from '@/core/constants';
 import { useI18n } from '@/i18n';
-import { formatNumber, toDateTimeLocal } from '@/lib/format';
-import { totalHoursFor } from '@/core/growth';
+import { formatGrams, formatNumber, formatYeastPct } from '@/lib/format';
 
 interface CalculatorInputsProps {
   style: BreadStyle;
   params: RecipeParams;
-  /** The other end of the clock, so the fixed side always shows what it implies. */
-  computed: { totalHours: number; leavenPct: number };
+  /** The computed recipe, so the fixed side of every slider shows what it implies. */
+  results: CalculationResults | null;
   onChange: <K extends keyof RecipeParams>(key: K, value: RecipeParams[K]) => void;
+  onDriverChange: (driver: FermentDriver) => void;
   onReset: () => void;
-  startTime: Date;
-  onStartTimeChange: (date: Date) => void;
+  plan: PlanState;
+  onPlanChange: (plan: PlanState) => void;
 }
 
 export function CalculatorInputs({
   style,
   params,
-  computed,
+  results,
   onChange,
+  onDriverChange,
   onReset,
-  startTime,
-  onStartTimeChange,
+  plan,
+  onPlanChange,
 }: CalculatorInputsProps) {
   const { t, lang } = useI18n();
   const num = (value: number, decimals = 1) => formatNumber(value, lang, decimals);
 
-  const pieceUnit = style.category === 'pizza' ? 'unit.ball' : 'unit.loaf';
-  const pieceUnitPlural = style.category === 'pizza' ? 'unit.balls' : 'unit.loaves';
+  const preferment = params.usePreferment ? style.preferment : undefined;
+  const prefermentName = preferment ? t(`section.${preferment.type}`) : '';
+  const prefermentTemp = params.prefermentTemp ?? preferment?.temp_c ?? params.roomTemp;
+  // In dose mode the time is an answer, not an input; the fridge slider still
+  // needs to know how long the ferment runs.
+  const totalHours = results?.fermentation.totalHours ?? params.totalTime;
+  const freshDose = params.yeastPct ?? results?.fermentation.freshYeastPct ?? 0.2;
+
+  const pieceUnit = isPizzaStyle(style) ? 'unit.ball' : 'unit.loaf';
+  const pieceUnitPlural = isPizzaStyle(style) ? 'unit.balls' : 'unit.loaves';
   const usesYeast = params.leavenType !== 'sourdough';
   const usesStarter = params.leavenType !== 'commercial';
 
@@ -210,6 +223,16 @@ export function CalculatorInputs({
         </div>
       </Card>
 
+      {/* ── Plan ── */}
+      {results && (
+        <PlanCard
+          results={results}
+          plan={plan}
+          onPlanChange={onPlanChange}
+          prefermentLabel={preferment ? t(`section.${preferment.type}`) : undefined}
+        />
+      )}
+
       {/* ── Fermentation ── */}
       <Card className="p-5" data-print-card>
         <h3 className="mb-4 text-base font-semibold">{t('params.fermentation')}</h3>
@@ -217,7 +240,7 @@ export function CalculatorInputs({
           id="driver"
           label={t('field.driver')}
           value={params.driver}
-          onChange={(value) => onChange('driver', value)}
+          onChange={onDriverChange}
           help={t('field.driver.help')}
           options={[
             { value: 'time', label: t('field.driver.time') },
@@ -225,11 +248,94 @@ export function CalculatorInputs({
           ]}
         />
 
+        {/* The preferment is part of the plan, not a fixed overnight: its time,
+            temperature and fridge hours are the baker's, and its yeast follows. */}
+        {preferment && (
+          <div className="mt-5 rounded-lg border border-dashed border-border p-4">
+            <h4 className="mb-4 text-sm font-semibold">
+              {t('field.preferment.title', { type: prefermentName })}
+            </h4>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <SliderField
+                id="prefermentHours"
+                label={t('field.prefermentHours', { type: prefermentName })}
+                value={params.prefermentHours}
+                min={2}
+                max={72}
+                step={0.5}
+                display={`${num(params.prefermentHours)} h`}
+                onChange={(value) => onChange('prefermentHours', value)}
+                help={t('field.prefermentHours.help')}
+                reference={{
+                  value: preferment.hours,
+                  label: t('field.styleDefault', { value: `${num(preferment.hours)} h` }),
+                }}
+              />
+              <SliderField
+                id="prefermentTemp"
+                label={t('field.prefermentTemp')}
+                value={prefermentTemp}
+                min={4}
+                max={30}
+                step={0.5}
+                display={`${num(prefermentTemp)} °C`}
+                onChange={(value) =>
+                  onChange(
+                    'prefermentTemp',
+                    preferment.temp_c === undefined && value === params.roomTemp ? null : value,
+                  )
+                }
+                help={t('field.prefermentTemp.help')}
+                disabled={params.prefermentColdHours >= params.prefermentHours}
+                reference={
+                  preferment.temp_c !== undefined
+                    ? {
+                        value: preferment.temp_c,
+                        label: t('field.styleDefault', { value: `${num(preferment.temp_c)} °C` }),
+                      }
+                    : {
+                        value: params.roomTemp,
+                        label: t('field.prefermentTemp.room', {
+                          value: `${num(params.roomTemp)} °C`,
+                        }),
+                      }
+                }
+              />
+              <SliderField
+                id="prefermentColdHours"
+                label={t('field.prefermentColdHours')}
+                value={Math.min(params.prefermentColdHours, params.prefermentHours)}
+                min={0}
+                max={Math.max(1, params.prefermentHours)}
+                step={0.5}
+                display={`${num(Math.min(params.prefermentColdHours, params.prefermentHours))} h`}
+                onChange={(value) => onChange('prefermentColdHours', value)}
+                help={t('field.prefermentColdHours.help')}
+              />
+            </div>
+            {results?.preferment && (
+              <p className="mt-4 flex items-center gap-1.5 text-sm tabular text-muted-foreground">
+                {t('field.prefermentYeast', {
+                  type: prefermentName.toLowerCase(),
+                  pct: formatYeastPct(results.preferment.yeastPct, lang),
+                  form: t(`field.yeast.${params.yeastForm}`).toLowerCase(),
+                  grams: formatGrams(
+                    results.totals.flour *
+                      (results.preferment.flourPct / 100) *
+                      (results.preferment.yeastPct / 100),
+                    lang,
+                  ),
+                })}
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {params.driver === 'time' ? (
             <SliderField
               id="totalTime"
-              label={t('field.totalTime')}
+              label={t(preferment ? 'field.totalTime.dough' : 'field.totalTime')}
               value={params.totalTime}
               min={1}
               max={96}
@@ -240,11 +346,25 @@ export function CalculatorInputs({
                 // Cold time can never outlast the ferment it lives inside.
                 if (params.coldHours > value) onChange('coldHours', value);
               }}
-              help={t('field.totalTime.help')}
+              help={t(preferment ? 'field.totalTime.dough.help' : 'field.totalTime.help')}
               reference={{
                 value: style.defaults.totalTime,
                 label: t('field.styleDefault', { value: `${num(style.defaults.totalTime)} h` }),
               }}
+            />
+          ) : params.leavenType === 'commercial' ? (
+            <SliderField
+              id="yeastPct"
+              label={t('field.yeastPct')}
+              value={yeastSliderPosition(freshDose)}
+              min={0}
+              max={100}
+              step={0.5}
+              display={`${formatYeastPct(freshDose * YEAST_CONVERSION[params.yeastForm], lang)}% ${t(
+                `field.yeast.${params.yeastForm}`,
+              ).toLowerCase()}`}
+              onChange={(position) => onChange('yeastPct', yeastFromSliderPosition(position))}
+              help={t('field.yeastPct.help')}
             />
           ) : (
             <SliderField
@@ -286,11 +406,11 @@ export function CalculatorInputs({
           <SliderField
             id="coldHours"
             label={t('field.coldHours')}
-            value={Math.min(params.coldHours, params.totalTime)}
+            value={Math.min(params.coldHours, totalHours)}
             min={0}
-            max={Math.max(1, params.totalTime)}
+            max={Math.max(1, totalHours)}
             step={0.5}
-            display={`${num(Math.min(params.coldHours, params.totalTime))} h`}
+            display={`${num(Math.min(params.coldHours, totalHours))} h`}
             onChange={(value) => onChange('coldHours', value)}
             help={t('field.coldHours.help')}
           />
@@ -306,38 +426,7 @@ export function CalculatorInputs({
             ]}
           />
 
-          <div className="flex flex-col justify-center rounded-lg bg-muted px-4 py-3 sm:col-span-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {params.driver === 'time' ? t('field.leavenPct') : t('field.computedTime')}
-            </span>
-            <span className="mt-0.5 text-xl font-semibold tabular">
-              {params.driver === 'time'
-                ? `${num(computed.leavenPct, 2)}%`
-                : `${num(computed.totalHours)} h`}
-            </span>
-            <span className="mt-1 text-xs text-muted-foreground">
-              {params.driver === 'time'
-                ? t('field.leavenPct.help')
-                : t('field.totalTime.help')}
-            </span>
-          </div>
-
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="startTime" className="text-sm">
-              {t('field.startTime')}
-            </Label>
-            <Input
-              id="startTime"
-              type="datetime-local"
-              value={toDateTimeLocal(startTime)}
-              onChange={(event) => {
-                const next = new Date(event.target.value);
-                if (!Number.isNaN(next.getTime())) onStartTimeChange(next);
-              }}
-              className="tabular"
-            />
-            <p className="text-xs text-muted-foreground">{t('field.startTime.help')}</p>
-          </div>
+          <ComputedReadout params={params} results={results} />
         </div>
       </Card>
 
@@ -477,6 +566,78 @@ export function CalculatorInputs({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+    </div>
+  );
+}
+
+/**
+ * The yeast slider runs on a logarithmic scale: the doses that matter span
+ * three orders of magnitude, from a pinch for a long room ferment to a few
+ * percent for a fast one, and a linear slider would spend all its travel on
+ * the fast end.
+ */
+const YEAST_SLIDER_MIN = 0.005;
+const YEAST_SLIDER_MAX = 6;
+const YEAST_SLIDER_SPAN = Math.log(YEAST_SLIDER_MAX / YEAST_SLIDER_MIN);
+
+function yeastSliderPosition(freshPct: number): number {
+  const fresh = clamp(freshPct, YEAST_SLIDER_MIN, YEAST_SLIDER_MAX);
+  return (100 * Math.log(fresh / YEAST_SLIDER_MIN)) / YEAST_SLIDER_SPAN;
+}
+
+function yeastFromSliderPosition(position: number): number {
+  return round(YEAST_SLIDER_MIN * Math.exp((position / 100) * YEAST_SLIDER_SPAN), 4);
+}
+
+/** What the fixed end of the clock implies at the other end. */
+function ComputedReadout({
+  params,
+  results,
+}: {
+  params: RecipeParams;
+  results: CalculationResults | null;
+}) {
+  const { t, lang } = useI18n();
+  if (!results) return null;
+  const f = results.fermentation;
+  const form = t(`field.yeast.${f.yeastForm}`).toLowerCase();
+
+  let label: string;
+  let value: string;
+  let help: string;
+
+  if (params.driver === 'dose') {
+    label = t('field.computedTime');
+    value = `${formatNumber(f.totalHours, lang)} h`;
+    help = t('field.totalTime.help');
+  } else if (params.leavenType === 'commercial') {
+    label = t('field.computedYeast');
+    value =
+      f.yeastPct > 0
+        ? `${formatYeastPct(f.yeastPct, lang)}% ${form} · ${formatGrams(
+            results.totals.flour * (f.yeastPct / 100),
+            lang,
+          )} g`
+        : t('field.computedYeast.none');
+    help = t('field.computedYeast.help');
+  } else {
+    label = t('field.leavenPct');
+    value = `${formatNumber(f.starterEquivalentPct, lang, 2)}%`;
+    help = t('field.leavenPct.help');
+  }
+
+  return (
+    <div className="flex flex-col justify-center rounded-lg bg-muted px-4 py-3 sm:col-span-2">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
+      <span className="mt-0.5 text-xl font-semibold tabular">{value}</span>
+      {params.leavenType === 'hybrid' && params.driver === 'time' && f.yeastPct > 0 && (
+        <span className="mt-0.5 text-sm tabular text-muted-foreground">
+          + {formatYeastPct(f.yeastPct, lang)}% {form}
+        </span>
+      )}
+      <span className="mt-1 text-xs text-muted-foreground">{help}</span>
     </div>
   );
 }

@@ -7,13 +7,17 @@ import { IngredientTable } from '@/components/recipe/IngredientTable';
 import { RecipeTimeline } from '@/components/recipe/RecipeTimeline';
 import { DoughTempCard } from '@/components/recipe/DoughTempCard';
 import { FermentationClock } from '@/components/recipe/FermentationClock';
+import { YeastClock } from '@/components/recipe/YeastClock';
+import { PlanWarnings } from '@/components/PlanCard';
 import { SourdoughPanel } from '@/components/recipe/SourdoughPanel';
 import { NotesList } from '@/components/recipe/NotesList';
 import { FlourAdvisor } from '@/components/recipe/FlourAdvisor';
 import type { BreadStyle } from '@/data/styles';
+import { isPizzaStyle } from '@/data/styles';
 import type { CalculationResults } from '@/core/types';
+import type { PlanState } from '@/lib/recipe/plan';
 import { useI18n } from '@/i18n';
-import { formatClock, formatGrams, formatNumber } from '@/lib/format';
+import { formatDateTime, formatGrams, formatNumber, formatYeastPct } from '@/lib/format';
 import {
   copyToClipboard,
   downloadText,
@@ -24,7 +28,8 @@ import {
 interface RecipeResultsProps {
   style: BreadStyle;
   results: CalculationResults;
-  startIso: string;
+  /** Lets the plan warnings fix the plan from here, without a trip back. */
+  onPlanChange: (plan: PlanState) => void;
   shareUrl: string;
   onSave: () => void;
   saved: boolean;
@@ -33,7 +38,7 @@ interface RecipeResultsProps {
 export function RecipeResults({
   style,
   results,
-  startIso,
+  onPlanChange,
   shareUrl,
   onSave,
   saved,
@@ -43,7 +48,7 @@ export function RecipeResults({
 
   const n = (value: number, decimals = 1) => formatNumber(value, lang, decimals);
   const pieceUnit =
-    style.category === 'pizza'
+    isPizzaStyle(style)
       ? results.totals.pieces === 1
         ? 'unit.ball'
         : 'unit.balls'
@@ -86,9 +91,14 @@ export function RecipeResults({
               })}
             </p>
           </div>
-          <Badge variant="secondary" className="tabular">
-            {t('recipe.readyAt', { time: formatClock(results.readyAt, lang) })}
-          </Badge>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="tabular">
+              {t('recipe.startAt', { time: formatDateTime(results.plan.startsAt, lang) })}
+            </Badge>
+            <Badge variant="secondary" className="tabular">
+              {t('recipe.readyAt', { time: formatDateTime(results.readyAt, lang) })}
+            </Badge>
+          </div>
         </div>
 
         <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -104,6 +114,14 @@ export function RecipeResults({
           />
         </dl>
       </Card>
+
+      <div className="no-print">
+        <PlanWarnings
+          results={results}
+          plan={{ mode: results.plan.mode === 'start' ? 'start' : 'ready', at: null }}
+          onPlanChange={onPlanChange}
+        />
+      </div>
 
       {/* ── Actions ── */}
       <div className="no-print flex flex-wrap gap-2">
@@ -147,13 +165,17 @@ export function RecipeResults({
           water={results.water}
           doughTemp={results.water.desiredDoughTempC}
           roomTempC={results.fermentation.roomTempC}
-          prefermentTempC={preferment?.meta?.tempC}
+          prefermentTempC={results.preferment?.mixTempC ?? preferment?.meta?.tempC}
         />
         <FermentationCard results={results} />
       </div>
 
       <div className="print-grid grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <FermentationClock results={results} />
+        {results.fermentation.leavenType === 'commercial' ? (
+          <YeastClock results={results} />
+        ) : (
+          <FermentationClock results={results} />
+        )}
         <FlourAdvisor style={style} effectiveHours={results.fermentation.roomEquivHours} />
       </div>
 
@@ -168,7 +190,7 @@ export function RecipeResults({
       {/* ── Timeline ── */}
       <Card className="p-5" data-print-card>
         <h4 className="mb-4 font-semibold">{t('recipe.timeline')}</h4>
-        <RecipeTimeline steps={results.timeline} startIso={startIso} />
+        <RecipeTimeline steps={results.timeline} />
       </Card>
 
       <NotesList notes={results.notes} />
@@ -210,10 +232,10 @@ function FermentationCard({ results }: { results: CalculationResults }) {
         {f.inoculationPct > 0 && (
           <Stat label={t('recipe.inoculation')} value={`${n(f.levainOnFlourPct)}%`} />
         )}
-        {f.yeastPct > 0 && (
+        {f.totalYeastPct > 0 && (
           <Stat
-            label={t('recipe.yeast')}
-            value={`${formatNumber(f.yeastPct, lang, 3)}%`}
+            label={t('recipe.yeastTotal')}
+            value={`${formatYeastPct(f.totalYeastPct, lang)}%`}
           />
         )}
       </dl>

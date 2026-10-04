@@ -4,7 +4,7 @@ import { bulkHoursFor, doublingHoursAt } from '@/core/growth';
 import { FULL_FERMENT_PCT } from '@/data/fermentationTable';
 import type { CalculationResults } from '@/core/types';
 import { useI18n } from '@/i18n';
-import { formatGrams, formatNumber } from '@/lib/format';
+import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 interface FermentationClockProps {
@@ -73,17 +73,6 @@ export function FermentationClock({ results }: FermentationClockProps) {
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
           {t(f.timeCorrection > 1 ? 'clock.slower' : 'clock.faster', {
             pct: n(Math.abs(f.timeCorrection - 1) * 100, 0),
-          })}
-        </p>
-      )}
-
-      {f.yeastPct > 0 && (
-        <p className="mt-3 rounded-lg bg-muted px-3 py-2 text-sm leading-relaxed text-muted-foreground">
-          {t('clock.yeastEquivalent', {
-            yeast: formatNumber(f.yeastPct, lang, 3),
-            form: t(`field.yeast.${f.yeastForm}`).toLowerCase(),
-            grams: formatGrams(results.totals.flour * (f.yeastPct / 100), lang),
-            starter: n(f.starterEquivalentPct, 1),
           })}
         </p>
       )}

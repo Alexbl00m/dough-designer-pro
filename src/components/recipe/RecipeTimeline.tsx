@@ -13,7 +13,13 @@ import {
 } from 'lucide-react';
 import type { TimelinePhase, TimelineStep } from '@/core/types';
 import { useI18n } from '@/i18n';
-import { dayIndex, formatClock, formatDuration, resolveStepValues } from '@/lib/format';
+import {
+  formatClock,
+  formatDayHeading,
+  formatDuration,
+  localDayKey,
+  resolveStepValues,
+} from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 const ICON: Record<TimelinePhase, typeof Clock> = {
@@ -36,19 +42,23 @@ const SPAN_PHASES = new Set<TimelinePhase>(['preferment', 'levain', 'bulk', 'pro
 
 interface RecipeTimelineProps {
   steps: TimelineStep[];
-  startIso: string;
 }
 
-export function RecipeTimeline({ steps, startIso }: RecipeTimelineProps) {
+/**
+ * The plan, step by step, under the calendar day each step falls on — a bake
+ * that starts on Friday evening reads "Friday", "Saturday", not "the day
+ * before" and "day 1".
+ */
+export function RecipeTimeline({ steps }: RecipeTimelineProps) {
   const { t, lang } = useI18n();
 
-  let lastDay: number | null = null;
+  let lastDay: string | null = null;
 
   return (
     <ol className="relative space-y-0">
       {steps.map((step, index) => {
         const Icon = ICON[step.phase];
-        const day = dayIndex(startIso, step.at);
+        const day = localDayKey(step.at);
         const showDay = day !== lastDay;
         lastDay = day;
         const isSpan = SPAN_PHASES.has(step.phase);
@@ -60,9 +70,7 @@ export function RecipeTimeline({ steps, startIso }: RecipeTimelineProps) {
           <li key={`${step.key}-${step.offsetMin}-${index}`}>
             {showDay && (
               <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground first:mt-0">
-                {day < 0
-                  ? t('timeline.dayBefore')
-                  : t('timeline.day', { n: day + 1 })}
+                {formatDayHeading(step.at, lang)}
               </p>
             )}
 
