@@ -10,6 +10,8 @@ import { BREAD_STYLES, getStyleById } from '@/data/styles';
 import type { BreadStyle } from '@/data/styles';
 import type { FermentDriver, LeavenType, PercentBasis, ScaleMode } from '@/core/types';
 import type { MixingMethod, YeastForm } from '@/core/constants';
+import type { BlendPart } from '@/core/flour';
+import { getFlour } from '@/data/flours';
 
 export interface RecipeParams {
   styleId: string;
@@ -47,6 +49,8 @@ export interface RecipeParams {
    * what the baker holds. Null until they take hold of it.
    */
   yeastPct: number | null;
+  /** The baker's own flours, up to three; null keeps the style's blend. */
+  flourBlend: BlendPart[] | null;
   percentBasis: PercentBasis;
 }
 
@@ -83,6 +87,7 @@ export function paramsForStyle(style: BreadStyle): RecipeParams {
     prefermentTemp: null,
     prefermentColdHours: style.preferment?.cold_hours ?? 0,
     yeastPct: null,
+    flourBlend: null,
     percentBasis: 'total',
   };
 }
@@ -116,8 +121,26 @@ const KEYS: Record<keyof RecipeParams, string> = {
   prefermentTemp: 'pt',
   prefermentColdHours: 'pc',
   yeastPct: 'yp',
+  flourBlend: 'fb',
   percentBasis: 'pb',
 };
+
+/** `caputo_pizzeria.70-caputo_manitoba.30`: readable, and nothing in it needs escaping. */
+export const blendToParam = (blend: BlendPart[]): string =>
+  blend.map((p) => `${p.id}.${Math.round(p.pct * 10) / 10}`).join('-');
+
+export function blendFromParam(raw: string): BlendPart[] | null {
+  const parts = raw
+    .split('-')
+    .map((item) => {
+      // Ids never contain a dot; a share may carry one decimal.
+      const match = item.match(/^([a-z0-9_]+)\.(\d+(?:\.\d+)?)$/);
+      return match ? { id: match[1], pct: Number(match[2]) } : null;
+    })
+    .filter((p): p is BlendPart => p !== null && Boolean(getFlour(p.id)) && p.pct > 0)
+    .slice(0, 3);
+  return parts.length ? parts : null;
+}
 
 export function paramsToQuery(params: RecipeParams): string {
   const style = getStyleById(params.styleId);
@@ -131,6 +154,10 @@ export function paramsToQuery(params: RecipeParams): string {
     const value = params[field];
     if (defaults && defaults[field] === value) continue;
     if (value === null || value === undefined) continue;
+    if (Array.isArray(value)) {
+      if (value.length) search.set(short, blendToParam(value));
+      continue;
+    }
     search.set(short, typeof value === 'boolean' ? (value ? '1' : '0') : String(value));
   }
   return search.toString();
@@ -201,6 +228,9 @@ export function queryToParams(query: string): RecipeParams | null {
     const raw = search.get(KEYS[field]);
     if (raw !== null && allowed.includes(raw)) (params[field] as string) = raw;
   }
+
+  const blend = search.get(KEYS.flourBlend);
+  if (blend !== null) params.flourBlend = blendFromParam(blend);
 
   const preferment = search.get(KEYS.usePreferment);
   if (preferment !== null) params.usePreferment = preferment === '1';

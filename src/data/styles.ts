@@ -1148,13 +1148,3 @@ export const getFlourBlendText = (
   if (!blend?.length) return t('flour.bread');
   return blend.map((f) => `${f.percentage}% ${t(f.key)}`).join(' + ');
 };
-
-/** Flour-weighted average protein, used by the strength advisor. */
-export const getBlendProtein = (blend: FlourComponent[] | undefined): number | undefined => {
-  if (!blend?.length) return undefined;
-  const known = blend.filter((f) => typeof f.protein_pct === 'number');
-  if (!known.length) return undefined;
-  const weight = known.reduce((sum, f) => sum + f.percentage, 0);
-  if (weight === 0) return undefined;
-  return known.reduce((sum, f) => sum + (f.protein_pct as number) * f.percentage, 0) / weight;
-};

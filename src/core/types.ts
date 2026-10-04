@@ -4,6 +4,7 @@ import type {
   PrefermentType,
 } from '@/data/styles';
 import type { MixingMethod, YeastForm } from './constants';
+import type { BlendPart, FlourAdvice } from './flour';
 
 export type LeavenType = 'commercial' | 'sourdough' | 'hybrid';
 export type ScaleMode = 'pieces' | 'flour' | 'dough';
@@ -91,6 +92,11 @@ export interface CalculationInputs {
 
   /** Levain hydration, in %. 100 = equal flour and water. */
   starterHydration?: number;
+  /**
+   * The baker's own flours, up to three, with their shares. Replaces the
+   * style's blend; shares are scaled to add up to 100.
+   */
+  flourBlend?: BlendPart[];
   /** Turn the style's preferment on or off. Defaults to on when the style has one. */
   usePreferment?: boolean;
   /** Preferment build time in hours, fridge included. Defaults to the style's own. */
@@ -306,6 +312,8 @@ export interface CalculationResults {
     basisFlour: number;
   };
   preferment?: PrefermentResult;
+  /** The blend's strength against what the plan asks of it, with suggestions. */
+  flour: FlourAdvice;
   timeline: TimelineStep[];
   plan: PlanResult;
   notes: Note[];
