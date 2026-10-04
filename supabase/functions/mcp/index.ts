@@ -1378,6 +1378,12 @@ var sv = {
   "flour.vigevano_oro": "Vigevano Oro di Macina",
   "flour.vigevano_tramonti": "Vigevano Tramonti Oro",
   "flour.pizzuti": "Molino Pizzuti Costa d'Amalfi",
+  "flour.caputo_nuvola": "Caputo Nuvola",
+  "flour.caputo_saccorosso": "Caputo Saccorosso (Cuoco)",
+  "flour.caputo_manitoba": "Caputo Manitoba Oro",
+  "flour.le5stagioni_napoletana": "Le 5 Stagioni Pizza Napoletana",
+  "flour.polselli_classica": "Polselli Classica",
+  "flour.kungsornen_pizza": "Kungs\xF6rnen Pizzamj\xF6l",
   "region.napoli": "Neapel, Italien",
   "region.newyork": "New York, USA",
   "region.detroit": "Detroit, USA",
@@ -1428,9 +1434,31 @@ var sv = {
   "note.from_section": "fr\xE5n egen sektion",
   // ── Flour advisor ──
   "flourAdvice.title": "Mj\xF6lstyrka",
-  "flourAdvice.ok": "Blandningen ligger p\xE5 ca {protein}% protein, vilket r\xE4cker f\xF6r den h\xE4r stilen.",
-  "flourAdvice.weak": "Blandningen ligger p\xE5 ca {protein}% protein men stilen vill ha minst {min}%. Vid {hours} h j\xE4sning riskerar glutenet att brytas ner \u2013 byt till ett starkare mj\xF6l eller korta tiden.",
-  "flourAdvice.long": "Vid {hours} h j\xE4sning beh\xF6ver mj\xF6let vara starkt (W300+ / 13% protein). Svagt mj\xF6l blir klistrigt och tappar formen.",
+  "flourGroup.pizza": "Pizzamj\xF6l",
+  "flourGroup.strong": "Starka mj\xF6l",
+  "flourGroup.bread": "Vetemj\xF6l",
+  "flourGroup.specialty": "\xD6vrigt",
+  "params.flour": "Mj\xF6l",
+  "flour.lead": "V\xE4lj ett till tre mj\xF6l och hur stor del vart och ett ska vara. \xC4ndrar du ett f\xF6ljer de andra med, s\xE5 summan alltid \xE4r 100%.",
+  "flour.which": "Mj\xF6l {n}",
+  "flour.share": "Andel {name}",
+  "flour.add": "L\xE4gg till mj\xF6l",
+  "flour.remove": "Ta bort {name}",
+  "flour.reset": "Tillbaka till stilens mj\xF6l",
+  "flour.strength": "Ca {protein}% protein \xB7 W {w}",
+  "flour.strengthEstimated": "Ca {protein}% protein \xB7 W \u2248 {w} (delvis uppskattat)",
+  "flour.specialty": "{pct}% semola, fullkorn, r\xE5g eller dinkel r\xE4knas inte in i W",
+  "flour.plan": "I din plan mognar mj\xF6let i snitt {hours} h, f\xF6rj\xE4sning och kyl inr\xE4knade. Det passar ett mj\xF6l med W \u2248 {w}.",
+  "flour.fit.ok": "Blandningen passar planen.",
+  "flour.fit.edge": "Det fungerar, men W {w} \xE4r gjort f\xF6r ungef\xE4r {optimum} h mognad. Ett starkare mj\xF6l ger mer marginal om degen f\xE5r st\xE5 l\xE4nge.",
+  "flour.fit.weak": "F\xF6r svagt f\xF6r planen: W {w} \xE4r gjort f\xF6r ungef\xE4r {optimum} h mognad. S\xE5 l\xE4nge riskerar glutenet att brytas ner, och degen blir slapp och klibbig. V\xE4lj ett starkare mj\xF6l eller korta tiden.",
+  "flour.fit.weakProtein": "Blandningen ligger p\xE5 ca {protein}% protein, men stilen vill ha minst {min}%. V\xE4lj ett starkare mj\xF6l.",
+  "flour.fit.strong": "Starkare \xE4n planen beh\xF6ver. Degen kan bli seg och sv\xE5r att \xF6ppna \u2013 ge den l\xE4ngre tid eller blanda i ett svagare mj\xF6l.",
+  "flour.fit.unknown": "Styrkan g\xE5r inte att r\xE4kna ut f\xF6r den h\xE4r blandningen.",
+  "flour.suggest": "F\xF6rslag f\xF6r din plan",
+  "flour.suggestion.w": "W \u2248 {w}",
+  "flour.use": "Anv\xE4nd",
+  "flour.source": "W enligt kvarnens uppgifter d\xE4r den finns, annars uppskattat fr\xE5n proteinhalten. En blandnings W \xE4r ett viktat medel. Mognadstid efter den italienska W-tabellen (W 260 \u2248 9 h, W 280 \u2248 12 h, W 320 \u2248 24 h, W 380 \u2248 48 h) \u2013 kvarnarna anger ofta l\xE4ngre, Caputo Pizzeria upp till 24 h.",
   // ── Saved recipes ──
   "saved.title": "Bakloggen",
   "saved.lead": "Sparade recept ligger i den h\xE4r webbl\xE4saren. Dela ett recept med l\xE4nken ist\xE4llet f\xF6r att flytta filer.",
@@ -1872,6 +1900,12 @@ var en = {
   "flour.vigevano_oro": "Vigevano Oro di Macina",
   "flour.vigevano_tramonti": "Vigevano Tramonti Oro",
   "flour.pizzuti": "Molino Pizzuti Costa d'Amalfi",
+  "flour.caputo_nuvola": "Caputo Nuvola",
+  "flour.caputo_saccorosso": "Caputo Saccorosso (Cuoco)",
+  "flour.caputo_manitoba": "Caputo Manitoba Oro",
+  "flour.le5stagioni_napoletana": "Le 5 Stagioni Pizza Napoletana",
+  "flour.polselli_classica": "Polselli Classica",
+  "flour.kungsornen_pizza": "Kungs\xF6rnen Pizzamj\xF6l",
   "region.napoli": "Naples, Italy",
   "region.newyork": "New York, USA",
   "region.detroit": "Detroit, USA",
@@ -1922,9 +1956,31 @@ var en = {
   "note.from_section": "from its own section",
   // ── Flour advisor ──
   "flourAdvice.title": "Flour strength",
-  "flourAdvice.ok": "The blend averages about {protein}% protein, which is enough for this style.",
-  "flourAdvice.weak": "The blend averages about {protein}% protein but this style wants at least {min}%. Over {hours} h the gluten risks breaking down \u2014 use a stronger flour or shorten the ferment.",
-  "flourAdvice.long": "At {hours} h of fermentation the flour needs to be strong (W300+ / 13% protein). Weak flour turns sticky and loses its shape.",
+  "flourGroup.pizza": "Pizza flours",
+  "flourGroup.strong": "Strong flours",
+  "flourGroup.bread": "Wheat flours",
+  "flourGroup.specialty": "Other",
+  "params.flour": "Flour",
+  "flour.lead": "Choose one to three flours and how much of the flour each one is. Change one and the others follow, so the total is always 100%.",
+  "flour.which": "Flour {n}",
+  "flour.share": "Share of {name}",
+  "flour.add": "Add a flour",
+  "flour.remove": "Remove {name}",
+  "flour.reset": "Back to the style's flour",
+  "flour.strength": "About {protein}% protein \xB7 W {w}",
+  "flour.strengthEstimated": "About {protein}% protein \xB7 W \u2248 {w} (partly estimated)",
+  "flour.specialty": "{pct}% semolina, wholegrain, rye or spelt not counted in W",
+  "flour.plan": "In your plan the flour matures for {hours} h on average, preferment and fridge included. That suits a flour of W \u2248 {w}.",
+  "flour.fit.ok": "The blend suits the plan.",
+  "flour.fit.edge": "It works, but W {w} is made for about {optimum} h of maturation. A stronger flour gives more margin when the dough stands long.",
+  "flour.fit.weak": "Too weak for the plan: W {w} is made for about {optimum} h of maturation. Over this long the gluten can break down and the dough turns slack and sticky. Choose a stronger flour or shorten the time.",
+  "flour.fit.weakProtein": "The blend is about {protein}% protein, but the style wants at least {min}%. Choose a stronger flour.",
+  "flour.fit.strong": "Stronger than the plan needs. The dough can be tough and hard to open \u2013 give it longer or blend in a weaker flour.",
+  "flour.fit.unknown": "The blend's strength cannot be worked out.",
+  "flour.suggest": "Suggested for your plan",
+  "flour.suggestion.w": "W \u2248 {w}",
+  "flour.use": "Use",
+  "flour.source": "W from the mill's specification where published, otherwise estimated from protein. A blend's W is a weighted average. Maturation follows the Italian W table (W 260 \u2248 9 h, W 280 \u2248 12 h, W 320 \u2248 24 h, W 380 \u2248 48 h) \u2013 mills often rate longer, Caputo Pizzeria up to 24 h.",
   // ── Saved recipes ──
   "saved.title": "Bake log",
   "saved.lead": "Saved recipes live in this browser. Share a recipe with its link rather than moving files around.",
@@ -2234,6 +2290,38 @@ var localeOf = (lang) => lang === "sv" ? "sv-SE" : "en-GB";
 // src/lib/mcp/shared.ts
 import { z } from "npm:zod@^3.25.76";
 
+// src/data/flours.ts
+var FLOURS = [
+  // ── Pizza ──
+  { id: "caputo_pizzeria", grade: "00", proteinPct: 12.5, w: [260, 270], use: "pizza" },
+  { id: "caputo_nuvola", grade: "0", proteinPct: 12.5, w: [260, 280], use: "pizza" },
+  { id: "polselli_classica", grade: "00", proteinPct: 12.5, w: [260, 280], use: "pizza" },
+  { id: "caputo_saccorosso", grade: "00", proteinPct: 13, w: [300, 320], use: "pizza" },
+  { id: "le5stagioni_napoletana", grade: "00", proteinPct: 13.5, w: [310, 310], use: "pizza" },
+  { id: "vigevano_oro", grade: "1", proteinPct: 13, use: "pizza" },
+  { id: "pizzuti", grade: "00", proteinPct: 13, use: "pizza" },
+  { id: "vigevano_tramonti", grade: "1", proteinPct: 14, use: "pizza" },
+  { id: "kungsornen_pizza", proteinPct: 12, use: "pizza" },
+  { id: "tipo00", grade: "00", proteinPct: 12, use: "pizza" },
+  // ── Strong ──
+  { id: "caputo_manitoba", grade: "0", proteinPct: 14.5, w: [370, 390], use: "strong" },
+  { id: "bread_high", proteinPct: 13.5, use: "strong" },
+  // ── Everyday wheat ──
+  { id: "tipo0", grade: "0", proteinPct: 12, use: "bread" },
+  { id: "tipo1", grade: "1", proteinPct: 12.5, use: "bread" },
+  { id: "bread", proteinPct: 12, use: "bread" },
+  { id: "t65", grade: "T65", proteinPct: 11.5, use: "bread" },
+  { id: "ap", proteinPct: 10.5, use: "bread" },
+  // ── Specialty ──
+  { id: "semolina", proteinPct: 12.5, use: "specialty" },
+  { id: "wholewheat", proteinPct: 14, use: "specialty" },
+  { id: "spelt", proteinPct: 14, use: "specialty" },
+  { id: "rye", proteinPct: 8, use: "specialty" }
+];
+var getFlour = (id) => FLOURS.find((f) => f.id === id);
+var flourIdOfKey = (key) => key.replace(/^flour\./, "");
+var flourKey = (id) => `flour.${id}`;
+
 // src/core/constants.ts
 var Q10 = 2;
 var Q10_STARTER = 3.8;
@@ -2281,6 +2369,168 @@ var round = (value, decimals = 0) => {
 };
 var clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 var rateRatio = (temp, reference = REFERENCE_TEMP_C, q10 = Q10) => q10 ** ((temp - reference) / 10);
+
+// src/core/flour.ts
+var MATURATION_TABLE = [
+  [2, 160],
+  [3, 180],
+  [3.5, 200],
+  [4, 215],
+  [6, 240],
+  [9, 260],
+  [12, 280],
+  [15, 300],
+  [24, 320],
+  [48, 380],
+  [72, 400]
+];
+var MATURATION_TOLERANCE = 2.5;
+var estimateW = (proteinPct) => clamp(250 + (proteinPct - 12) * 40, 120, 420);
+function recommendedW(hours) {
+  const table = MATURATION_TABLE;
+  const h = clamp(hours, table[0][0], table[table.length - 1][0]);
+  for (let i = 0; i < table.length - 1; i += 1) {
+    const [h0, w0] = table[i];
+    const [h1, w1] = table[i + 1];
+    if (h <= h1) {
+      const f = (Math.log(h) - Math.log(h0)) / (Math.log(h1) - Math.log(h0));
+      return w0 + f * (w1 - w0);
+    }
+  }
+  return table[table.length - 1][1];
+}
+function optimumHours(w) {
+  const table = MATURATION_TABLE;
+  if (w <= table[0][1]) return table[0][0];
+  for (let i = 0; i < table.length - 1; i += 1) {
+    const [h0, w0] = table[i];
+    const [h1, w1] = table[i + 1];
+    if (w <= w1) {
+      const f = (w - w0) / (w1 - w0);
+      return Math.exp(Math.log(h0) + f * (Math.log(h1) - Math.log(h0)));
+    }
+  }
+  return table[table.length - 1][0];
+}
+function strengthOf(spec, proteinPct) {
+  if (spec?.use === "specialty") return { w: void 0, wEstimated: false };
+  if (spec?.w) return { w: (spec.w[0] + spec.w[1]) / 2, wEstimated: false };
+  return { w: estimateW(proteinPct), wEstimated: true };
+}
+function normalizeBlend(parts) {
+  const usable = (parts ?? []).filter((p) => getFlour(p.id) && p.pct > 0).slice(0, 3);
+  const sum = usable.reduce((s, p) => s + p.pct, 0);
+  if (!usable.length || sum <= 0) return void 0;
+  return usable.map((p) => ({ id: p.id, pct: p.pct / sum * 100 }));
+}
+function describeBlend(parts) {
+  return parts.map((p) => {
+    const spec = getFlour(p.id);
+    const proteinPct = p.proteinPct ?? spec?.proteinPct ?? 12;
+    return { id: p.id, pct: p.pct, proteinPct, ...strengthOf(spec, proteinPct) };
+  });
+}
+var partsOfStyleBlend = (blend) => (blend ?? []).map((f) => ({
+  id: flourIdOfKey(f.key),
+  pct: f.percentage,
+  proteinPct: f.protein_pct
+}));
+function adviseFlour(input) {
+  const parts = describeBlend(input.parts);
+  const total = parts.reduce((s, p) => s + p.pct, 0) || 1;
+  const proteinPct = parts.reduce((s, p) => s + p.proteinPct * p.pct, 0) / total;
+  const rated = parts.filter((p) => p.w !== void 0);
+  const ratedPct = rated.reduce((s, p) => s + p.pct, 0);
+  const w = ratedPct > 0 ? rated.reduce((s, p) => s + p.w * p.pct, 0) / ratedPct : void 0;
+  const wEstimated = rated.some((p) => p.wEstimated);
+  const specialtyPct = (total - ratedPct) / total * 100;
+  const hours = Math.max(1, input.maturationHours);
+  const target = recommendedW(hours);
+  const optimum = w !== void 0 ? optimumHours(w) : void 0;
+  const belowStyle = input.minProteinPct !== void 0 && proteinPct < input.minProteinPct - 0.25;
+  let fit = "unknown";
+  if (optimum !== void 0) {
+    if (hours > optimum * MATURATION_TOLERANCE || belowStyle) fit = "weak";
+    else if (hours > optimum * 1.6) fit = "edge";
+    else if (hours < optimum / 3) fit = "strong";
+    else fit = "ok";
+  } else if (belowStyle) {
+    fit = "weak";
+  }
+  return {
+    parts,
+    proteinPct: round(proteinPct, 1),
+    w: w !== void 0 ? round(w, 0) : void 0,
+    wEstimated,
+    specialtyPct: round(specialtyPct, 1),
+    maturationHours: round(hours, 1),
+    recommendedW: round(target, 0),
+    optimumHours: optimum !== void 0 ? round(optimum, 1) : void 0,
+    fit,
+    minProteinPct: belowStyle ? input.minProteinPct : void 0,
+    // A pizza baker always gets the flour that suits the plan; a bread baker
+    // only when the flour is short of what the plan asks.
+    suggestions: input.pizza || fit === "weak" || fit === "edge" ? suggestFlours(parts, target, input.pizza, fit === "weak" || fit === "edge") : []
+  };
+}
+function blendMaturationHours(doughHours, prefermentHours = 0, prefermentShare = 0) {
+  const share = clamp(prefermentShare, 0, 1);
+  return share * (prefermentHours + doughHours) + (1 - share) * doughHours;
+}
+var candidates = (pizza) => FLOURS.filter(
+  (f) => pizza ? f.use === "pizza" && f.w !== void 0 : f.use === "bread" || f.use === "strong"
+);
+var midW = (f) => f.w ? (f.w[0] + f.w[1]) / 2 : estimateW(f.proteinPct);
+function suggestFlours(current, targetW, pizza, shortOfTarget = true) {
+  const pool = candidates(pizza);
+  const strongest = getFlour("caputo_manitoba");
+  const weakest = getFlour(pizza ? "caputo_pizzeria" : "ap");
+  const kept = current.filter((p) => p.w === void 0);
+  const keptPct = kept.reduce((sum, p) => sum + p.pct, 0);
+  const whiteShare = Math.max(0, 100 - keptPct) / 100;
+  const withKept = (parts) => {
+    const white = parts.map((p) => ({ id: p.id, pct: Math.round(p.pct * whiteShare) }));
+    const rest = kept.map((p) => ({ id: p.id, pct: Math.round(p.pct) }));
+    const drift = 100 - [...white, ...rest].reduce((sum, p) => sum + p.pct, 0);
+    if (white.length) white[0].pct += drift;
+    return [...white, ...rest];
+  };
+  const rated = current.filter((p) => p.w !== void 0);
+  const ratedPct = rated.reduce((sum, p) => sum + p.pct, 0);
+  const currentW = ratedPct > 0 ? rated.reduce((sum, p) => sum + p.w * p.pct, 0) / ratedPct : void 0;
+  const gap = (w) => Math.abs(w - targetW);
+  const improves = (w) => currentW === void 0 || gap(w) < gap(currentW) - 5;
+  const signature = (parts) => parts.map((p) => `${p.id}:${Math.round(p.pct)}`).sort().join("|");
+  const currentSignature = signature(current);
+  const single = pool.map((f) => ({ parts: withKept([{ id: f.id, pct: 100 }]), w: round(midW(f), 0) })).reduce((a, b) => gap(b.w) < gap(a.w) ? b : a);
+  const cutOf = (base) => {
+    if (gap(base.w) <= 20) return void 0;
+    const partner = targetW > base.w ? strongest : weakest;
+    const partnerW = midW(partner);
+    if (partner.id === base.id || Math.sign(partnerW - base.w) !== Math.sign(targetW - base.w)) {
+      return void 0;
+    }
+    const maxShare = partner.id === strongest.id ? pizza ? 30 : 50 : 70;
+    const share = clamp(Math.round((targetW - base.w) / (partnerW - base.w) * 20) * 5, 10, maxShare);
+    return {
+      parts: withKept([
+        { id: base.id, pct: 100 - share },
+        { id: partner.id, pct: share }
+      ]),
+      w: round((base.w * (100 - share) + partnerW * share) / 100, 0)
+    };
+  };
+  const main = [...rated].sort((a, b) => b.pct - a.pct)[0];
+  const fresh = (c) => c && signature(c.parts) !== currentSignature ? c : void 0;
+  const mainCut = fresh(main ? cutOf({ id: main.id, w: main.w }) : void 0);
+  const strongestBase = pool.filter((f) => f.id !== strongest.id).reduce((a, b) => midW(b) > midW(a) ? b : a);
+  const strongCut = targetW > midW(strongestBase) ? fresh(cutOf({ id: strongestBase.id, w: midW(strongestBase) })) : void 0;
+  const cut = mainCut && (gap(mainCut.w) <= 25 || !strongCut || gap(mainCut.w) <= gap(strongCut.w)) ? mainCut : strongCut;
+  const useful = (s) => Boolean(s) && signature(s.parts) !== currentSignature && (shortOfTarget ? improves(s.w) : gap(s.w) <= 25);
+  const ordered = pizza ? [single, shortOfTarget ? cut : void 0] : [cut, single];
+  const suggestions = ordered.filter(useful);
+  return suggestions.slice(0, 2);
+}
 
 // src/data/fermentationTable.ts
 var FULL_FERMENT_PCT = 97.7;
@@ -2795,6 +3045,7 @@ function calculateRecipe(inputs) {
   const yeastForm = inputs.yeastForm;
   const leavenType = inputs.leavenType;
   const usePreferment = (inputs.usePreferment ?? true) && Boolean(style.preferment);
+  const chosenBlend = normalizeBlend(inputs.flourBlend);
   const preferment = usePreferment ? style.preferment : void 0;
   const percentBasis = inputs.percentBasis ?? "total";
   const build = preferment ? resolvePrefermentBuild(preferment, inputs, roomTemp, coldTemp) : void 0;
@@ -3048,7 +3299,7 @@ function calculateRecipe(inputs) {
     });
   }
   const finalIngredients = [];
-  const blend = style.flourBlend;
+  const blend = chosenBlend ? chosenBlend.map((p) => ({ key: flourKey(p.id), percentage: round(p.pct, 1) })) : style.flourBlend;
   if (blend?.length) {
     for (const component of blend) {
       const grams = finalFlour * (component.percentage / 100);
@@ -3176,6 +3427,12 @@ function calculateRecipe(inputs) {
     proofHours -= surplus;
     bulkHours += surplus;
   }
+  const flour = adviseFlour({
+    parts: chosenBlend ?? partsOfStyleBlend(style.flourBlend ?? [{ key: "flour.bread", percentage: 100 }]),
+    maturationHours: blendMaturationHours(requestedTotal, build?.hours, prefShare),
+    pizza: isPizzaStyle(style),
+    minProteinPct: style.minProteinPct
+  });
   const now = inputs.now ?? /* @__PURE__ */ new Date();
   const anchor = inputs.plan ? { mode: inputs.plan.mode, at: inputs.plan.at } : { mode: "mix", at: inputs.startTime ?? now };
   const schedule = buildSchedule({
@@ -3319,6 +3576,7 @@ function calculateRecipe(inputs) {
       basisFlour: round(basisFlour, 1)
     },
     preferment: prefermentResult,
+    flour,
     timeline: schedule.steps,
     plan,
     notes,
@@ -3565,6 +3823,14 @@ var recipeInputSchema = {
   desired_dough_temp: z.number().optional().describe("Target dough temperature in \xB0C. Defaults to the style's own."),
   flour_temp: z.number().optional().describe("Flour temperature in \xB0C. Defaults to room temp."),
   starter_hydration: z.number().optional().describe("Levain hydration in %. Default 100."),
+  flour_blend: z.array(
+    z.object({
+      id: z.string().describe(
+        "Flour id: caputo_pizzeria, caputo_nuvola, polselli_classica, caputo_saccorosso, le5stagioni_napoletana, caputo_manitoba, kungsornen_pizza, tipo00, tipo0, tipo1, bread, bread_high, t65, ap, semolina, wholewheat, spelt, rye, vigevano_oro, vigevano_tramonti, pizzuti."
+      ),
+      pct: z.number().positive().describe("Share of the flour, %. Shares are scaled to add up to 100.")
+    })
+  ).max(3).optional().describe("Up to three flours with their shares, replacing the style's blend."),
   use_preferment: z.boolean().optional().describe("Whether to use the style's preferment. Default true."),
   start_time: z.string().optional().describe(
     "ISO timestamp when the plan starts \u2014 the first step, preferment or levain build included. Defaults to now."
@@ -3614,6 +3880,7 @@ function resolveRecipe(input) {
     flourTemp: input.flour_temp,
     starterHydration: input.starter_hydration,
     usePreferment: input.use_preferment,
+    flourBlend: input.flour_blend?.map((part) => ({ id: String(part.id), pct: Number(part.pct) })),
     prefermentHours: input.preferment_hours,
     prefermentTemp: input.preferment_temp,
     prefermentColdHours: input.preferment_cold_hours,
@@ -3635,6 +3902,18 @@ function toReadable({ style, results, t }) {
     water: results.water,
     fermentation: results.fermentation,
     preferment: results.preferment,
+    flour: {
+      ...results.flour,
+      parts: results.flour.parts.map((p) => ({ ...p, name: t(`flour.${p.id}`) })),
+      verdict: t(`flour.fit.${results.flour.fit}`, {
+        w: results.flour.w ?? "\u2013",
+        optimum: Math.round(results.flour.optimumHours ?? 0)
+      }),
+      suggestions: results.flour.suggestions.map((s) => ({
+        w: s.w,
+        parts: s.parts.map((p) => ({ ...p, name: t(`flour.${p.id}`) }))
+      }))
+    },
     params: results.params,
     sections: results.sections.map((section) => ({
       id: section.id,

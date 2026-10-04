@@ -176,7 +176,7 @@ export function RecipeResults({
         ) : (
           <FermentationClock results={results} />
         )}
-        <FlourAdvisor style={style} effectiveHours={results.fermentation.roomEquivHours} />
+        <FlourAdvisor advice={results.flour} />
       </div>
 
       <SourdoughPanel

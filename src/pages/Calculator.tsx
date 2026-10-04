@@ -130,6 +130,7 @@ export default function Calculator() {
         prefermentTemp: params.prefermentTemp ?? undefined,
         prefermentColdHours: params.prefermentColdHours,
         yeastPct: params.yeastPct ?? undefined,
+        flourBlend: params.flourBlend ?? undefined,
       }, plan, now);
     } catch (error) {
       console.error('Recipe calculation failed', error);

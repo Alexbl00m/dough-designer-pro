@@ -12,6 +12,9 @@
  */
 
 import type { BreadStyle, IngredientType, PrefermentSpec } from '@/data/styles';
+import { isPizzaStyle } from '@/data/styles';
+import { flourKey } from '@/data/flours';
+import { adviseFlour, blendMaturationHours, normalizeBlend, partsOfStyleBlend } from './flour';
 import {
   DEFAULT_COLD_TEMP_C,
   FRICTION_FACTOR_C,
@@ -116,6 +119,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   const leavenType = inputs.leavenType;
 
   const usePreferment = (inputs.usePreferment ?? true) && Boolean(style.preferment);
+  const chosenBlend = normalizeBlend(inputs.flourBlend);
   const preferment = usePreferment ? style.preferment : undefined;
   const percentBasis = inputs.percentBasis ?? 'total';
 
@@ -465,9 +469,12 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   // Final dough
   const finalIngredients: Ingredient[] = [];
 
-  // Flour, split across the blend. The preferment and levain draw from the
-  // blend proportionally so the overall blend ratio is preserved.
-  const blend = style.flourBlend;
+  // Flour, split across the blend — the baker's own if they chose one, the
+  // style's otherwise. The preferment and levain draw from the blend
+  // proportionally so the overall blend ratio is preserved.
+  const blend = chosenBlend
+    ? chosenBlend.map((p) => ({ key: flourKey(p.id), percentage: round(p.pct, 1) }))
+    : style.flourBlend;
   if (blend?.length) {
     for (const component of blend) {
       const grams = finalFlour * (component.percentage / 100);
@@ -633,7 +640,15 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
     bulkHours += surplus;
   }
 
-  // ── 9. Schedule, pinned where the baker wants it ──
+  // ── 9. Flour strength: what the blend can stand, and what the plan asks ──
+  const flour = adviseFlour({
+    parts: chosenBlend ?? partsOfStyleBlend(style.flourBlend ?? [{ key: 'flour.bread', percentage: 100 }]),
+    maturationHours: blendMaturationHours(requestedTotal, build?.hours, prefShare),
+    pizza: isPizzaStyle(style),
+    minProteinPct: style.minProteinPct,
+  });
+
+  // ── 10. Schedule, pinned where the baker wants it ──
   const now = inputs.now ?? new Date();
   const anchor: ScheduleAnchor = inputs.plan
     ? { mode: inputs.plan.mode, at: inputs.plan.at }
@@ -661,7 +676,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
   });
   const plan = analysePlan(schedule, anchor.mode, now, (build?.hours ?? 0) + requestedTotal);
 
-  // ── 10. Notes ──
+  // ── 11. Notes ──
   const doughWeight = sections
     .filter((s) => s.id === 'final')
     .reduce((sum, s) => sum + s.totalGrams, 0);
@@ -793,6 +808,7 @@ export function calculateRecipe(inputs: CalculationInputs): CalculationResults {
       basisFlour: round(basisFlour, 1),
     },
     preferment: prefermentResult,
+    flour,
     timeline: schedule.steps,
     plan,
     notes,

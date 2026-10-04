@@ -90,6 +90,18 @@ export const recipeInputSchema = {
     .describe("Target dough temperature in °C. Defaults to the style's own."),
   flour_temp: z.number().optional().describe('Flour temperature in °C. Defaults to room temp.'),
   starter_hydration: z.number().optional().describe('Levain hydration in %. Default 100.'),
+  flour_blend: z
+    .array(
+      z.object({
+        id: z.string().describe(
+          'Flour id: caputo_pizzeria, caputo_nuvola, polselli_classica, caputo_saccorosso, le5stagioni_napoletana, caputo_manitoba, kungsornen_pizza, tipo00, tipo0, tipo1, bread, bread_high, t65, ap, semolina, wholewheat, spelt, rye, vigevano_oro, vigevano_tramonti, pizzuti.',
+        ),
+        pct: z.number().positive().describe('Share of the flour, %. Shares are scaled to add up to 100.'),
+      }),
+    )
+    .max(3)
+    .optional()
+    .describe("Up to three flours with their shares, replacing the style's blend."),
   use_preferment: z
     .boolean()
     .optional()
@@ -165,6 +177,7 @@ export function resolveRecipe(input: RecipeToolInput): ResolvedRecipe | { error:
     flourTemp: input.flour_temp,
     starterHydration: input.starter_hydration,
     usePreferment: input.use_preferment,
+    flourBlend: input.flour_blend?.map((part) => ({ id: String(part.id), pct: Number(part.pct) })),
     prefermentHours: input.preferment_hours,
     prefermentTemp: input.preferment_temp,
     prefermentColdHours: input.preferment_cold_hours,
@@ -189,6 +202,18 @@ export function toReadable({ style, results, t }: ResolvedRecipe) {
     water: results.water,
     fermentation: results.fermentation,
     preferment: results.preferment,
+    flour: {
+      ...results.flour,
+      parts: results.flour.parts.map((p) => ({ ...p, name: t(`flour.${p.id}`) })),
+      verdict: t(`flour.fit.${results.flour.fit}`, {
+        w: results.flour.w ?? '–',
+        optimum: Math.round(results.flour.optimumHours ?? 0),
+      }),
+      suggestions: results.flour.suggestions.map((s) => ({
+        w: s.w,
+        parts: s.parts.map((p) => ({ ...p, name: t(`flour.${p.id}`) })),
+      })),
+    },
     params: results.params,
     sections: results.sections.map((section) => ({
       id: section.id,

@@ -49,3 +49,26 @@ describe('recipe links', () => {
     expect(params.yeastPct).toBeNull();
   });
 });
+
+describe('flour blends in links', () => {
+  it('round-trip, decimals included', () => {
+    const style = getStyleById('neapolitan')!;
+    const params = {
+      ...paramsForStyle(style),
+      flourBlend: [
+        { id: 'caputo_pizzeria', pct: 67.5 },
+        { id: 'caputo_manitoba', pct: 32.5 },
+      ],
+    };
+    const query = paramsToQuery(params);
+    expect(query).toContain('fb=caputo_pizzeria.67.5-caputo_manitoba.32.5');
+    expect(queryToParams(query)!.flourBlend).toEqual(params.flourBlend);
+  });
+
+  it('drop flours they do not know, and fall back to the style when nothing is left', () => {
+    expect(queryToParams('s=neapolitan&fb=caputo_pizzeria.70-mystery.30')!.flourBlend).toEqual([
+      { id: 'caputo_pizzeria', pct: 70 },
+    ]);
+    expect(queryToParams('s=neapolitan&fb=mystery.100')!.flourBlend).toBeNull();
+  });
+});

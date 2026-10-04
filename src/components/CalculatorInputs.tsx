@@ -19,6 +19,7 @@ import { FRICTION_FACTOR_C } from '@/core/constants';
 import type { MixingMethod, YeastForm } from '@/core/constants';
 import type { FermentDriver, LeavenType, PercentBasis, ScaleMode } from '@/core/types';
 import { PlanCard } from '@/components/PlanCard';
+import { FlourCard } from '@/components/FlourCard';
 import type { PlanState } from '@/lib/recipe/plan';
 import type { CalculationResults } from '@/core/types';
 import { YEAST_CONVERSION, clamp, round } from '@/core/constants';
@@ -222,6 +223,14 @@ export function CalculatorInputs({
           </div>
         </div>
       </Card>
+
+      {/* ── Flour ── */}
+      <FlourCard
+        style={style}
+        blend={params.flourBlend}
+        advice={results?.flour}
+        onChange={(blend) => onChange('flourBlend', blend)}
+      />
 
       {/* ── Plan ── */}
       {results && (
