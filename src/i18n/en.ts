@@ -10,39 +10,34 @@ export const en: Record<string, string> = {
   'nav.home': 'Back to home',
   'nav.back': 'Back',
   'nav.next': 'Next',
-  'nav.step': 'Step {n} of {total}',
+  'nav.steps': 'Steps',
 
-  // ── Hero ──
-  'hero.title': "Baker's",
-  'hero.titleAccent': 'Calculator',
-  'hero.lead': 'Dough maths built on fermentation chemistry.\nThe right yeast, the right water temperature, the right time — every time.',
+  // ── Landing ──
+  'hero.title': 'Dough ready when you want to eat.',
+  'hero.lead': 'Yeast, water temperature and a timeline for {n} styles, worked out for your time, your kitchen and your flour.',
   'hero.cta': 'Start calculating',
   'hero.secondary': 'How it works',
-  'hero.styles': '{n} styles',
-  'hero.scroll': 'Read on',
 
-  'feature.title': 'Precision meets craft',
-  'feature.lead': 'From Neapolitan pizza to rye sourdough — one model, different conditions.',
-  'feature.q10.title':
-    'Yeast and sourdough, each on its own curve',
-  'feature.q10.body':
-    'Yeast follows TXCraig1\'s model with Gänzle\'s temperature curve; sourdough a measured fermentation table. Fridge time is converted on each curve, including the hours the dough is still warm on its way down.',
-  'feature.timing.title':
-    'Ready when you want',
-  'feature.timing.body':
-    'Say when you want to be done and the whole plan is worked backwards — preferment, folds, fridge, shaping and bake — with a warning for any step in the middle of the night.',
-  'feature.styles.title': '{n} styles',
-  'feature.styles.body':
+  'landing.plan.title': 'Ready when you want',
+  'landing.plan.body':
+    'Pick when the dough should be ready and the plan runs backwards from there, from the preferment to the oven. Any step in the middle of the night is flagged.',
+  'landing.plan.open': 'Open the example',
+  'landing.numbers.title': 'The numbers you would otherwise guess',
+  'landing.yeast.label': '{form} for {count} {unit}',
+  'landing.yeast.body':
+    '{preferment} g goes in the poolish and {dough} g in the dough. A ferment twice as long needs about a third of the yeast.',
+  'landing.water.body':
+    'The poolish comes in cold from the fridge, so the water warms the dough to {dough} °C in a {room} °C kitchen.',
+  'landing.more.title': 'Also included',
+  'landing.more.styles.title': '{n} styles',
+  'landing.more.styles.body':
     'Pizza, bread, enriched doughs and preferments. Poolish, biga and levain are subtracted from the final dough automatically.',
-  'feature.ddt.title': 'DDT water temperature',
-  'feature.ddt.body':
-    'Water temperature solved from target dough temperature, flour, room and friction — with an ice split when you need one.',
-  'feature.export.title': 'Save, share, print',
-  'feature.export.body':
-    'Every recipe gets a shareable link. Keep it in the bake log, print a clean bake sheet or export it as text.',
-  'feature.mcp.title': 'Open MCP server',
-  'feature.mcp.body':
-    'Four tools — list_styles, get_style, calculate_recipe and explain_recipe — expose the engine to AI assistants.',
+  'landing.more.share.title': 'Save, share, print',
+  'landing.more.share.body':
+    'Every recipe gets its own link. Keep it in the bake log, print a clean bake sheet or download it as text.',
+  'landing.more.mcp.title': 'Open MCP server',
+  'landing.more.mcp.body':
+    'The same engine runs as an MCP server, so AI assistants can calculate and explain recipes with it.',
 
   // ── Categories ──
   'category.pizza': 'Pizza',
@@ -88,7 +83,7 @@ export const en: Record<string, string> = {
   'field.percentBasis.total': 'Total flour',
   'field.percentBasis.dough': 'Dough flour',
   'field.percentBasis.help':
-    'Which flour the percentages divide by. “Total flour” counts the flour inside the starter and preferment; “dough flour” counts only what you weigh out separately. Recipes use both and rarely say which — switch here if the numbers do not match the recipe you are reading.',
+    'Which flour the percentages divide by. “Total flour” counts the flour inside the starter and preferment; “dough flour” counts only what you weigh out separately. Recipes use both and rarely say which. Switch here if the numbers do not match the recipe you are reading.',
   'clock.title': 'The fermentation clock',
   'clock.doubling': 'Doubling {hours} h',
   'clock.lead':
@@ -100,13 +95,13 @@ export const en: Record<string, string> = {
   'clock.source':
     'The curve is interpolated from a measured table of bulk times across eight temperatures and eight starter doses. The temperature dependence is not a single Q10: steep in the cold, around 3 at room temperature, flattening near the yeast optimum around 29 °C.',
   'yeastClock.title': 'The yeast clock',
-  'yeastClock.lead': 'Yeast does not follow the sourdough curve. Double it and the dough is about a third faster; halve it and it takes about half as long again. Warmer is faster – the fridge is nearly ten times slower than 21 °C.',
+  'yeastClock.lead': 'Yeast does not follow the sourdough curve. Double it and the dough is about a third faster; halve it and it takes about half as long again. Warmer is faster, and the fridge is nearly ten times slower than 21 °C.',
   'yeastClock.dose': '{pct}% {form}',
   'yeastClock.hours': '{hours} h',
   'yeastClock.table': 'Yeast for time and temperature',
   'yeastClock.tableLead': '{form} as % of flour for a straight dough with this recipe\'s salt, sugar, water and fat, at room temperature throughout. Your setting is highlighted.',
   'yeastClock.carried': 'The preferment carries the equivalent of {pct}% fresh yeast on all the flour.',
-  'yeastClock.source': 'Model: TXCraig1\'s yeast model (pizzamaking.com) with Gänzle\'s temperature curve. Anchor: 0.048% instant is ready in 12 h at 21 °C. Poolish calibrated on the rule of thumb – 0.1% for 12–15 h, 1.5% for 3 h – and biga on Giorilli\'s 1% for 18 h at 18 °C.',
+  'yeastClock.source': 'Model: TXCraig1\'s yeast model (pizzamaking.com) with Gänzle\'s temperature curve. Anchor: 0.048% instant is ready in 12 h at 21 °C. Poolish calibrated on the rule of thumb (0.1% for 12–15 h, 1.5% for 3 h) and biga on Giorilli\'s 1% for 18 h at 18 °C.',
 
   'field.driver': 'What are you holding?',
   'field.driver.time': 'I choose the time',
@@ -115,7 +110,7 @@ export const en: Record<string, string> = {
     'Two ways to hold the same equation. Choose the time and the leavening follows; choose the leavening and the time follows. They can never contradict each other.',
   'field.leavenPct': 'Leavening amount',
   'field.leavenPct.help':
-    'Ripe levain as a percentage of the dough flour — the figure recipes mean by "inoculation". Yeast is converted to the same scale.',
+    'Ripe levain as a percentage of the dough flour, the figure recipes mean by "inoculation". Yeast is converted to the same scale.',
   'field.computedTime': 'Calculated fermentation time',
   'params.plan': 'Plan',
   'plan.mode.ready': 'Ready by',
@@ -132,13 +127,13 @@ export const en: Record<string, string> = {
   'plan.fermentSplit': '{type} {pref} h + dough {dough} h = {total} h of fermentation',
   'plan.past': 'Not enough time: to be ready {ready} you would have had to start {start}.',
   'plan.past.fix': 'Earliest ready {time}',
-  'plan.night': '{count} steps fall between 11 pm and 6 am – the first at {time}: {step}.',
+  'plan.night': '{count} steps fall between 11 pm and 6 am. The first is at {time}: {step}.',
   'plan.night.fixReady': 'Ready {time} instead',
   'plan.night.fixStart': 'Start {time} instead',
   'plan.night.none': 'No time within a day keeps every step in daylight hours. Shorten the ferment or move part of it into the fridge.',
   'field.preferment.title': '{type}',
   'field.prefermentHours': '{type} time',
-  'field.prefermentHours.help': 'The whole preferment, from mixing it until it goes into the dough – fridge time included.',
+  'field.prefermentHours.help': 'The whole preferment, from mixing it until it goes into the dough, fridge time included.',
   'field.prefermentTemp': 'Temperature',
   'field.prefermentTemp.help': 'Where it stands before it goes into the fridge, if it does. Follows the room until you change it.',
   'field.prefermentTemp.room': 'Room temperature: {value}',
@@ -147,12 +142,12 @@ export const en: Record<string, string> = {
   'field.prefermentYeast': 'Yeast in the {type}: {pct}% {form} · {grams} g',
   'field.prefermentYeast.help': 'Worked out so it is ripe just as the dough is mixed. Shorter or colder takes more yeast.',
   'field.totalTime.dough': 'The dough\'s fermentation',
-  'field.totalTime.dough.help': 'From mixing to baking – after the preferment, which is counted on its own above.',
+  'field.totalTime.dough.help': 'From mixing to baking. The preferment comes before this and is counted on its own above.',
   'field.yeastPct': 'Yeast in the final dough',
   'field.yeastPct.help': 'In the yeast form you chose, on total flour. The time is worked out from it.',
   'field.computedYeast': 'Yeast in the final dough',
   'field.computedYeast.help': 'What your time and temperature need, after what the preferment already carries.',
-  'field.computedYeast.none': 'None – the preferment is enough',
+  'field.computedYeast.none': 'None, the preferment is enough',
 
   'field.hydration': 'Hydration',
   'field.hydration.help': 'Water as a percentage of flour weight.',
@@ -205,6 +200,7 @@ export const en: Record<string, string> = {
   'action.showRecipe': 'Show recipe',
   'action.print': 'Print',
   'action.share': 'Copy link',
+  'action.shareMenu': 'Share',
   'action.shared': 'Link copied',
   'action.copy': 'Copy recipe',
   'action.copied': 'Recipe copied',
@@ -269,7 +265,7 @@ export const en: Record<string, string> = {
   'sd.title': 'Sourdough',
   'sd.ratio': '{onFlour}% levain on flour',
   'sd.body':
-    '{grams} g of ripe levain at {hydration}% hydration. That is {onFlour}% against the dough flour — the figure most recipes mean by “inoculation” — or {inoculation}% of the total flour if you count the starter\'s flour separately.',
+    '{grams} g of ripe levain at {hydration}% hydration. That is {onFlour}% against the dough flour (the figure most recipes mean by “inoculation”), or {inoculation}% of the total flour if you count the starter\'s flour separately.',
   'sd.peak': 'The levain needs roughly {hours} h to peak at {temp} °C.',
   'sd.base':
     'The amount follows the fermentation clock: at {temp} °C the population doubles every {hours} h, so every halving of the starter adds exactly that much to the bulk.',
@@ -282,7 +278,7 @@ export const en: Record<string, string> = {
   'sd.check.3': 'Float test: a spoonful floats in room-temperature water',
   'sd.check.4': 'Smell: tangy and fruity, not sharp vinegar or acetone',
   'sd.check.5': 'A web of bubbles is visible down the sides of the jar',
-  'sd.checkFoot': 'A sluggish or freshly fed starter ferments slower than the model assumes — give it the extra hour.',
+  'sd.checkFoot': 'A sluggish or freshly fed starter ferments slower than the model assumes. Give it the extra hour.',
   'sd.sensitivity': 'Sensitivity: time and temperature',
   'sd.sensitivityLead':
     'Levain as % of dough flour needed to hit each time and temperature. Your setting is highlighted.',
@@ -315,13 +311,13 @@ export const en: Record<string, string> = {
   'process.mix.body': 'Work the dough for {minutes} min until it comes together and looks smooth.',
   'process.bulk': 'Bulk fermentation',
   'process.bulk.body':
-    '{hours} h at {temp} °C. Aim for {riseMin}–{riseMax}% growth — the dough should be supple and hold its shape, not sticky.',
+    '{hours} h at {temp} °C. Aim for {riseMin}–{riseMax}% growth. The dough should be supple and hold its shape, not sticky.',
   'process.fold': 'Fold {index} of {count}',
   'process.fold.body': '{technique}',
   'process.fold.slapfold': 'Slap and fold on the bench until the dough tightens',
   'process.fold.coil': 'Coil fold in the tub with wet hands',
   'process.fold.stretchfold': 'Stretch and fold, one round of the bowl',
-  'process.fold.letterfold': 'Letter fold — fold the dough in thirds',
+  'process.fold.letterfold': 'Letter fold: fold the dough in thirds',
   'process.fold.bowlfold': 'Fold the dough over itself in the bowl, four sides',
   'process.divide': 'Divide',
   'process.divide.body': 'Divide into {pieces} equal pieces.',
@@ -332,14 +328,14 @@ export const en: Record<string, string> = {
   'process.cold.bulk': 'Bulk in the fridge',
   'process.cold.bulk.body': '{hours} h at {temp} °C. Flavour builds while fermentation slows.',
   'process.cold.proof': 'Final proof in the fridge',
-  'process.cold.proof.body': '{hours} h at {temp} °C. Bake straight from cold — chilled dough scores far better.',
+  'process.cold.proof.body': '{hours} h at {temp} °C. Bake straight from cold, since chilled dough scores far better.',
   'process.preheat': 'Preheat the oven',
   'process.preheat.body': 'Preheat to {temp} °C for at least {minutes} min, with the stone or pot inside.',
   'process.done': 'Done',
   'process.done.body':
-    'Cool {minutes} min before slicing — the crumb sets as the loaf cools, and sourdough cut warm turns gummy.',
+    'Cool {minutes} min before slicing. The crumb sets as the loaf cools, and sourdough cut warm turns gummy.',
   'process.done.pizza': 'Ready',
-  'process.done.pizza.body': 'Let the pizza rest {minutes} min so the cheese sets – then slice and eat.',
+  'process.done.pizza.body': 'Let the pizza rest {minutes} min so the cheese sets. Then slice and eat.',
   'process.preferment.poolish': 'Build the poolish',
   'process.preferment.poolish.body': 'Mix and leave {hours} h at {temp} °C until bubbly and just starting to fall.',
   'process.preferment.biga': 'Build the biga',
@@ -357,10 +353,10 @@ export const en: Record<string, string> = {
   'process.preferment.fridge': 'Into the fridge',
   'process.preferment.fridge.body': '{hours} h at {temp} °C. It keeps ripening slowly and goes straight into the dough when it is time.',
   'process.preferment.temper': 'Take the preferment out',
-  'process.preferment.temper.body': 'Leave it out {minutes} min before mixing to take the chill off – straight from the fridge the water would have to be far too hot.',
+  'process.preferment.temper.body': 'Leave it out {minutes} min before mixing to take the chill off. Straight from the fridge the water would have to be far too hot.',
   'process.levain.build': 'Feed the levain',
   'process.levain.build.body':
-    'Feed the starter and let it reach its peak — roughly {hours} h at {temp} °C. That time is for your kitchen: at 18 °C the same feed takes nearly twice as long as at 26 °C.',
+    'Feed the starter and let it reach its peak, roughly {hours} h at {temp} °C. That time is for your kitchen: at 18 °C the same feed takes nearly twice as long as at 26 °C.',
 
   'process.shape.balls': 'Ball up',
   'process.shape.balls.body': 'Shape {pieces} balls with a taut surface and proof them in a tray.',
@@ -377,7 +373,7 @@ export const en: Record<string, string> = {
   'process.shape.baguette': 'Shape baguettes',
   'process.shape.baguette.body': 'Roll out {pieces} baguettes and lay them in a pleated couche.',
   'process.shape.ciabatta': 'Cut the ciabatta',
-  'process.shape.ciabatta.body': 'Turn out onto a floured bench and cut into {pieces} rectangles — do not reshape.',
+  'process.shape.ciabatta.body': 'Turn out onto a floured bench and cut into {pieces} rectangles. Do not reshape.',
   'process.shape.pullman': 'Into the tin',
   'process.shape.pullman.body': 'Shape into a loaf and place in a greased tin.',
   'process.shape.discs': 'Roll out',
@@ -414,7 +410,7 @@ export const en: Record<string, string> = {
   'process.bake.pullman': 'Bake in the tin',
   'process.bake.pullman.body': '{temp} °C for {minutes} min. With the lid on you get square corners.',
   'process.bake.pita': 'Bake',
-  'process.bake.pita.body': '{temp} °C on a hot stone, {minutes} min — they should puff completely.',
+  'process.bake.pita.body': '{temp} °C on a hot stone for {minutes} min. They should puff completely.',
   'process.bake.rye': 'Bake',
   'process.bake.rye.body':
     '{temp} °C with steam for {steam} min, then {dropTemp} °C ({minutes} min total). Rye must cool fully before slicing.',
@@ -492,42 +488,42 @@ export const en: Record<string, string> = {
   'note.cold_clamped': 'The cold time exceeded the total time and was capped at {hours} h.',
   'note.water_clamped':
     'The calculated water temperature ({raw} °C) falls outside a practical range and was adjusted to {used} °C, so the dough will not land exactly on your target.',
-  'note.water_too_hot': 'To reach {target} °C the water would have to be {raw} °C – too hot for the yeast. Use at most {used} °C; the dough then lands at about {dough} °C and starts a little slower. For a warmer dough: take the preferment out earlier or mix somewhere warmer.',
+  'note.water_too_hot': 'To reach {target} °C the water would have to be {raw} °C, which is too hot for the yeast. Use at most {used} °C; the dough then lands at about {dough} °C and starts a little slower. For a warmer dough: take the preferment out earlier or mix somewhere warmer.',
   'note.use_ice': 'Swap {grams} g of the water for ice to reach {temp} °C.',
   'note.cold_retard':
     'Cold retard: {cold} of {total} h sit at {coldTemp} °C ({phase}). That is worth about {equiv} h at room temperature, and the dose is set for that figure.',
   'note.yeast_clamped': 'The dose hit the model\'s limit and stops at {pct}% ({grams} g). Adjust time or temperature instead.',
   'note.tiny_yeast':
     'Only {grams} g of yeast. Use a 0.01 g scale, or dissolve a larger amount in water and use part of the solution.',
-  'note.yeast_fast': 'A lot of yeast – {pct}% for {hours} h. The dough will move fast; go by how it looks and feels, not by the clock.',
+  'note.yeast_fast': 'A lot of yeast: {pct}% for {hours} h. The dough will move fast; go by how it looks and feels, not by the clock.',
   'note.tiny_yeast_preferment': 'Only {grams} g of yeast in the preferment. Use a 0.01 g scale, or dissolve a larger amount in water and use part of the solution.',
   'note.preferment_too_short': 'The preferment cannot ripen in {hours} h at this temperature, even with the most yeast the model allows. Give it longer or somewhere warmer.',
-  'note.preferment_enough': 'The preferment carries the whole rise – the final dough needs no extra yeast.',
+  'note.preferment_enough': 'The preferment carries the whole rise, so the final dough needs no extra yeast.',
   'note.preferment_carries': 'The preferment carries much of the rise: the final dough gets {grams} g of yeast instead of the {straight} g the same schedule would need without it.',
-  'note.preferment_strong': 'The preferment alone has the dough ready in about {hours} h – sooner than the {planned} h planned. Shorten the dough\'s time, lower the dough temperature, or give the dough part of the time in the fridge.',
+  'note.preferment_strong': 'The preferment alone has the dough ready in about {hours} h, sooner than the {planned} h planned. Shorten the dough\'s time, lower the dough temperature, or give the dough part of the time in the fridge.',
   'note.cold_preferment':
     'The preferment has only warmed to about {temp} °C when it goes into the dough, so the water needs to be lukewarm for the dough to reach its temperature.',
   'note.time_too_long':
     '{hours} h at {temp} °C needs less leavening than you can weigh. Drop the temperature, move part of the time into the fridge, or shorten the ferment.',
   'note.very_fast':
-    'A lot of leavening ({pct}% levain-equivalent). This dough moves fast — go by how it looks and feels, not by the clock.',
+    'A lot of leavening ({pct}% levain-equivalent). This dough moves fast, so go by how it looks and feels, not by the clock.',
   'note.levain_ratio':
-    'Starter ratio: {onFlour}% ripe levain on the dough flour — the figure most recipes mean by “inoculation”. That is {grams} g of levain at {hydration}% hydration, which is {inoculation}% of the total flour counted as starter flour.',
+    'Starter ratio: {onFlour}% ripe levain on the dough flour, the figure most recipes mean by “inoculation”. That is {grams} g of levain at {hydration}% hydration, which is {inoculation}% of the total flour counted as starter flour.',
   'note.levain_ripe':
-    'Use the levain at its peak — roughly {hours} h at {temp} °C after a normal feed. A high-dilution feed like 1:5:5 takes longer, and a sluggish starter ferments slower than the model assumes.',
-  'note.levain_high': 'High inoculation ({pct}%). The dough moves fast and turns tangier — start checking at the halfway mark.',
+    'Use the levain at its peak, roughly {hours} h at {temp} °C after a normal feed. A high-dilution feed like 1:5:5 takes longer, and a sluggish starter ferments slower than the model assumes.',
+  'note.levain_high': 'High inoculation ({pct}%). The dough moves fast and turns tangier. Start checking at the halfway mark.',
   'note.levain_generic': 'This style has no sourdough reference of its own, so a generic 20% base is used.',
   'note.high_hydration': '{pct}% hydration. Wet hands for folding, and a light touch when shaping.',
   'note.true_hydration':
     'Stated hydration is {stated}%, but counting milk, eggs and soakers the dough is really {actual}% water on flour.',
-  'note.low_salt': 'Only {pct}% salt. The dough will be slack and ferment unpredictably — 1.8–2.2% is normal.',
+  'note.low_salt': 'Only {pct}% salt. The dough will be slack and ferment unpredictably. Normal is 1.8–2.2%.',
   'note.high_salt': '{pct}% salt slows the yeast noticeably. The dose has been raised to compensate.',
   'note.rich_dough': '{pct}% fat. Add it once the gluten is developed, otherwise the dough never takes hold.',
   'note.preferment': 'The preferment\'s flour and water are subtracted from the final dough, so the totals still add up.',
   'note.percent_basis_total':
     'Percentages are on total flour ({total} g), including the flour in the preferment and starter.',
   'note.percent_basis_dough':
-    'Percentages are on the flour added directly to the dough ({flour} g), not the total ({total} g). Plenty of recipes are written this way — but not all, so check the basis before comparing numbers.',
+    'Percentages are on the flour added directly to the dough ({flour} g), not the total ({total} g). Plenty of recipes are written this way, but not all, so check the basis before comparing numbers.',
   'note.flour_overdrawn': 'The preferment and starter draw more flour than the recipe contains. Reduce one of them.',
   'note.water_overdrawn': 'The preferment and starter hold more water than {hydration}% hydration allows. Raise hydration or use a stiffer starter.',
   'note.from_section': 'from its own section',
@@ -553,12 +549,12 @@ export const en: Record<string, string> = {
   'flour.fit.edge': 'It works, but W {w} is made for about {optimum} h of maturation. A stronger flour gives more margin when the dough stands long.',
   'flour.fit.weak': 'Too weak for the plan: W {w} is made for about {optimum} h of maturation. Over this long the gluten can break down and the dough turns slack and sticky. Choose a stronger flour or shorten the time.',
   'flour.fit.weakProtein': 'The blend is about {protein}% protein, but the style wants at least {min}%. Choose a stronger flour.',
-  'flour.fit.strong': 'Stronger than the plan needs. The dough can be tough and hard to open – give it longer or blend in a weaker flour.',
+  'flour.fit.strong': 'Stronger than the plan needs. The dough can be tough and hard to open. Give it longer or blend in a weaker flour.',
   'flour.fit.unknown': 'The blend\'s strength cannot be worked out.',
   'flour.suggest': 'Suggested for your plan',
   'flour.suggestion.w': 'W ≈ {w}',
   'flour.use': 'Use',
-  'flour.source': 'W from the mill\'s specification where published, otherwise estimated from protein. A blend\'s W is a weighted average. Maturation follows the Italian W table (W 260 ≈ 9 h, W 280 ≈ 12 h, W 320 ≈ 24 h, W 380 ≈ 48 h) – mills often rate longer, Caputo Pizzeria up to 24 h.',
+  'flour.source': 'W from the mill\'s specification where published, otherwise estimated from protein. A blend\'s W is a weighted average. Maturation follows the Italian W table (W 260 ≈ 9 h, W 280 ≈ 12 h, W 320 ≈ 24 h, W 380 ≈ 48 h). Mills often rate longer, Caputo Pizzeria up to 24 h.',
 
   // ── Saved recipes ──
   'saved.title': 'Bake log',

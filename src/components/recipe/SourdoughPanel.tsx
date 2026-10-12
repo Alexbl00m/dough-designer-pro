@@ -36,7 +36,7 @@ export function SourdoughPanel({
     <Card className="space-y-6 p-5" data-print-card>
       <div>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h4 className="font-semibold">{t('sd.title')}</h4>
+          <h2 className="text-display-sm">{t('sd.title')}</h2>
           <Badge variant="secondary" className="tabular">
             {t('sd.ratio', { onFlour: n(f.levainOnFlourPct) })}
           </Badge>
@@ -72,7 +72,7 @@ export function SourdoughPanel({
       </div>
 
       <div>
-        <h5 className="mb-3 text-sm font-semibold">{t('sd.checklist')}</h5>
+        <h3 className="mb-3 text-caption font-semibold">{t('sd.checklist')}</h3>
         <ul className="space-y-2">
           {Array.from({ length: CHECKLIST_LENGTH }, (_, i) => (
             <li key={i} className="flex gap-2.5 text-sm text-muted-foreground">
@@ -85,7 +85,7 @@ export function SourdoughPanel({
       </div>
 
       <div>
-        <h5 className="mb-1 text-sm font-semibold">{t('sd.sensitivity')}</h5>
+        <h3 className="mb-1 text-caption font-semibold">{t('sd.sensitivity')}</h3>
         <p className="mb-3 text-sm text-muted-foreground">{t('sd.sensitivityLead')}</p>
 
         {/* Wide tables scroll inside their own box rather than pushing the page sideways. */}

@@ -69,7 +69,7 @@ export function CalculatorInputs({
       {/* ── Batch size ── */}
       <Card className="p-5" data-print-card>
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="text-base font-semibold">{t('params.dough')}</h3>
+          <h2 className="text-display-sm">{t('params.dough')}</h2>
           <Button variant="ghost" size="sm" onClick={onReset} className="gap-1.5">
             <RotateCcw className="h-3.5 w-3.5" aria-hidden />
             <span className="hidden sm:inline">{t('params.reset')}</span>
@@ -244,7 +244,7 @@ export function CalculatorInputs({
 
       {/* ── Fermentation ── */}
       <Card className="p-5" data-print-card>
-        <h3 className="mb-4 text-base font-semibold">{t('params.fermentation')}</h3>
+        <h2 className="mb-4 text-display-sm">{t('params.fermentation')}</h2>
         <SelectField<FermentDriver>
           id="driver"
           label={t('field.driver')}
@@ -261,9 +261,9 @@ export function CalculatorInputs({
             temperature and fridge hours are the baker's, and its yeast follows. */}
         {preferment && (
           <div className="mt-5 rounded-lg border border-dashed border-border p-4">
-            <h4 className="mb-4 text-sm font-semibold">
+            <h3 className="mb-4 text-caption font-semibold">
               {t('field.preferment.title', { type: prefermentName })}
-            </h4>
+            </h3>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
               <SliderField
                 id="prefermentHours"
@@ -441,7 +441,7 @@ export function CalculatorInputs({
 
       {/* ── Method ── */}
       <Card className="p-5" data-print-card>
-        <h3 className="mb-4 text-base font-semibold">{t('params.method')}</h3>
+        <h2 className="mb-4 text-display-sm">{t('params.method')}</h2>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <SelectField<LeavenType>
             id="leavenType"
@@ -500,7 +500,7 @@ export function CalculatorInputs({
       {/* ── Advanced ── */}
       <Accordion type="single" collapsible>
         <AccordionItem value="advanced" className="rounded-xl border border-border bg-card px-5">
-          <AccordionTrigger className="text-base font-semibold hover:no-underline">
+          <AccordionTrigger className="text-display-sm font-semibold hover:no-underline">
             {t('params.advanced')}
           </AccordionTrigger>
           <AccordionContent className="pb-5">

@@ -119,12 +119,12 @@ export function StyleSelector({ selectedStyle, onStyleSelect }: StyleSelectorPro
         if (!styles?.length) return null;
         return (
           <section key={category} aria-labelledby={`cat-${category}`}>
-            <h3
+            <h2
               id={`cat-${category}`}
               className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground"
             >
               {t(`category.${category}`)}
-            </h3>
+            </h2>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {styles.map((style) => (
                 <StyleCard
@@ -153,10 +153,6 @@ interface StyleCardProps {
 }
 
 function StyleCard({ style, selected, onSelect, t, lang }: StyleCardProps) {
-  const characteristics = Array.from({ length: style.characteristicCount }, (_, i) =>
-    t(`style.${style.id}.char.${i}`),
-  );
-
   return (
     // A real <button> so the card is reachable by keyboard and announced as a
     // control — the previous div-with-onClick was invisible to assistive tech.
@@ -172,7 +168,7 @@ function StyleCard({ style, selected, onSelect, t, lang }: StyleCardProps) {
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <h4 className="text-display-sm leading-tight">{style.name}</h4>
+        <h3 className="text-display-sm leading-tight">{style.name}</h3>
         {selected ? (
           <Badge className="shrink-0 gap-1">
             <Check className="h-3 w-3" aria-hidden />
@@ -196,38 +192,24 @@ function StyleCard({ style, selected, onSelect, t, lang }: StyleCardProps) {
         </p>
       )}
 
-      <div className="flex flex-wrap gap-1.5">
-        <Badge variant="secondary" className="text-xs tabular">
-          {t('styles.hydration', { n: formatNumber(style.defaultParams.hydration_pct, lang) })}
-        </Badge>
-        <Badge variant="secondary" className="text-xs tabular">
-          {t('styles.salt', { n: formatNumber(style.defaultParams.salt_pct, lang) })}
-        </Badge>
-        <Badge variant="secondary" className="text-xs tabular">
-          {t('styles.time', { n: formatNumber(style.defaults.totalTime, lang) })}
-        </Badge>
+      {/* The three numbers that define a style, as plain text: in a card that is
+          itself a button, pill-shaped tags would read as more buttons. The
+          characteristics stay searchable without crowding the card. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-caption font-semibold tabular">
+        <span>{t('styles.hydration', { n: formatNumber(style.defaultParams.hydration_pct, lang) })}</span>
+        <span>{t('styles.salt', { n: formatNumber(style.defaultParams.salt_pct, lang) })}</span>
+        <span>{t('styles.time', { n: formatNumber(style.defaults.totalTime, lang) })}</span>
         {style.preferment && (
-          <Badge variant="outline" className="text-xs capitalize">
+          <Badge variant="outline" className="text-xs font-normal capitalize">
             {style.preferment.type}
           </Badge>
         )}
         {style.defaults.leavenType === 'sourdough' && (
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs font-normal">
             {t('field.leaven.sourdough')}
           </Badge>
         )}
       </div>
-
-      <ul className="flex flex-wrap gap-1">
-        {characteristics.map((char) => (
-          <li
-            key={char}
-            className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
-          >
-            {char}
-          </li>
-        ))}
-      </ul>
     </button>
   );
 }

@@ -124,3 +124,15 @@ describe('interpolate', () => {
     expect(t('app.name')).toBe("Baker's Calculator");
   });
 });
+
+describe('copy', () => {
+  it('writes asides as sentences: no em dash, and an en dash only inside a range', () => {
+    for (const [lang, dict] of Object.entries(DICTIONARIES)) {
+      for (const [key, value] of Object.entries(dict)) {
+        expect(value.includes('—'), `${lang}/${key}`).toBe(false);
+        // "2–3 dygn", "{riseMin}–{riseMax}%": between two numbers or placeholders.
+        expect(value.replace(/[\d}]–[\d{]/g, '').includes('–'), `${lang}/${key}`).toBe(false);
+      }
+    }
+  });
+});

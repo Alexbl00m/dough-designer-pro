@@ -10,39 +10,34 @@ export const sv: Record<string, string> = {
   'nav.home': 'Till start',
   'nav.back': 'Tillbaka',
   'nav.next': 'Nästa',
-  'nav.step': 'Steg {n} av {total}',
+  'nav.steps': 'Steg',
 
-  // ── Hero ──
-  'hero.title': "Baker's",
-  'hero.titleAccent': 'Calculator',
-  'hero.lead': 'Degberäkning byggd på jäsningskemi.\nRätt mängd jäst, rätt vattentemperatur, rätt tid – varje gång.',
+  // ── Landing ──
+  'hero.title': 'Degen klar när du vill äta.',
+  'hero.lead': 'Jäst, vattentemperatur och tidsplan för {n} stilar, räknat på din tid, ditt kök och ditt mjöl.',
   'hero.cta': 'Börja beräkna',
   'hero.secondary': 'Så fungerar det',
-  'hero.styles': '{n} stilar',
-  'hero.scroll': 'Läs mer',
 
-  'feature.title': 'Precision möter hantverk',
-  'feature.lead': 'Från napolitansk pizza till rågsurdeg – samma modell, olika förutsättningar.',
-  'feature.q10.title':
-    'Jäst och surdeg på var sin kurva',
-  'feature.q10.body':
-    'Jästen följer TXCraig1:s modell med Gänzles temperaturkurva, surdegen en mätt jäsningstabell. Kyltid räknas om på varje kurva, inklusive timmarna degen är ljummen på väg ner.',
-  'feature.timing.title':
-    'Klar när du vill',
-  'feature.timing.body':
-    'Säg när du vill vara klar så räknas hela planen baklänges – förjäsning, vikningar, kyl, formning och gräddning – och du varnas för moment mitt i natten.',
-  'feature.styles.title': '{n} stilar',
-  'feature.styles.body':
+  'landing.plan.title': 'Klar när du vill',
+  'landing.plan.body':
+    'Välj när degen ska vara klar så räknas planen baklänges, från förjäsningen till ugnen. Hamnar något moment mitt i natten får du veta det.',
+  'landing.plan.open': 'Öppna exemplet',
+  'landing.numbers.title': 'Siffrorna du annars gissar',
+  'landing.yeast.label': '{form} för {count} {unit}',
+  'landing.yeast.body':
+    '{preferment} g går i poolishen och {dough} g i degen. Dubbelt så lång jäsning behöver ungefär en tredjedel så mycket jäst.',
+  'landing.water.body':
+    'Poolishen kommer kall från kylen, så vattnet får värma degen till {dough} °C i ett kök på {room} °C.',
+  'landing.more.title': 'Det här ingår också',
+  'landing.more.styles.title': '{n} stilar',
+  'landing.more.styles.body':
     'Pizza, bröd, rika degar och förjäsningar. Poolish, biga och levain räknas av från huvuddegen automatiskt.',
-  'feature.ddt.title': 'DDT-vattentemperatur',
-  'feature.ddt.body':
-    'Vattentemperaturen räknas ut från måltemperatur, mjöl, rum och friktion – med isandel när det behövs.',
-  'feature.export.title': 'Spara, dela, skriv ut',
-  'feature.export.body':
-    'Varje recept får en delbar länk. Spara i bakloggen, skriv ut ett rent bakblad eller exportera som text.',
-  'feature.mcp.title': 'Öppen MCP-server',
-  'feature.mcp.body':
-    'Fyra verktyg – list_styles, get_style, calculate_recipe och explain_recipe – gör motorn tillgänglig för AI-assistenter.',
+  'landing.more.share.title': 'Spara, dela, skriv ut',
+  'landing.more.share.body':
+    'Varje recept får en egen länk. Spara det i bakloggen, skriv ut ett rent bakblad eller ladda ner det som text.',
+  'landing.more.mcp.title': 'Öppen MCP-server',
+  'landing.more.mcp.body':
+    'Samma motor finns som MCP-server, så att AI-assistenter kan räkna och förklara recept med den.',
 
   // ── Categories ──
   'category.pizza': 'Pizza',
@@ -88,11 +83,11 @@ export const sv: Record<string, string> = {
   'field.percentBasis.total': 'Totalt mjöl',
   'field.percentBasis.dough': 'Degens mjöl',
   'field.percentBasis.help':
-    'Vilket mjöl procenten räknas på. “Totalt mjöl” räknar in surdegens och förjäsningens mjöl; “degens mjöl” bara det du väger upp separat. Recept använder båda och skriver sällan vilket – byt hit om siffrorna inte stämmer med receptet du läser.',
+    'Vilket mjöl procenten räknas på. “Totalt mjöl” räknar in surdegens och förjäsningens mjöl; “degens mjöl” bara det du väger upp separat. Recept använder båda och skriver sällan vilket. Byt hit om siffrorna inte stämmer med receptet du läser.',
   'clock.title': 'Jäsningsklockan',
   'clock.doubling': 'Fördubbling {hours} h',
   'clock.lead':
-    'Vid {temp} °C fördubblas jästpopulationen var {hours} h. Det är själva nyckeln: varje fördubbling av jäsmedlet kortar bulken med exakt så mycket – oavsett hur mycket du redan har i. Därför gör 50× mer surdeg degen ungefär 3,7× snabbare, inte 50×.',
+    'Vid {temp} °C fördubblas jästpopulationen var {hours} h. Det är själva nyckeln: varje fördubbling av jäsmedlet kortar bulken med exakt så mycket, oavsett hur mycket du redan har i. Därför gör 50× mer surdeg degen ungefär 3,7× snabbare, inte 50×.',
   'clock.dose': '{pct}% levain',
   'clock.bulk': '{hours} h bulk',
   'clock.slower': 'Salt, socker, vatten och fett i det här receptet drar ut klockan med {pct}%.',
@@ -100,7 +95,7 @@ export const sv: Record<string, string> = {
   'clock.source':
     'Kurvan är interpolerad ur en mätt tabell över bulktider vid åtta temperaturer och åtta surdegsmängder. Temperaturberoendet är inte ett enda Q10: brant i kylan, omkring 3 vid rumstemperatur, och planar ut nära jästens optimum runt 29 °C.',
   'yeastClock.title': 'Jästklockan',
-  'yeastClock.lead': 'Jäst följer inte surdegens kurva. Dubblar du jästen går det ungefär en tredjedel fortare; halverar du den tar det ungefär hälften till. Varmare går fortare – i kylen nästan tio gånger långsammare än vid 21 °C.',
+  'yeastClock.lead': 'Jäst följer inte surdegens kurva. Dubblar du jästen går det ungefär en tredjedel fortare; halverar du den tar det ungefär hälften till. Varmare går fortare, och i kylen går det nästan tio gånger långsammare än vid 21 °C.',
   'yeastClock.dose': '{pct}% {form}',
   'yeastClock.hours': '{hours} h',
   'yeastClock.table': 'Jäst för tid och temperatur',
@@ -115,7 +110,7 @@ export const sv: Record<string, string> = {
     'Två sätt att hålla i samma ekvation. Väljer du tiden räknas mängden jäsmedel ut; väljer du mängden räknas tiden ut. De kan aldrig säga emot varandra.',
   'field.leavenPct': 'Mängd jäsmedel',
   'field.leavenPct.help':
-    'Mogen levain i procent av degens mjöl – siffran recept menar med “inokulering”. Jäst räknas om till samma skala.',
+    'Mogen levain i procent av degens mjöl, alltså siffran recept menar med “inokulering”. Jäst räknas om till samma skala.',
   'field.computedTime': 'Beräknad jäsningstid',
   'params.plan': 'Planering',
   'plan.mode.ready': 'Klar till',
@@ -132,13 +127,13 @@ export const sv: Record<string, string> = {
   'plan.fermentSplit': '{type} {pref} h + deg {dough} h = {total} h jäsning',
   'plan.past': 'Hinner inte: för att vara klar {ready} skulle du ha behövt börja {start}.',
   'plan.past.fix': 'Klar tidigast {time}',
-  'plan.night': '{count} moment hamnar mellan 23 och 06 – först {time}: {step}.',
+  'plan.night': '{count} moment hamnar mellan 23 och 06. Det första är {time}: {step}.',
   'plan.night.fixReady': 'Klar {time} i stället',
   'plan.night.fixStart': 'Börja {time} i stället',
   'plan.night.none': 'Ingen tid inom ett dygn håller alla moment på dagen. Korta jäsningen eller lägg en del av den i kylen.',
   'field.preferment.title': '{type}',
   'field.prefermentHours': 'Tid för {type}',
-  'field.prefermentHours.help': 'Hela förjäsningen, från blandning tills den går in i degen – kyltiden inräknad.',
+  'field.prefermentHours.help': 'Hela förjäsningen, från blandning tills den går in i degen, kyltiden inräknad.',
   'field.prefermentTemp': 'Temperatur',
   'field.prefermentTemp.help': 'Där den står innan den eventuellt går in i kylen. Följer rumstemperaturen tills du ändrar den.',
   'field.prefermentTemp.room': 'Rumstemperatur: {value}',
@@ -147,12 +142,12 @@ export const sv: Record<string, string> = {
   'field.prefermentYeast': 'Jäst i {type}: {pct}% {form} · {grams} g',
   'field.prefermentYeast.help': 'Räknas ut så att den är mogen precis när degen ska blandas. Kortare eller kallare kräver mer jäst.',
   'field.totalTime.dough': 'Degens jäsningstid',
-  'field.totalTime.dough.help': 'Från blandning till gräddning – efter förjäsningen, som räknas för sig ovan.',
+  'field.totalTime.dough.help': 'Från blandning till gräddning. Förjäsningen kommer före och räknas för sig ovan.',
   'field.yeastPct': 'Jäst i huvuddegen',
   'field.yeastPct.help': 'I den jästform du valt, räknat på totalt mjöl. Tiden räknas ut från den.',
   'field.computedYeast': 'Jäst i huvuddegen',
   'field.computedYeast.help': 'Det som behövs för din tid och temperatur, efter det förjäsningen redan bär.',
-  'field.computedYeast.none': 'Ingen – förjäsningen räcker',
+  'field.computedYeast.none': 'Ingen, förjäsningen räcker',
 
   'field.hydration': 'Hydrering',
   'field.hydration.help': 'Vatten i procent av mjölvikten.',
@@ -205,6 +200,7 @@ export const sv: Record<string, string> = {
   'action.showRecipe': 'Visa recept',
   'action.print': 'Skriv ut',
   'action.share': 'Kopiera länk',
+  'action.shareMenu': 'Dela',
   'action.shared': 'Länken är kopierad',
   'action.copy': 'Kopiera recept',
   'action.copied': 'Receptet är kopierat',
@@ -269,7 +265,7 @@ export const sv: Record<string, string> = {
   'sd.title': 'Surdeg',
   'sd.ratio': '{onFlour}% levain på mjölet',
   'sd.body':
-    '{grams} g mogen levain vid {hydration}% hydrering. Det är {onFlour}% räknat på degens mjöl – siffran de flesta recept menar med “inokulering” – eller {inoculation}% av det totala mjölet om man räknar surdegens mjöl för sig.',
+    '{grams} g mogen levain vid {hydration}% hydrering. Det är {onFlour}% räknat på degens mjöl (siffran de flesta recept menar med “inokulering”), eller {inoculation}% av det totala mjölet om man räknar surdegens mjöl för sig.',
   'sd.peak': 'Levainen behöver ungefär {hours} h för att nå toppen vid {temp} °C.',
   'sd.base':
     'Mängden följer jäsningsklockan: vid {temp} °C fördubblas populationen var {hours} h, så varje halvering av surdegen förlänger bulken med just den tiden.',
@@ -282,7 +278,7 @@ export const sv: Record<string, string> = {
   'sd.check.3': 'Flyttest: en klick flyter i rumstempererat vatten',
   'sd.check.4': 'Doft: syrlig och fruktig, inte skarp ättika eller aceton',
   'sd.check.5': 'Nätverk av bubblor syns längs burkens sidor',
-  'sd.checkFoot': 'Trög eller nymatad surdeg jäser långsammare än beräkningen antar – vänta hellre en timme extra.',
+  'sd.checkFoot': 'Trög eller nymatad surdeg jäser långsammare än beräkningen antar. Vänta hellre en timme extra.',
   'sd.sensitivity': 'Känslighet: tid och temperatur',
   'sd.sensitivityLead':
     'Levain i % av degens mjöl för att träffa varje tid och temperatur. Ditt läge är markerat.',
@@ -315,13 +311,13 @@ export const sv: Record<string, string> = {
   'process.mix.body': 'Arbeta degen {minutes} min tills den är sammanhållen och slät.',
   'process.bulk': 'Bulkjäsning',
   'process.bulk.body':
-    '{hours} h vid {temp} °C. Sikta på {riseMin}–{riseMax}% volymökning – degen ska vara spänstig och hålla formen, inte klibbig.',
+    '{hours} h vid {temp} °C. Sikta på {riseMin}–{riseMax}% volymökning. Degen ska vara spänstig och hålla formen, inte klibbig.',
   'process.fold': 'Vikning {index} av {count}',
   'process.fold.body': '{technique}',
   'process.fold.slapfold': 'Slap & fold på bänken tills degen spänner upp',
   'process.fold.coil': 'Coil fold i bunken med våta händer',
   'process.fold.stretchfold': 'Stretch & fold, ett varv runt bunken',
-  'process.fold.letterfold': 'Bokvikning – vik degen i tre delar',
+  'process.fold.letterfold': 'Bokvikning: vik degen i tre delar',
   'process.fold.bowlfold': 'Vik degen över sig själv i bunken, fyra håll',
   'process.divide': 'Dela degen',
   'process.divide.body': 'Dela i {pieces} lika delar.',
@@ -332,14 +328,14 @@ export const sv: Record<string, string> = {
   'process.cold.bulk': 'Bulk i kyl',
   'process.cold.bulk.body': '{hours} h vid {temp} °C. Smaken byggs, jäsningen bromsas.',
   'process.cold.proof': 'Slutjäsning i kyl',
-  'process.cold.proof.body': '{hours} h vid {temp} °C. Grädda direkt ur kylen – kall deg är lättare att snitta.',
+  'process.cold.proof.body': '{hours} h vid {temp} °C. Grädda direkt ur kylen, eftersom kall deg är lättare att snitta.',
   'process.preheat': 'Sätt på ugnen',
   'process.preheat.body': 'Förvärm till {temp} °C i minst {minutes} min, med sten eller gryta i ugnen.',
   'process.done': 'Klart',
   'process.done.body':
-    'Låt svalna {minutes} min innan du skär – krumman sätter sig medan brödet kyler, och surdegsbröd som skärs varmt blir degigt.',
+    'Låt svalna {minutes} min innan du skär. Krumman sätter sig medan brödet kyler, och surdegsbröd som skärs varmt blir degigt.',
   'process.done.pizza': 'Klart',
-  'process.done.pizza.body': 'Låt pizzan vila {minutes} min så att osten sätter sig – sedan är det bara att skära och äta.',
+  'process.done.pizza.body': 'Låt pizzan vila {minutes} min så att osten sätter sig. Sedan är det bara att skära och äta.',
   'process.preferment.poolish': 'Gör poolish',
   'process.preferment.poolish.body': 'Blanda och låt stå {hours} h vid {temp} °C tills den är bubblig och just börjat sjunka.',
   'process.preferment.biga': 'Gör biga',
@@ -357,10 +353,10 @@ export const sv: Record<string, string> = {
   'process.preferment.fridge': 'In i kylen',
   'process.preferment.fridge.body': '{hours} h vid {temp} °C. Förjäsningen mognar långsamt vidare och går rakt in i degen när det är dags.',
   'process.preferment.temper': 'Ta fram förjäsningen',
-  'process.preferment.temper.body': 'Ställ den framme {minutes} min innan du blandar så att kylan går ur den – direkt ur kylen skulle vattnet behöva vara alldeles för varmt.',
+  'process.preferment.temper.body': 'Ställ den framme {minutes} min innan du blandar så att kylan går ur den. Direkt ur kylen skulle vattnet behöva vara alldeles för varmt.',
   'process.levain.build': 'Mata levainen',
   'process.levain.build.body':
-    'Mata surdegen och låt den nå toppen – ungefär {hours} h vid {temp} °C. Tiden gäller ditt rum: vid 18 °C tar samma matning nästan dubbelt så lång tid som vid 26 °C.',
+    'Mata surdegen och låt den nå toppen, vilket tar ungefär {hours} h vid {temp} °C. Tiden gäller ditt rum: vid 18 °C tar samma matning nästan dubbelt så lång tid som vid 26 °C.',
 
   'process.shape.balls': 'Bolla',
   'process.shape.balls.body': 'Bolla {pieces} stycken med spänd yta och låt dem gå i låda.',
@@ -377,7 +373,7 @@ export const sv: Record<string, string> = {
   'process.shape.baguette': 'Forma baguetter',
   'process.shape.baguette.body': 'Rulla ut till {pieces} baguetter och lägg i veckad duk.',
   'process.shape.ciabatta': 'Dela ciabatta',
-  'process.shape.ciabatta.body': 'Häll ut degen på mjölad bänk och dela i {pieces} rektanglar – forma inte om.',
+  'process.shape.ciabatta.body': 'Häll ut degen på mjölad bänk och dela i {pieces} rektanglar. Forma inte om.',
   'process.shape.pullman': 'Lägg i formen',
   'process.shape.pullman.body': 'Forma till limpa och lägg i smord form.',
   'process.shape.discs': 'Kavla ut',
@@ -414,7 +410,7 @@ export const sv: Record<string, string> = {
   'process.bake.pullman': 'Grädda i form',
   'process.bake.pullman.body': '{temp} °C i {minutes} min. Med lock blir kanten kvadratisk.',
   'process.bake.pita': 'Grädda',
-  'process.bake.pita.body': '{temp} °C på het sten, {minutes} min – de ska blåsa upp helt.',
+  'process.bake.pita.body': '{temp} °C på het sten i {minutes} min. De ska blåsa upp helt.',
   'process.bake.rye': 'Grädda',
   'process.bake.rye.body':
     '{temp} °C med ånga i {steam} min, sedan {dropTemp} °C ({minutes} min totalt). Rågbröd ska svalna helt innan det skärs.',
@@ -492,42 +488,42 @@ export const sv: Record<string, string> = {
   'note.cold_clamped': 'Kyltiden var längre än den totala tiden och har begränsats till {hours} h.',
   'note.water_clamped':
     'Beräknad vattentemperatur ({raw} °C) ligger utanför praktiskt intervall och har justerats till {used} °C. Degtemperaturen blir därmed inte exakt din målsättning.',
-  'note.water_too_hot': 'För att nå {target} °C skulle vattnet behöva vara {raw} °C – för varmt för jästen. Använd högst {used} °C; degen landar då på ungefär {dough} °C och kommer igång lite långsammare. För en varmare deg: ta fram förjäsningen tidigare eller blanda i ett varmare rum.',
+  'note.water_too_hot': 'För att nå {target} °C skulle vattnet behöva vara {raw} °C, vilket är för varmt för jästen. Använd högst {used} °C; degen landar då på ungefär {dough} °C och kommer igång lite långsammare. För en varmare deg: ta fram förjäsningen tidigare eller blanda i ett varmare rum.',
   'note.use_ice': 'Byt {grams} g av vattnet mot is för att nå {temp} °C.',
   'note.cold_retard':
     'Kyljäsning: {cold} av {total} h ligger vid {coldTemp} °C ({phase}). Det motsvarar {equiv} h i rumstemperatur, och jästen är doserad för den siffran.',
   'note.yeast_clamped': 'Jästmängden nådde modellens gräns och stannar på {pct}% ({grams} g). Justera tid eller temperatur istället.',
   'note.tiny_yeast':
     'Bara {grams} g jäst. Väg på en 0,01-våg, eller lös upp en större mängd i vatten och använd en del av lösningen.',
-  'note.yeast_fast': 'Mycket jäst – {pct}% för {hours} h. Degen går fort; gå efter hur den ser ut och känns, inte efter klockan.',
+  'note.yeast_fast': 'Mycket jäst: {pct}% för {hours} h. Degen går fort; gå efter hur den ser ut och känns, inte efter klockan.',
   'note.tiny_yeast_preferment': 'Bara {grams} g jäst i förjäsningen. Väg på en 0,01-våg, eller lös upp en större mängd i vatten och använd en del av lösningen.',
   'note.preferment_too_short': 'Förjäsningen hinner inte mogna på {hours} h vid den här temperaturen, inte ens med modellens största jästmängd. Ge den längre tid eller varmare.',
-  'note.preferment_enough': 'Förjäsningen bär hela jäsningen – huvuddegen behöver ingen extra jäst.',
+  'note.preferment_enough': 'Förjäsningen bär hela jäsningen, så huvuddegen behöver ingen extra jäst.',
   'note.preferment_carries': 'Förjäsningen bär en stor del av jäsningen: huvuddegen får {grams} g jäst i stället för de {straight} g samma schema hade krävt utan den.',
-  'note.preferment_strong': 'Förjäsningen ensam gör degen klar på ungefär {hours} h – kortare än planerade {planned} h. Korta degens tid, sänk degtemperaturen eller låt degen stå en del av tiden i kyl.',
+  'note.preferment_strong': 'Förjäsningen ensam gör degen klar på ungefär {hours} h, kortare än de planerade {planned} h. Korta degens tid, sänk degtemperaturen eller låt degen stå en del av tiden i kyl.',
   'note.cold_preferment':
     'Förjäsningen har bara hunnit bli ungefär {temp} °C när den går i degen, så vattnet behöver vara ljummet för att degen ska nå rätt temperatur.',
   'note.time_too_long':
     '{hours} h vid {temp} °C kräver mindre jäsmedel än du kan väga. Sänk temperaturen, lägg en del av tiden i kyl, eller korta jäsningen.',
   'note.very_fast':
-    'Mycket jäsmedel ({pct}% levainekvivalent). Degen går fort – gå efter hur den ser ut och känns, inte efter klockan.',
+    'Mycket jäsmedel ({pct}% levainekvivalent). Degen går fort, så gå efter hur den ser ut och känns, inte efter klockan.',
   'note.levain_ratio':
-    'Surdegsratio: {onFlour}% mogen levain på mjölet i degen – den siffran de flesta recept menar med “inokulering”. Det är {grams} g levain vid {hydration}% hydrering, vilket motsvarar {inoculation}% av det totala mjölet räknat som surdegens mjöl.',
+    'Surdegsratio: {onFlour}% mogen levain på mjölet i degen, alltså den siffra de flesta recept menar med “inokulering”. Det är {grams} g levain vid {hydration}% hydrering, vilket motsvarar {inoculation}% av det totala mjölet räknat som surdegens mjöl.',
   'note.levain_ripe':
-    'Använd levainen på toppen – ungefär {hours} h vid {temp} °C efter en vanlig matning. En hög utspädning som 1:5:5 tar längre tid, och en trög surdeg jäser långsammare än beräkningen antar.',
-  'note.levain_high': 'Hög inokulering ({pct}%). Degen jäser fort och blir syrligare – håll koll från halva tiden.',
+    'Använd levainen på toppen, ungefär {hours} h vid {temp} °C efter en vanlig matning. En hög utspädning som 1:5:5 tar längre tid, och en trög surdeg jäser långsammare än beräkningen antar.',
+  'note.levain_high': 'Hög inokulering ({pct}%). Degen jäser fort och blir syrligare. Håll koll från halva tiden.',
   'note.levain_generic': 'Den här stilen har ingen egen surdegsreferens, så en generisk bas på 20% används.',
   'note.high_hydration': '{pct}% hydrering. Blöta händer vid vikning, och forma med lätt hand.',
   'note.true_hydration':
     'Angiven hydrering är {stated}%, men mjölk, ägg och blötläggningar räknat gör degen {actual}% vatten på mjölet.',
-  'note.low_salt': 'Bara {pct}% salt. Degen blir slapp och jäser okontrollerat – 1,8–2,2% är normalt.',
+  'note.low_salt': 'Bara {pct}% salt. Degen blir slapp och jäser okontrollerat. Normalt är 1,8–2,2%.',
   'note.high_salt': '{pct}% salt bromsar jästen märkbart. Jästmängden är uppjusterad för att kompensera.',
   'note.rich_dough': '{pct}% fett. Tillsätt fettet först när glutenet är utvecklat, annars får degen aldrig fäste.',
   'note.preferment': 'Förjäsningens mjöl och vatten är avräknade från huvuddegen, så totalerna stämmer.',
   'note.percent_basis_total':
     'Procenten räknas på det totala mjölet ({total} g), inklusive mjölet i förjäsning och surdeg.',
   'note.percent_basis_dough':
-    'Procenten räknas på mjölet som går direkt i degen ({flour} g), inte på det totala ({total} g). Många recept skriver så – men inte alla, så jämför alltid basen innan du jämför siffror.',
+    'Procenten räknas på mjölet som går direkt i degen ({flour} g), inte på det totala ({total} g). Många recept skriver så, men inte alla, så jämför alltid basen innan du jämför siffror.',
   'note.flour_overdrawn': 'Förjäsning och surdeg drar mer mjöl än receptet innehåller. Minska förjäsningen eller inokuleringen.',
   'note.water_overdrawn': 'Förjäsning och surdeg innehåller mer vatten än {hydration}% hydrering tillåter. Höj hydreringen eller sänk surdegens hydrering.',
   'note.from_section': 'från egen sektion',
@@ -553,12 +549,12 @@ export const sv: Record<string, string> = {
   'flour.fit.edge': 'Det fungerar, men W {w} är gjort för ungefär {optimum} h mognad. Ett starkare mjöl ger mer marginal om degen får stå länge.',
   'flour.fit.weak': 'För svagt för planen: W {w} är gjort för ungefär {optimum} h mognad. Så länge riskerar glutenet att brytas ner, och degen blir slapp och klibbig. Välj ett starkare mjöl eller korta tiden.',
   'flour.fit.weakProtein': 'Blandningen ligger på ca {protein}% protein, men stilen vill ha minst {min}%. Välj ett starkare mjöl.',
-  'flour.fit.strong': 'Starkare än planen behöver. Degen kan bli seg och svår att öppna – ge den längre tid eller blanda i ett svagare mjöl.',
+  'flour.fit.strong': 'Starkare än planen behöver. Degen kan bli seg och svår att öppna. Ge den längre tid eller blanda i ett svagare mjöl.',
   'flour.fit.unknown': 'Styrkan går inte att räkna ut för den här blandningen.',
   'flour.suggest': 'Förslag för din plan',
   'flour.suggestion.w': 'W ≈ {w}',
   'flour.use': 'Använd',
-  'flour.source': 'W enligt kvarnens uppgifter där den finns, annars uppskattat från proteinhalten. En blandnings W är ett viktat medel. Mognadstid efter den italienska W-tabellen (W 260 ≈ 9 h, W 280 ≈ 12 h, W 320 ≈ 24 h, W 380 ≈ 48 h) – kvarnarna anger ofta längre, Caputo Pizzeria upp till 24 h.',
+  'flour.source': 'W enligt kvarnens uppgifter där den finns, annars uppskattat från proteinhalten. En blandnings W är ett viktat medel. Mognadstid efter den italienska W-tabellen (W 260 ≈ 9 h, W 280 ≈ 12 h, W 320 ≈ 24 h, W 380 ≈ 48 h). Kvarnarna anger ofta längre, Caputo Pizzeria upp till 24 h.',
 
   // ── Saved recipes ──
   'saved.title': 'Bakloggen',

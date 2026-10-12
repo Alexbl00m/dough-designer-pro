@@ -8,7 +8,13 @@
 
 import { BREAD_STYLES, getStyleById } from '@/data/styles';
 import type { BreadStyle } from '@/data/styles';
-import type { FermentDriver, LeavenType, PercentBasis, ScaleMode } from '@/core/types';
+import type {
+  CalculationInputs,
+  FermentDriver,
+  LeavenType,
+  PercentBasis,
+  ScaleMode,
+} from '@/core/types';
 import type { MixingMethod, YeastForm } from '@/core/constants';
 import type { BlendPart } from '@/core/flour';
 import { getFlour } from '@/data/flours';
@@ -126,6 +132,48 @@ const KEYS: Record<keyof RecipeParams, string> = {
 };
 
 /** `caputo_pizzeria.70-caputo_manitoba.30`: readable, and nothing in it needs escaping. */
+/**
+ * The engine's inputs for a style and the baker's parameters. The plan is left
+ * out: it is personal, and the caller pins it (see `calculateWithPlan`).
+ */
+export function paramsToInputs(
+  style: BreadStyle,
+  params: RecipeParams,
+): Omit<CalculationInputs, 'plan' | 'startTime' | 'now'> {
+  return {
+    style,
+    scaleMode: params.scaleMode,
+    ballWeight: params.ballWeight,
+    ballCount: params.ballCount,
+    targetFlour: params.targetFlour,
+    targetDough: params.targetDough,
+    driver: params.driver,
+    totalTime: params.totalTime,
+    leavenPct: params.leavenPct,
+    roomTemp: params.roomTemp,
+    coldTemp: params.coldTemp,
+    coldHours: params.coldHours,
+    coldPhase: params.coldPhase,
+    hydration: params.hydration,
+    salt: params.salt,
+    sugar: params.sugar,
+    oil: params.oil,
+    leavenType: params.leavenType,
+    yeastForm: params.yeastForm,
+    mixing: params.mixing,
+    desiredDoughTemp: params.doughTemp,
+    flourTemp: params.flourTemp ?? undefined,
+    starterHydration: params.starterHydration,
+    percentBasis: params.percentBasis,
+    usePreferment: params.usePreferment,
+    prefermentHours: params.prefermentHours || undefined,
+    prefermentTemp: params.prefermentTemp ?? undefined,
+    prefermentColdHours: params.prefermentColdHours,
+    yeastPct: params.yeastPct ?? undefined,
+    flourBlend: params.flourBlend ?? undefined,
+  };
+}
+
 export const blendToParam = (blend: BlendPart[]): string =>
   blend.map((p) => `${p.id}.${Math.round(p.pct * 10) / 10}`).join('-');
 

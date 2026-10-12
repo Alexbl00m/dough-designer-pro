@@ -40,7 +40,7 @@ export function FermentationClock({ results }: FermentationClockProps) {
   return (
     <Card className="p-5" data-print-card>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-        <h4 className="font-semibold">{t('clock.title')}</h4>
+        <h2 className="text-display-sm">{t('clock.title')}</h2>
         <Badge variant="secondary" className="tabular">
           {t('clock.doubling', { hours: n(f.doublingHours) })}
         </Badge>

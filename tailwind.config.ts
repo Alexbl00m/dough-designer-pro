@@ -19,9 +19,17 @@ export default {
 		},
 		extend: {
 			/*
+			 * Geist, self-hosted: one face on every device instead of whatever the
+			 * system offers, with true tabular figures for the ingredient columns.
+			 */
+			fontFamily: {
+				sans: ['"Geist Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+			},
+			/*
 			 * One ladder, applied everywhere. Sizes above 20px carry negative
 			 * tracking so a large heading reads as one shape instead of a row of
-			 * letters; body and below sit at normal or slightly tight.
+			 * letters; body and below sit at Geist's own spacing, which is drawn
+			 * for text sizes and closes up if tightened further.
 			 */
 			fontSize: {
 				'display-xl': ['3.25rem', { lineHeight: '1.07', letterSpacing: '-0.035em', fontWeight: '600' }],
@@ -29,10 +37,10 @@ export default {
 				'display-md': ['1.75rem', { lineHeight: '1.18', letterSpacing: '-0.025em', fontWeight: '600' }],
 				'display-sm': ['1.3125rem', { lineHeight: '1.25', letterSpacing: '-0.02em', fontWeight: '600' }],
 				lead: ['1.3125rem', { lineHeight: '1.45', letterSpacing: '-0.01em', fontWeight: '400' }],
-				'body-lg': ['1.1875rem', { lineHeight: '1.5', letterSpacing: '-0.011em' }],
-				body: ['1.0625rem', { lineHeight: '1.47', letterSpacing: '-0.011em' }],
-				'body-sm': ['0.9375rem', { lineHeight: '1.45', letterSpacing: '-0.008em' }],
-				caption: ['0.875rem', { lineHeight: '1.43', letterSpacing: '-0.006em' }],
+				'body-lg': ['1.1875rem', { lineHeight: '1.5', letterSpacing: '0' }],
+				body: ['1.0625rem', { lineHeight: '1.47', letterSpacing: '0' }],
+				'body-sm': ['0.9375rem', { lineHeight: '1.45', letterSpacing: '0' }],
+				caption: ['0.875rem', { lineHeight: '1.43', letterSpacing: '0' }],
 				micro: ['0.75rem', { lineHeight: '1.35', letterSpacing: '0' }],
 			},
 			colors: {
@@ -78,18 +86,6 @@ export default {
 				success: 'hsl(var(--success))',
 				warning: 'hsl(var(--warning))',
 				info: 'hsl(var(--info))',
-				ing: {
-					flour: 'hsl(var(--ing-flour))',
-					water: 'hsl(var(--ing-water))',
-					salt: 'hsl(var(--ing-salt))',
-					yeast: 'hsl(var(--ing-yeast))',
-					starter: 'hsl(var(--ing-starter))',
-					fat: 'hsl(var(--ing-fat))',
-					sugar: 'hsl(var(--ing-sugar))',
-					dairy: 'hsl(var(--ing-dairy))',
-					egg: 'hsl(var(--ing-egg))',
-					other: 'hsl(var(--ing-other))'
-				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

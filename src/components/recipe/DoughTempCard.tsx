@@ -1,4 +1,4 @@
-import { Droplets, Snowflake, Thermometer } from 'lucide-react';
+import { Droplets, Snowflake } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import type { CalculationResults } from '@/core/types';
 import { useI18n } from '@/i18n';
@@ -26,10 +26,7 @@ export function DoughTempCard({
 
   return (
     <Card className="p-5" data-print-card>
-      <div className="mb-4 flex items-center gap-2">
-        <Thermometer className="h-4 w-4 text-primary" aria-hidden />
-        <h4 className="font-semibold">{t('ddt.title')}</h4>
-      </div>
+      <h2 className="mb-4 text-display-sm">{t('ddt.title')}</h2>
 
       <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
         <div>

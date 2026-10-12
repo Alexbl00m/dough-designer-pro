@@ -2,18 +2,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { AppSidebar } from '@/components/AppSidebar';
 import type { Section } from '@/components/AppSidebar';
 import { StyleSelector } from '@/components/StyleSelector';
 import { CalculatorInputs } from '@/components/CalculatorInputs';
 import { RecipeResults } from '@/components/RecipeResults';
-import { getStyleById } from '@/data/styles';
+import { getStyleById, pieceUnitKey } from '@/data/styles';
 import { round } from '@/core/constants';
 import type { CalculationResults, FermentDriver } from '@/core/types';
 import {
   paramsForStyle,
+  paramsToInputs,
   paramsToQuery,
   queryToParams,
 } from '@/lib/recipe/state';
@@ -21,13 +22,15 @@ import type { RecipeParams } from '@/lib/recipe/state';
 import { DEFAULT_PLAN, calculateWithPlan } from '@/lib/recipe/plan';
 import type { PlanState } from '@/lib/recipe/plan';
 import { saveBake } from '@/lib/recipe/storage';
-import { useT } from '@/i18n';
+import { useI18n, useT } from '@/i18n';
 import { useToast } from '@/hooks/use-toast';
+import { formatGrams } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 const SECTION_ORDER: Section[] = ['styles', 'parameters', 'recipe'];
 
 export default function Calculator() {
-  const t = useT();
+  const { t, lang } = useI18n();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -49,7 +52,24 @@ export default function Calculator() {
     return () => window.clearInterval(id);
   }, []);
   const [savedId, setSavedId] = useState<string | null>(null);
-  const mainRef = useRef<HTMLElement>(null);
+
+  // Moving between steps puts the reader at the top of the new step, not
+  // wherever they were in the previous one. The window is what scrolls (the
+  // layout grows with its content), and focus moves to the new step's heading
+  // so a screen reader announces where it landed.
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const stepped = useRef(false);
+  const goToSection = useCallback((next: Section) => {
+    setSection(next);
+    stepped.current = true;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  }, []);
+  useEffect(() => {
+    if (!stepped.current) return;
+    stepped.current = false;
+    headingRef.current?.focus({ preventScroll: true });
+  }, [section]);
 
   const style = params ? getStyleById(params.styleId) : undefined;
 
@@ -70,8 +90,8 @@ export default function Calculator() {
     // previous style's 265 g pizza balls over to a sourdough loaf is a bug.
     setParams(paramsForStyle(selected));
     setSavedId(null);
-    setSection('parameters');
-  }, []);
+    goToSection('parameters');
+  }, [goToSection]);
 
   const handleParamChange = useCallback(
     <K extends keyof RecipeParams>(key: K, value: RecipeParams[K]) => {
@@ -100,38 +120,7 @@ export default function Calculator() {
   const results: CalculationResults | null = useMemo(() => {
     if (!style || !params) return null;
     try {
-      return calculateWithPlan({
-        style,
-        scaleMode: params.scaleMode,
-        ballWeight: params.ballWeight,
-        ballCount: params.ballCount,
-        targetFlour: params.targetFlour,
-        targetDough: params.targetDough,
-        driver: params.driver,
-        totalTime: params.totalTime,
-        leavenPct: params.leavenPct,
-        roomTemp: params.roomTemp,
-        coldTemp: params.coldTemp,
-        coldHours: params.coldHours,
-        coldPhase: params.coldPhase,
-        hydration: params.hydration,
-        salt: params.salt,
-        sugar: params.sugar,
-        oil: params.oil,
-        leavenType: params.leavenType,
-        yeastForm: params.yeastForm,
-        mixing: params.mixing,
-        desiredDoughTemp: params.doughTemp,
-        flourTemp: params.flourTemp ?? undefined,
-        starterHydration: params.starterHydration,
-        percentBasis: params.percentBasis,
-        usePreferment: params.usePreferment,
-        prefermentHours: params.prefermentHours || undefined,
-        prefermentTemp: params.prefermentTemp ?? undefined,
-        prefermentColdHours: params.prefermentColdHours,
-        yeastPct: params.yeastPct ?? undefined,
-        flourBlend: params.flourBlend ?? undefined,
-      }, plan, now);
+      return calculateWithPlan(paramsToInputs(style, params), plan, now);
     } catch (error) {
       console.error('Recipe calculation failed', error);
       return null;
@@ -174,15 +163,6 @@ export default function Calculator() {
     toast({ description: t('action.saved') });
   }, [params, style, t, toast]);
 
-  // Moving between steps should put the reader at the top of the new step,
-  // not wherever they happened to be scrolled in the previous one.
-  const goToSection = useCallback((next: Section) => {
-    setSection(next);
-    mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-  const index = SECTION_ORDER.indexOf(section);
-
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
@@ -196,18 +176,21 @@ export default function Calculator() {
         <div className="flex min-w-0 flex-1 flex-col">
           <AppHeader context={style?.name} />
 
-          <main ref={mainRef} className="flex-1 overflow-auto p-4 sm:p-6">
+          <main className="flex-1 overflow-auto p-4 sm:p-6">
             <div className="mx-auto w-full max-w-5xl">
-              <p className="no-print mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t('nav.step', { n: index + 1, total: SECTION_ORDER.length })}
-              </p>
+              <StepNav current={section} hasStyle={Boolean(style)} onSelect={goToSection} />
 
               {section === 'styles' && (
                 <section aria-labelledby="section-heading">
                   <header className="mb-6">
-                    <h2 id="section-heading" className="text-display-md">
+                    <h1
+                      id="section-heading"
+                      ref={headingRef}
+                      tabIndex={-1}
+                      className="text-display-md outline-none"
+                    >
                       {t('styles.title')}
-                    </h2>
+                    </h1>
                     <p className="mt-1 text-muted-foreground">{t('styles.lead')}</p>
                   </header>
                   <StyleSelector
@@ -220,9 +203,14 @@ export default function Calculator() {
               {section === 'parameters' && style && params && (
                 <section aria-labelledby="section-heading">
                   <header className="mb-6">
-                    <h2 id="section-heading" className="text-display-md">
+                    <h1
+                      id="section-heading"
+                      ref={headingRef}
+                      tabIndex={-1}
+                      className="text-display-md outline-none"
+                    >
                       {t('params.title')}
-                    </h2>
+                    </h1>
                     <p className="mt-1 text-muted-foreground">
                       {t('params.lead', { name: style.name })}
                     </p>
@@ -259,10 +247,22 @@ export default function Calculator() {
               {section === 'recipe' && style && params && results && (
                 <section aria-labelledby="section-heading">
                   <header className="mb-6">
-                    <h2 id="section-heading" className="text-display-md">
-                      {t('recipe.title')}
-                    </h2>
-                    <p className="mt-1 text-muted-foreground">{t('app.tagline')}</p>
+                    {/* The recipe is named for what it makes; the step needs no title of its own. */}
+                    <h1
+                      id="section-heading"
+                      ref={headingRef}
+                      tabIndex={-1}
+                      className="text-display-md outline-none"
+                    >
+                      {style.name}
+                    </h1>
+                    <p className="mt-1 tabular text-muted-foreground">
+                      {t('recipe.for', {
+                        count: results.totals.pieces,
+                        weight: formatGrams(results.totals.perPiece, lang),
+                        unit: t(pieceUnitKey(style, results.totals.pieces)),
+                      })}
+                    </p>
                   </header>
 
                   <RecipeResults
@@ -301,5 +301,58 @@ export default function Calculator() {
         </div>
       </div>
     </SidebarProvider>
+  );
+}
+
+const STEP_LABEL: Record<Section, string> = {
+  styles: 'nav.styles',
+  parameters: 'nav.parameters',
+  recipe: 'nav.recipe',
+};
+
+/**
+ * The three steps by name, so the baker can see where they are and go back.
+ * The sidebar carries them on a wide screen; when it is closed, or on a phone
+ * where it is a drawer, this row does.
+ */
+function StepNav({
+  current,
+  hasStyle,
+  onSelect,
+}: {
+  current: Section;
+  hasStyle: boolean;
+  onSelect: (section: Section) => void;
+}) {
+  const t = useT();
+  const { isMobile, open } = useSidebar();
+  if (!isMobile && open) return null;
+
+  return (
+    <nav aria-label={t('nav.steps')} className="no-print mb-5">
+      <ol className="inline-flex max-w-full gap-1 rounded-lg bg-muted p-1">
+        {SECTION_ORDER.map((step) => {
+          const active = step === current;
+          return (
+            <li key={step}>
+              <button
+                type="button"
+                onClick={() => onSelect(step)}
+                disabled={step !== 'styles' && !hasStyle}
+                aria-current={active ? 'step' : undefined}
+                className={cn(
+                  'pressable rounded-md px-3 py-1.5 text-caption transition-colors disabled:opacity-40',
+                  active
+                    ? 'bg-card font-semibold text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {t(STEP_LABEL[step])}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }
