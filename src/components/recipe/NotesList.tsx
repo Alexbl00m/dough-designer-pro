@@ -27,7 +27,7 @@ export function NotesList({ notes }: { notes: Note[] }) {
 
   return (
     <Card className="p-5" data-print-card>
-      <h4 className="mb-3 font-semibold">{t('recipe.notes')}</h4>
+      <h2 className="mb-3 text-display-sm">{t('recipe.notes')}</h2>
       <ul className="space-y-2.5">
         {sorted.map((note, index) => {
           const Icon = ICON[note.severity];

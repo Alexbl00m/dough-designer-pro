@@ -42,6 +42,8 @@ const SPAN_PHASES = new Set<TimelinePhase>(['preferment', 'levain', 'bulk', 'pro
 
 interface RecipeTimelineProps {
   steps: TimelineStep[];
+  /** Times and step names only, for a preview of the plan rather than the plan. */
+  compact?: boolean;
 }
 
 /**
@@ -49,7 +51,7 @@ interface RecipeTimelineProps {
  * that starts on Friday evening reads "Friday", "Saturday", not "the day
  * before" and "day 1".
  */
-export function RecipeTimeline({ steps }: RecipeTimelineProps) {
+export function RecipeTimeline({ steps, compact = false }: RecipeTimelineProps) {
   const { t, lang } = useI18n();
 
   let lastDay: string | null = null;
@@ -74,7 +76,7 @@ export function RecipeTimeline({ steps }: RecipeTimelineProps) {
               </p>
             )}
 
-            <div className="relative flex gap-3 pb-4">
+            <div className={cn('relative flex gap-3', compact ? 'pb-3' : 'pb-4')}>
               {/* Connector line, stopping at the final step */}
               {!isLast && (
                 <span
@@ -111,9 +113,11 @@ export function RecipeTimeline({ steps }: RecipeTimelineProps) {
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
-                  {t(`${step.key}.body`, values)}
-                </p>
+                {!compact && (
+                  <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
+                    {t(`${step.key}.body`, values)}
+                  </p>
+                )}
               </div>
             </div>
           </li>

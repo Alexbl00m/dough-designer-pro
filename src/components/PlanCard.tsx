@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarClock, Moon } from 'lucide-react';
+import { AlertTriangle, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -31,10 +31,7 @@ export function PlanCard({ results, plan, onPlanChange, prefermentLabel }: PlanC
 
   return (
     <Card className="p-5" data-print-card>
-      <div className="mb-4 flex items-center gap-2">
-        <CalendarClock className="h-4 w-4 text-primary" aria-hidden />
-        <h3 className="text-base font-semibold">{t('params.plan')}</h3>
-      </div>
+      <h2 className="mb-4 text-display-sm">{t('params.plan')}</h2>
 
       <div className="space-y-4">
         <ToggleGroup

@@ -1132,6 +1132,16 @@ export const BREAD_STYLES: BreadStyle[] = [
 export const isPizzaStyle = (style: BreadStyle): boolean =>
   style.category === 'pizza' || style.process.shapeKey === 'process.shape.balls';
 
+/** The i18n key for what a batch divides into: balls of pizza, loaves of bread. */
+export const pieceUnitKey = (style: BreadStyle, count: number): string =>
+  isPizzaStyle(style)
+    ? count === 1
+      ? 'unit.ball'
+      : 'unit.balls'
+    : count === 1
+      ? 'unit.loaf'
+      : 'unit.loaves';
+
 export const getStyleById = (id: string): BreadStyle | undefined =>
   BREAD_STYLES.find((style) => style.id === id);
 

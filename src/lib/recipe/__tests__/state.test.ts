@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getStyleById } from '@/data/styles';
-import { paramsForStyle, paramsToQuery, queryToParams } from '@/lib/recipe/state';
+import { DEFAULT_PLAN, calculateWithPlan } from '@/lib/recipe/plan';
+import { paramsForStyle, paramsToInputs, paramsToQuery, queryToParams } from '@/lib/recipe/state';
 
 describe('recipe links', () => {
   it('carry the preferment build and a fixed yeast dose, and nothing they do not need', () => {
@@ -70,5 +71,52 @@ describe('flour blends in links', () => {
       { id: 'caputo_pizzeria', pct: 70 },
     ]);
     expect(queryToParams('s=neapolitan&fb=mystery.100')!.flourBlend).toBeNull();
+  });
+});
+
+describe('engine inputs', () => {
+  it('carry the baker\'s own yeast and flours, and leave the style to decide when there are none', () => {
+    const style = getStyleById('pizza_poolish')!;
+    const own = paramsToInputs(style, {
+      ...paramsForStyle(style),
+      yeastPct: 0.15,
+      flourBlend: [{ id: 'caputo_pizzeria', pct: 100 }],
+    });
+    expect(own.yeastPct).toBe(0.15);
+    expect(own.flourBlend).toEqual([{ id: 'caputo_pizzeria', pct: 100 }]);
+
+    const plain = paramsToInputs(style, paramsForStyle(style));
+    expect(plain.yeastPct).toBeUndefined();
+    expect(plain.flourBlend).toBeUndefined();
+  });
+});
+
+describe('the landing page example', () => {
+  // The landing page explains these numbers in words; the words must stay true.
+  const style = getStyleById('pizza_poolish')!;
+  const r = calculateWithPlan(
+    paramsToInputs(style, paramsForStyle(style)),
+    DEFAULT_PLAN,
+    new Date(2026, 9, 12, 9, 0),
+  );
+  const yeast = (section: string) =>
+    r.sections
+      .find((s) => s.id === section)!
+      .ingredients.filter((i) => i.type === 'yeast')
+      .reduce((sum, i) => sum + i.grams, 0);
+
+  it('has a poolish that comes in cold from the fridge, which is why the water is warm', () => {
+    expect(r.preferment!.coldHours).toBeGreaterThan(0);
+    expect(r.water.clamped).toBe(false);
+    expect(r.water.tempC).toBeGreaterThan(r.fermentation.roomTempC);
+  });
+
+  it('puts yeast in both the poolish and the dough', () => {
+    expect(yeast('preferment')).toBeGreaterThan(0);
+    expect(yeast('final')).toBeGreaterThan(0);
+  });
+
+  it('is ready at dinner time', () => {
+    expect(new Date(r.readyAt).getHours()).toBe(18);
   });
 });

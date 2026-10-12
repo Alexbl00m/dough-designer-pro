@@ -87,7 +87,7 @@ export const stylesSv: Record<string, string> = {
   'region.uk': 'Storbritannien',
 
   'style.strong_white_sourdough.desc':
-    'Rakt vitt surdegsbröd på starkt vetemjöl – den mest grundläggande limpan att lära sig. Progressiv hydrering: börja på 67,5% och arbeta in mer vatten tills degen känns rätt.',
+    'Rakt vitt surdegsbröd på starkt vetemjöl. Den mest grundläggande limpan att lära sig. Progressiv hydrering: börja på 67,5% och arbeta in mer vatten tills degen känns rätt.',
   'style.strong_white_sourdough.char.0': 'Bara mjöl, vatten, surdeg och salt',
   'style.strong_white_sourdough.char.1': 'Progressiv hydrering (bassinage)',
   'style.strong_white_sourdough.char.2': 'Varm deg, 26–28 °C',

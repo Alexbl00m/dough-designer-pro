@@ -68,7 +68,7 @@ export function YeastClock({ results }: YeastClockProps) {
   return (
     <Card className="p-5" data-print-card>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-        <h4 className="font-semibold">{t('yeastClock.title')}</h4>
+        <h2 className="text-display-sm">{t('yeastClock.title')}</h2>
         <Badge variant="secondary" className="tabular">
           {n(f.roomTempC)} °C
         </Badge>
@@ -104,7 +104,7 @@ export function YeastClock({ results }: YeastClockProps) {
         </p>
       )}
 
-      <h5 className="mt-5 text-sm font-semibold">{t('yeastClock.table')}</h5>
+      <h3 className="mt-5 text-caption font-semibold">{t('yeastClock.table')}</h3>
       <p className="mb-2 mt-1 text-xs leading-relaxed text-muted-foreground">
         {t('yeastClock.tableLead', { form })}
       </p>
@@ -112,11 +112,11 @@ export function YeastClock({ results }: YeastClockProps) {
         <table className="w-full text-xs tabular">
           <thead>
             <tr className="text-muted-foreground">
-              <th scope="col" className="py-1 pr-2 text-left font-medium">
+              <th scope="col" className="py-1 pr-2 text-left font-semibold">
                 h
               </th>
               {TEMPS.map((temp) => (
-                <th key={temp} scope="col" className="px-1 py-1 text-right font-medium">
+                <th key={temp} scope="col" className="px-1 py-1 text-right font-semibold">
                   {temp} °C
                 </th>
               ))}
@@ -125,7 +125,7 @@ export function YeastClock({ results }: YeastClockProps) {
           <tbody>
             {HOURS.map((hours) => (
               <tr key={hours} className="border-t border-border/60">
-                <th scope="row" className="py-1 pr-2 text-left font-medium text-muted-foreground">
+                <th scope="row" className="py-1 pr-2 text-left font-semibold text-muted-foreground">
                   {hours}
                 </th>
                 {TEMPS.map((temp) => {

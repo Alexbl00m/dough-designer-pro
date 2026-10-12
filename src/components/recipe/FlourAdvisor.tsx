@@ -1,4 +1,3 @@
-import { Wheat } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { FlourStrength } from '@/components/FlourCard';
 import type { FlourAdvice } from '@/core/flour';
@@ -21,10 +20,7 @@ export function FlourAdvisor({ advice }: FlourAdvisorProps) {
 
   return (
     <Card className={cn('p-5', warn && 'border-warning/50')} data-print-card>
-      <div className="mb-2 flex items-center gap-2">
-        <Wheat className={cn('h-4 w-4', warn ? 'text-warning' : 'text-primary')} aria-hidden />
-        <h4 className="font-semibold">{t('flourAdvice.title')}</h4>
-      </div>
+      <h2 className="mb-2 text-display-sm">{t('flourAdvice.title')}</h2>
       <p className="text-sm text-muted-foreground">
         {advice.parts
           .map((p) => `${formatNumber(p.pct, lang, 0)}% ${t(flourKey(p.id))}`)

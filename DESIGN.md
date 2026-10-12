@@ -584,3 +584,21 @@ tables, sliders, timelines — and the source document describes marketing pages
 Full-bleed product tiles, one section per viewport, 80px section padding and
 photography-first composition would all make a dough calculator worse to use, so
 the layout rules were left behind and only the craft rules carried over.
+
+### Decisions from the design-taste-frontend review
+
+The `design-taste-frontend` skill (`.agents/skills/`) was applied to the
+landing page in full and to the calculator only for its global rules, since
+the skill itself rules multi-step forms and data tables out of scope.
+
+| Rule | Where it lives |
+| --- | --- |
+| One typeface on every device: Geist Variable, self-hosted | `@fontsource-variable/geist` in `src/main.tsx`; `fontFamily.sans` in `tailwind.config.ts` |
+| Body sizes use Geist's own spacing; only display sizes are tightened | `fontSize` letter-spacing in `tailwind.config.ts` |
+| The accent clears WCAG AA in light mode: white on amber 5.2:1, amber on paper 5.0:1 | `--primary: 28 78% 36%`, `--muted-foreground: 28 12% 39%` in `src/index.css` |
+| `cn()` knows the type scale and radii, so a size class never strips a colour | `extendTailwindMerge` in `src/lib/utils.ts`, guarded by `src/lib/__tests__/utils.test.ts` |
+| Pill means action, so badges label with the utility radius and never react to hover | `src/components/ui/badge.tsx` |
+| One h1 per page, card titles are h2 at `display-sm`, with no decorative icons | calculator steps, parameter and recipe cards |
+| No decorative colour dots: an ingredient's name is its label | `IngredientTable` |
+| No em dash in copy; an en dash only inside a range such as "2–3 dygn", as Swedish typography wants | both dictionaries, guarded by `src/i18n/__tests__/dictionaries.test.ts` |
+| The landing page shows the product, never a mock-up: its timeline and numbers are a live calculation | `src/pages/Landing.tsx`, premises guarded in `state.test.ts` |

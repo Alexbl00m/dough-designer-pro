@@ -1,4 +1,4 @@
-import { Plus, RotateCcw, Wheat, X } from 'lucide-react';
+import { Plus, RotateCcw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -88,10 +88,7 @@ export function FlourCard({ style, blend, advice, onChange }: FlourCardProps) {
   return (
     <Card className="p-5" data-print-card>
       <div className="mb-1 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Wheat className="h-4 w-4 text-primary" aria-hidden />
-          <h3 className="text-base font-semibold">{t('params.flour')}</h3>
-        </div>
+        <h2 className="text-display-sm">{t('params.flour')}</h2>
         {blend !== null && (
           <Button variant="ghost" size="sm" onClick={() => onChange(null)} className="gap-1.5">
             <RotateCcw className="h-3.5 w-3.5" aria-hidden />

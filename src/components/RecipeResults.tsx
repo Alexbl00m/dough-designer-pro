@@ -1,8 +1,13 @@
-import { useState } from 'react';
-import { Check, Copy, Download, Link2, Printer, Save } from 'lucide-react';
+import { Check, ChevronDown, Copy, Download, Link2, Printer, Save, Share2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { IngredientTable } from '@/components/recipe/IngredientTable';
 import { RecipeTimeline } from '@/components/recipe/RecipeTimeline';
 import { DoughTempCard } from '@/components/recipe/DoughTempCard';
@@ -13,10 +18,10 @@ import { SourdoughPanel } from '@/components/recipe/SourdoughPanel';
 import { NotesList } from '@/components/recipe/NotesList';
 import { FlourAdvisor } from '@/components/recipe/FlourAdvisor';
 import type { BreadStyle } from '@/data/styles';
-import { isPizzaStyle } from '@/data/styles';
 import type { CalculationResults } from '@/core/types';
 import type { PlanState } from '@/lib/recipe/plan';
 import { useI18n } from '@/i18n';
+import { useToast } from '@/hooks/use-toast';
 import { formatDateTime, formatGrams, formatNumber, formatYeastPct } from '@/lib/format';
 import {
   copyToClipboard,
@@ -44,30 +49,17 @@ export function RecipeResults({
   saved,
 }: RecipeResultsProps) {
   const { t, lang } = useI18n();
-  const [copied, setCopied] = useState<'text' | 'link' | null>(null);
+  const { toast } = useToast();
 
   const n = (value: number, decimals = 1) => formatNumber(value, lang, decimals);
-  const pieceUnit =
-    isPizzaStyle(style)
-      ? results.totals.pieces === 1
-        ? 'unit.ball'
-        : 'unit.balls'
-      : results.totals.pieces === 1
-        ? 'unit.loaf'
-        : 'unit.loaves';
-
-  const flash = (which: 'text' | 'link') => {
-    setCopied(which);
-    window.setTimeout(() => setCopied(null), 2000);
-  };
 
   const handleCopyText = async () => {
     const text = recipeToText(style, results, t, lang, shareUrl);
-    if (await copyToClipboard(text)) flash('text');
+    if (await copyToClipboard(text)) toast({ description: t('action.copied') });
   };
 
   const handleCopyLink = async () => {
-    if (await copyToClipboard(shareUrl)) flash('link');
+    if (await copyToClipboard(shareUrl)) toast({ description: t('action.shared') });
   };
 
   const handleDownload = () => {
@@ -78,27 +70,15 @@ export function RecipeResults({
 
   return (
     <div className="space-y-4">
-      {/* ── Headline ── */}
+      {/* ── Headline: the page heading names the recipe, this card says when and how much ── */}
       <Card className="bg-primary-soft p-5" data-print-card>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="text-display-md">{style.name}</h3>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {t('recipe.for', {
-                count: results.totals.pieces,
-                weight: formatGrams(results.totals.perPiece, lang),
-                unit: t(pieceUnit),
-              })}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="tabular">
-              {t('recipe.startAt', { time: formatDateTime(results.plan.startsAt, lang) })}
-            </Badge>
-            <Badge variant="secondary" className="tabular">
-              {t('recipe.readyAt', { time: formatDateTime(results.readyAt, lang) })}
-            </Badge>
-          </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline" className="tabular">
+            {t('recipe.startAt', { time: formatDateTime(results.plan.startsAt, lang) })}
+          </Badge>
+          <Badge variant="secondary" className="tabular">
+            {t('recipe.readyAt', { time: formatDateTime(results.readyAt, lang) })}
+          </Badge>
         </div>
 
         <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -123,28 +103,39 @@ export function RecipeResults({
         />
       </div>
 
-      {/* ── Actions ── */}
+      {/* ── Actions: one to keep the recipe, one menu for every way it leaves the app ── */}
       <div className="no-print flex flex-wrap gap-2">
         <Button onClick={onSave} variant={saved ? 'secondary' : 'default'} className="gap-2">
-          {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+          {saved ? <Check className="h-4 w-4" aria-hidden /> : <Save className="h-4 w-4" aria-hidden />}
           {saved ? t('action.saved') : t('action.save')}
         </Button>
-        <Button onClick={handleCopyLink} variant="outline" className="gap-2">
-          {copied === 'link' ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
-          {copied === 'link' ? t('action.shared') : t('action.share')}
-        </Button>
-        <Button onClick={handleCopyText} variant="outline" className="gap-2">
-          {copied === 'text' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          {copied === 'text' ? t('action.copied') : t('action.copy')}
-        </Button>
-        <Button onClick={handleDownload} variant="outline" className="gap-2">
-          <Download className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('action.download')}</span>
-        </Button>
-        <Button onClick={() => window.print()} variant="outline" className="gap-2">
-          <Printer className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('action.print')}</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <Share2 className="h-4 w-4" aria-hidden />
+              {t('action.shareMenu')}
+              <ChevronDown className="h-4 w-4" aria-hidden />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onSelect={handleCopyLink} className="gap-2">
+              <Link2 className="h-4 w-4" aria-hidden />
+              {t('action.share')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleCopyText} className="gap-2">
+              <Copy className="h-4 w-4" aria-hidden />
+              {t('action.copy')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleDownload} className="gap-2">
+              <Download className="h-4 w-4" aria-hidden />
+              {t('action.download')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => window.print()} className="gap-2">
+              <Printer className="h-4 w-4" aria-hidden />
+              {t('action.print')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* ── Ingredients ── */}
@@ -189,14 +180,14 @@ export function RecipeResults({
 
       {/* ── Timeline ── */}
       <Card className="p-5" data-print-card>
-        <h4 className="mb-4 font-semibold">{t('recipe.timeline')}</h4>
+        <h2 className="mb-4 text-display-sm">{t('recipe.timeline')}</h2>
         <RecipeTimeline steps={results.timeline} />
       </Card>
 
       <NotesList notes={results.notes} />
 
       <p className="print-only pt-4 text-xs text-muted-foreground">
-        {t('recipe.printedBy')} — {shareUrl}
+        {t('recipe.printedBy')}: {shareUrl}
       </p>
     </div>
   );
@@ -218,7 +209,7 @@ function FermentationCard({ results }: { results: CalculationResults }) {
 
   return (
     <Card className="p-5" data-print-card>
-      <h4 className="mb-4 font-semibold">{t('params.fermentation')}</h4>
+      <h2 className="mb-4 text-display-sm">{t('params.fermentation')}</h2>
       <dl className="grid grid-cols-2 gap-4">
         <Stat label={t('recipe.bulk')} value={`${n(f.bulkHours)} h`} />
         <Stat label={t('recipe.proof')} value={`${n(f.proofHours)} h`} />
